@@ -1,8 +1,14 @@
-import {describe, expect, it} from 'vitest';
+import {afterEach, describe, expect, it, vi} from 'vitest';
 import {StellarTransactionError} from '@rosapay/stellar';
-import {confirmSubmittedSettlements, type SettlementConfirmationState} from '../src/confirmationWorker';
+import {
+  confirmSubmittedSettlements,
+  createConfirmationLoop,
+  type SettlementConfirmationState,
+} from '../src/confirmationWorker';
 
 const hash = 'a'.repeat(64);
+
+afterEach(() => vi.useRealTimers());
 
 function stateFor(items: Array<{intentId: string; transactionHash: string}>): SettlementConfirmationState & {
   confirmed: Array<unknown>;
@@ -74,5 +80,56 @@ describe('submitted settlement confirmation worker', () => {
       ['intent-3', 'STELLAR_FAILED'],
       ['intent-4', 'STELLAR_INVALID_SUCCESS_RESPONSE'],
     ]);
+  });
+
+  it('starts immediately, skips overlapping cycles and stops cleanly', async () => {
+    vi.useFakeTimers();
+    let calls = 0;
+    let release!: () => void;
+    const firstCycle = new Promise<void>(resolve => {
+      release = resolve;
+    });
+    const loop = createConfirmationLoop({
+      intervalMs: 1_000,
+      run: async () => {
+        calls += 1;
+        if (calls === 1) await firstCycle;
+      },
+    });
+
+    loop.start();
+    await Promise.resolve();
+    expect(calls).toBe(1);
+    await vi.advanceTimersByTimeAsync(3_000);
+    expect(calls).toBe(1);
+
+    release();
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(calls).toBe(2);
+
+    loop.stop();
+    vi.advanceTimersByTime(2_000);
+    expect(calls).toBe(2);
+  });
+
+  it('reports cycle errors without killing the loop', async () => {
+    vi.useFakeTimers();
+    const errors: unknown[] = [];
+    let calls = 0;
+    const loop = createConfirmationLoop({
+      intervalMs: 100,
+      run: async () => {
+        calls += 1;
+        if (calls === 1) throw new Error('temporary rpc outage');
+      },
+      onError: error => errors.push(error),
+    });
+
+    loop.start();
+    await Promise.resolve();
+    await vi.advanceTimersByTimeAsync(100);
+    expect(calls).toBe(2);
+    expect(errors).toHaveLength(1);
+    loop.stop();
   });
 });

@@ -27,6 +27,11 @@ export type ConfirmationSummary = {
   pending: number;
 };
 
+export type ConfirmationLoop = {
+  start(): void;
+  stop(): void;
+};
+
 /**
  * Reconciles submitted payments without coupling the worker to the API process.
  * The state port can be backed by the in-memory service today and a durable
@@ -71,4 +76,43 @@ export async function confirmSubmittedSettlements(input: {
   }
 
   return summary;
+}
+
+/** Runs reconciliation on a bounded interval and never overlaps cycles. */
+export function createConfirmationLoop(input: {
+  run: () => Promise<unknown>;
+  intervalMs: number;
+  onError?: (error: unknown) => void;
+}): ConfirmationLoop {
+  if (!Number.isFinite(input.intervalMs) || input.intervalMs <= 0) {
+    throw new Error('Confirmation interval must be a positive number');
+  }
+
+  let timer: ReturnType<typeof setInterval> | undefined;
+  let running = false;
+
+  const tick = async () => {
+    if (running) return;
+    running = true;
+    try {
+      await input.run();
+    } catch (error) {
+      input.onError?.(error);
+    } finally {
+      running = false;
+    }
+  };
+
+  return {
+    start() {
+      if (timer) return;
+      void tick();
+      timer = setInterval(() => void tick(), input.intervalMs);
+    },
+    stop() {
+      if (!timer) return;
+      clearInterval(timer);
+      timer = undefined;
+    },
+  };
 }
