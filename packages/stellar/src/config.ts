@@ -1,5 +1,6 @@
 import {Networks} from '@stellar/stellar-sdk';
 import {z} from 'zod';
+import {testnetDeployment} from './deployments';
 
 export const stellarNetworkSchema = z.enum(['testnet', 'pubnet', 'local']);
 export type StellarNetwork = z.infer<typeof stellarNetworkSchema>;
@@ -46,5 +47,12 @@ export function createStellarConfig(
   if (!config.rpcUrl) {
     throw new Error('A provider-specific RPC URL is required for pubnet');
   }
-  return {network, ...config, settlementContractId: config.settlementContractId ?? null};
+  const defaultContractId = network === 'testnet' ? testnetDeployment.settlementContractId : null;
+  return {
+    network,
+    ...config,
+    settlementContractId: overrides.settlementContractId === undefined
+      ? defaultContractId
+      : overrides.settlementContractId,
+  };
 }

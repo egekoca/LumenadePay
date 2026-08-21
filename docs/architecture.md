@@ -26,10 +26,10 @@ The repository uses npm workspaces. Dependencies point inward: screens depend on
 
 - `packages/protocol`: RTP/1 schemas, canonical JSON, QR URI encoding, policy validation and deterministic payment-intent hashing.
 - `packages/domain`: payment state machine. It accepts events and returns explicit next states; it has no network or UI side effects.
-- `packages/stellar`: Stellar RPC configuration and read-only adapter, StrKey validation and merchant signature verification.
+- `packages/stellar`: Stellar RPC configuration, generated settlement client, RTP/1 settlement mapping, StrKey validation and merchant signature verification.
 - `packages/secure-signer`: the only signing port exposed to TypeScript. The first implementation is an injected bridge; production adapters will be Swift/Kotlin backed.
 - `packages/ui`: platform-neutral design tokens and small presentational components.
-- `apps/mobile`: navigation, screen orchestration, query/cache state, capability switching and the mocked QR vertical slice.
+- `apps/mobile`: navigation, screen orchestration, runtime-validated API/query boundaries, capability switching and the mocked QR vertical slice.
 - `apps/api`: Fastify transport, request validation, idempotency and repository ports.
 - `apps/worker`: background RPC health boundary; durable indexing is intentionally a later phase.
 - `contracts/settlement`: Soroban settlement policy and on-chain replay protection.
@@ -38,7 +38,7 @@ The repository uses npm workspaces. Dependencies point inward: screens depend on
 
 JavaScript never receives a private key. `SecureSigner` accepts an opaque authorization request and returns an opaque signature or a typed error. A production native adapter must keep the key in Secure Enclave/Keychain (iOS) or Android Keystore, require user presence for payment authorization, and expose only public-key metadata to JS.
 
-Passkey/smart-account support remains an explicit adapter decision. Browser IndexedDB/WebAuthn code is not used in React Native. Before enabling it, the team must prove native passkey availability on both platforms, define account recovery, and make the signer implement the same port. The current app therefore has a clean seam without claiming that passkeys are already production-ready.
+The account decision is recorded in [ADR 0001](adr/0001-passkey-account-and-native-signer.md): use a Smart Account Kit/OpenZeppelin context-rule-compatible Soroban account, but keep React Native integration provider-neutral through a native bridge. Browser IndexedDB/WebAuthn storage is not used in React Native. Recovery and signer rotation are intentionally single-device for the Testnet demo and gated for production by [ADR 0002](adr/0002-recovery-and-signer-rotation.md). The bridge also exposes Stellar SDK-compatible `signAuthEntry` and `signTransaction` operations so the generated contract client can separate customer auth-entry signing from relayer fee-payer signing. Native iOS/Android implementation and physical-device passkey validation remain release gates.
 
 ## RTP/1 to settlement boundary
 
@@ -49,7 +49,16 @@ RTP/1 signs a canonical JSON payment intent and is the QR transport artifact. So
 3. The merchant signs the contract digest and the customer authorizes the contract call.
 4. The contract checks network, contract address, merchant registration, nonce, expiry, asset, amount and recipient before transferring funds.
 
-The TypeScript settlement-envelope builder and generated contract bindings are the next integration step. A QR signature must never be treated as an on-chain contract signature without that explicit mapping.
+The TypeScript settlement-envelope builder and generated contract binding now live in `packages/stellar`. The mapping is deterministic and explicit:
+
+- The Stellar network ID is SHA-256 of the exact network passphrase.
+- RTP intent IDs, merchant profile IDs and nonces are independently domain-separated and SHA-256 hashed into the contract's 32-byte fields.
+- Decimal RTP amounts are converted to integer token units with `BigInt`; excess precision, zero and i128 overflow are rejected before simulation.
+- Native and classic assets derive their SAC contract ID for the target network. Explicit SAC assets retain their validated contract ID.
+- The generated binding comes from the optimized settlement WASM and exposes typed simulation, authorization and submission methods.
+- `packages/stellar/src/settlementPipeline.ts` codifies the write path: the generated client simulates first, the customer signer authorizes every non-invoker auth entry, the relayer signs the transaction envelope, and the receipt is accepted only after RPC reports `SUCCESS` with a ledger.
+
+The envelope retains the RTP/1 hash for audit correlation, but does not reuse the QR signature. The merchant must sign the digest returned by the contract's `intent_digest` method, and the customer must separately authorize the exact `settle_payment` invocation.
 
 ## Network and assets
 
@@ -73,4 +82,6 @@ QR is the required common payment path and is the current vertical slice. Androi
 
 ## Delivery gates
 
-The repository currently has a mocked QR flow, live Testnet RPC health checks and a tested/buildable settlement contract. Testnet deployment is intentionally not performed by the repository because it requires a user-controlled deployer/admin identity and native asset configuration. The deploy script validates those inputs and must be run only with secrets supplied through the environment.
+The repository has a mocked QR flow, live Testnet RPC health checks and a tested settlement contract deployed as `CBX7XUIEFWMRBZBEJGZ7SJAFJXFCAB6VFJKOAFMUFAEXML2UVOAZFAQO`. The public deployment manifest records the admin address, deterministic native XLM SAC, WASM hash and transaction hashes; CLI identity material remains ignored under `.stellar/`.
+
+The live smoke suite registered an ephemeral merchant key, settled 0.1 XLM from a Friendbot-funded customer, checked the recipient balance delta and consumed state, then rejected replay, amount tampering, expiry, recipient substitution, unsupported asset, invalid amount, wrong network, wrong contract and fake merchant attempts. The mobile UI still uses the mock adapter until native customer authorization is available.

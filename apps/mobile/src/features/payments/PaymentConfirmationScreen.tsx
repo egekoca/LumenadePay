@@ -2,7 +2,7 @@ import {useMutation} from '@tanstack/react-query';
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {BadgeCheck, Fingerprint, ShieldCheck} from 'lucide-react-native';
 import {StyleSheet, Text, View} from 'react-native';
-import {Button, colors, radius, spacing, StatusPill, SurfaceCard, typography} from '@rosapay/ui';
+import {AnimatedContent, Button, colors, Pulse, radius, spacing, StatusPill, SurfaceCard, typography} from '@rosapay/ui';
 import type {RootStackParams} from '../../app/navigation';
 import {Screen} from '../../shared/Screen';
 import {useAppStore} from '../../state/appStore';
@@ -17,11 +17,11 @@ export function PaymentConfirmationScreen({route, navigation}: Props) {
   const recipient = payload.intent.recipient;
   return (
     <Screen>
-      <View style={styles.header}><View><Text style={styles.eyebrow}>SECURE CHECKOUT</Text><Text style={styles.title}>Review payment</Text></View><StatusPill tone="success">VERIFIED</StatusPill></View>
-      <SurfaceCard accent="amber" style={styles.merchantCard}><View style={styles.merchant}><View style={styles.initial}><Text style={styles.initialText}>RC</Text></View><View style={styles.merchantCopy}><Text style={styles.merchantName}>{payload.intent.merchantName}</Text><View style={styles.verified}><BadgeCheck color={colors.success} size={16} /><Text style={styles.verifiedText}>Verified merchant</Text></View></View></View></SurfaceCard>
-      <SurfaceCard style={styles.amountBlock}><Text style={styles.label}>YOU ARE PAYING</Text><Text style={styles.amount}>{payload.intent.amount} <Text style={styles.asset}>{payload.intent.asset.code}</Text></Text><Text style={styles.reference}>{payload.intent.reference}</Text></SurfaceCard>
-      <SurfaceCard padded={false} style={styles.details}><Detail label="Network" value="Stellar Testnet" /><Detail label="Recipient" value={`${recipient.slice(0, 10)}...${recipient.slice(-8)}`} mono /><Detail label="Asset" value="Native XLM" /><Detail label="Expires" value="About 10 minutes" /></SurfaceCard>
-      <View style={styles.security}><ShieldCheck color={colors.success} size={18} /><Text style={styles.securityText}>Your device will authorize this exact amount.</Text></View>
+      <AnimatedContent><View style={styles.header}><View><Text style={styles.eyebrow}>SECURE CHECKOUT</Text><Text style={styles.title}>Review payment</Text></View><StatusPill tone="success">VERIFIED</StatusPill></View></AnimatedContent>
+      <AnimatedContent delay={90} scaleFrom={0.98}><SurfaceCard accent="amber" style={styles.merchantCard}><View style={styles.merchant}><View style={styles.initial}><Text style={styles.initialText}>RC</Text></View><View style={styles.merchantCopy}><Text style={styles.merchantName}>{payload.intent.merchantName}</Text><View style={styles.verified}><BadgeCheck color={colors.success} size={16} /><Text style={styles.verifiedText}>Verified merchant</Text></View></View></View></SurfaceCard></AnimatedContent>
+      <AnimatedContent delay={150}><SurfaceCard style={styles.amountBlock}><Text style={styles.label}>YOU ARE PAYING</Text><Text style={styles.amount}>{payload.intent.amount} <Text style={styles.asset}>{payload.intent.asset.code}</Text></Text><Text style={styles.reference}>{payload.intent.reference}</Text></SurfaceCard></AnimatedContent>
+      <AnimatedContent delay={210}><SurfaceCard padded={false} style={styles.details}><Detail label="Network" value="Stellar Testnet" /><Detail label="Recipient" value={`${recipient.slice(0, 10)}...${recipient.slice(-8)}`} mono /><Detail label="Asset" value="Native XLM" /><Detail label="Expires" value="About 10 minutes" /></SurfaceCard></AnimatedContent>
+      <Pulse active={mutation.isPending} style={styles.security}><ShieldCheck color={colors.success} size={18} /><Text style={styles.securityText}>Your device will authorize this exact amount.</Text></Pulse>
       {mutation.error && <Text style={styles.error}>Payment could not be authorized. No funds were moved.</Text>}
       <Button loading={mutation.isPending} icon={<Fingerprint color={colors.black} size={21} />} onPress={() => mutation.mutate()}>{mutation.isPending ? 'Confirming securely' : 'Approve payment'}</Button>
     </Screen>

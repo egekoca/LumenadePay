@@ -21,6 +21,7 @@
     "lint": "npm run lint --workspaces --if-present",
     "contract:test": "cargo +stable test --manifest-path contracts/Cargo.toml",
     "contract:build": "stellar contract build --manifest-path contracts/Cargo.toml",
+    "testnet:smoke": "node scripts/testnet-smoke.mjs",
     "check": "npm run typecheck && npm run test"
   },
   "devDependencies": {

@@ -8,6 +8,8 @@
 **Document language:** English  
 **Last updated:** 2026-08-21
 
+Implementation status and remaining work are tracked in [`TODO.md`](TODO.md). Public Testnet deployment and smoke-test evidence are recorded under [`../config`](../config).
+
 ## 1. Executive Summary
 
 Rosa Pay is a non-custodial mobile payment application that lets a customer approve an exact payment to a verified merchant from a single React Native app. The customer uses a passkey and biometric confirmation. The merchant creates a signed payment intent containing the recipient, asset, amount, nonce, and expiry. Rosa Pay transports that intent over QR on both platforms, with Android NFC as an optional fast path. A relayer simulates and submits the transaction on Stellar so the customer does not need to manage network fees during the demo.

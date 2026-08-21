@@ -2,7 +2,7 @@
 
 Rosa Pay is a non-custodial Stellar payment app for iOS and Android, built with React Native and TypeScript.
 
-The product source of truth is [docs/PRD.md](docs/PRD.md). The implemented boundaries are documented in [architecture.md](docs/architecture.md), [rtp-1.md](docs/rtp-1.md), and [security-model.md](docs/security-model.md).
+The product source of truth is [docs/PRD.md](docs/PRD.md), with implementation status tracked in [docs/TODO.md](docs/TODO.md). The implemented boundaries are documented in [architecture.md](docs/architecture.md), [rtp-1.md](docs/rtp-1.md), and [security-model.md](docs/security-model.md).
 
 ## Current Status
 
@@ -12,10 +12,11 @@ The foundation and first vertical slice are implemented:
 - English dark near-black, amber and restrained rose design system with a complete mocked QR request, scan, confirm and receipt flow.
 - RTP/1 schema, QR codec, canonical hashing, merchant signature verification and policy tests.
 - Stellar RPC adapter with live Testnet health checking.
+- Typed RTP/1-to-settlement envelope conversion and a Stellar CLI-generated contract client binding.
 - Fastify API boundary, idempotent intent service, database schema and worker foundation.
 - Soroban settlement contract with customer auth, merchant signatures, asset policy, expiry and replay protection.
 
-The Soroban contract builds to a 7,320-byte optimized WASM (`SHA-256 22b1d0638f6128407579e3993386fde7b0a2ed13494cccb49a3c080ddfe0ac7e`). It has not been deployed: Testnet deployment requires a user-controlled deployer/admin identity and verified native SAC configuration.
+The settlement contract is deployed on Stellar Testnet as `CBX7XUIEFWMRBZBEJGZ7SJAFJXFCAB6VFJKOAFMUFAEXML2UVOAZFAQO`. It uses the verified deterministic native XLM SAC `CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC`. The optimized WASM is 7,320 bytes (`SHA-256 22b1d0638f6128407579e3993386fde7b0a2ed13494cccb49a3c080ddfe0ac7e`); public deployment and smoke-test evidence live under `config/`.
 
 ## Product Terms
 
@@ -72,6 +73,21 @@ Run a native app in another terminal:
 npm run ios
 ```
 
+For the supplied emulators, use the platform-specific commands below. Android
+needs the SDK path in the shell and a reverse Metro port; iOS uses the named
+Simulator directly from the mobile workspace:
+
+```bash
+export ANDROID_HOME="$HOME/Library/Android/sdk"
+export PATH="$PATH:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator"
+adb reverse tcp:8081 tcp:8081
+npm run android
+
+cd apps/mobile
+npx react-native run-ios --simulator 'iPhone 17 Pro'
+cd ../..
+```
+
 For Android on macOS, expose the local SDK first:
 
 ```bash
@@ -96,6 +112,30 @@ npm run contract:build
 npm audit
 ```
 
+The owner of the project-local Testnet identities can also run the live XLM settlement and negative-path smoke suite:
+
+```bash
+npm run testnet:smoke
+```
+
+## Stellar Agent Tooling
+
+This repository enables the Stellar Raven MCP server through
+`.codex/config.toml`. `AGENTS.md` requires Stellar work to use the matching
+`stellar-dev:*` skill, Raven's skill playbooks, and current Stellar
+documentation before network-sensitive implementation decisions.
+
+After trusting the project, start a new Codex session in the repository and
+verify the server:
+
+```bash
+codex mcp get stellar-raven --json
+```
+
+The result must show `enabled: true` and
+`https://raven.stellar.buzz/mcp`. Project-specific Stellar rules, security
+invariants, and verification commands are documented in `AGENTS.md`.
+
 ## Testnet Deployment
 
 Configure a Stellar CLI Testnet identity and pass only public addresses through the deployment environment:
@@ -104,7 +144,8 @@ Configure a Stellar CLI Testnet identity and pass only public addresses through 
 ROSAPAY_DEPLOYER=<cli-identity> \
 ROSAPAY_ADMIN=<G-or-C-address> \
 ROSAPAY_XLM_SAC=<verified-native-SAC-address> \
+ROSAPAY_STELLAR_CONFIG_DIR=<optional-cli-config-dir> \
 ./scripts/deploy-testnet.sh
 ```
 
-The next integration milestone is the typed TypeScript settlement envelope and generated contract binding, followed by a user-authorized Testnet deployment and replacement of the mocked settlement adapter. Native signer/passkey work follows that boundary; Android NFC remains the final fast path and QR remains mandatory on both platforms.
+The next integration milestone is the native signer/passkey decision and replacement of the mocked mobile settlement adapter with generated-client simulation, authorization, submission and polling. Android NFC remains the final fast path and QR remains mandatory on both platforms.

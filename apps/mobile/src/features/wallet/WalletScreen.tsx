@@ -1,13 +1,16 @@
 import {Check, Copy, ExternalLink, KeyRound, Radio, ShieldCheck} from 'lucide-react-native';
-import {Pressable, StyleSheet, Text, View} from 'react-native';
+import {Linking, Pressable, StyleSheet, Text, View} from 'react-native';
 import type {ReactNode} from 'react';
 import {colors, radius, spacing, StatusPill, SurfaceCard, typography} from '@rosapay/ui';
+import {testnetDeployment} from '@rosapay/stellar';
 import {Screen} from '../../shared/Screen';
 import {useStellarHealth} from '../../shared/useStellarHealth';
 
 export function WalletScreen() {
   const stellarHealth = useStellarHealth();
   const rpcStatus = stellarHealth.isPending ? 'CHECKING' : stellarHealth.isError ? 'OFFLINE' : 'LIVE';
+  const contractId = testnetDeployment.settlementContractId;
+  const shortContractId = `${contractId.slice(0, 10)}...${contractId.slice(-8)}`;
   return (
     <Screen>
       <View style={styles.header}><View><Text style={styles.eyebrow}>ACCOUNT</Text><Text style={styles.title}>Wallet</Text></View><StatusPill tone="success">PROTECTED</StatusPill></View>
@@ -26,7 +29,7 @@ export function WalletScreen() {
       <SurfaceCard padded={false} style={styles.networkCard}>
         <View style={styles.networkRow}><View style={styles.liveIcon}><Radio color={stellarHealth.isError ? colors.danger : colors.success} size={18} /></View><View style={styles.networkCopy}><Text style={styles.rowTitle}>Stellar RPC</Text><Text style={styles.body}>{stellarHealth.data ? `Ledger ${stellarHealth.data.latestLedger.toLocaleString()} · Protocol ${stellarHealth.data.protocolVersion}` : stellarHealth.isError ? 'Connection unavailable. Retrying automatically.' : 'Verifying Testnet connection...'}</Text></View><StatusPill tone={stellarHealth.isError ? 'danger' : stellarHealth.isPending ? 'pending' : 'success'}>{rpcStatus}</StatusPill></View>
         <View style={styles.separator} />
-        <View style={styles.networkRow}><View style={styles.networkIcon}><ExternalLink color={colors.amber} size={18} /></View><View style={styles.networkCopy}><Text style={styles.rowTitle}>Settlement contract</Text><Text style={styles.body}>Testnet deployment is pending</Text></View><StatusPill>NOT LIVE</StatusPill></View>
+        <Pressable accessibilityRole="link" onPress={() => Linking.openURL(`https://lab.stellar.org/r/testnet/contract/${contractId}`)} style={styles.networkRow}><View style={styles.networkIcon}><ExternalLink color={colors.amber} size={18} /></View><View style={styles.networkCopy}><Text style={styles.rowTitle}>Settlement contract</Text><Text style={[styles.body, styles.contractId]}>{shortContractId}</Text></View><StatusPill tone="success">LIVE</StatusPill></Pressable>
       </SurfaceCard>
     </Screen>
   );
@@ -64,4 +67,5 @@ const styles = StyleSheet.create({
   networkCopy: {flex: 1, gap: 2},
   rowTitle: {...typography.label, color: colors.ink, fontSize: 13},
   body: {color: colors.inkMuted, fontSize: 12, lineHeight: 17},
+  contractId: typography.mono,
 });

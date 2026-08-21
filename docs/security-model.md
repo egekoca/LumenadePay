@@ -42,6 +42,8 @@ The current tests cover:
 - contract replay, expiry, recipient mismatch, unsupported asset, zero amount and changed amount;
 - payment state-machine illegal transitions.
 
+The Testnet smoke suite additionally proves a real native XLM transfer and live rejection of replay, amount tampering, expiry, recipient substitution, unsupported asset, invalid amount, wrong network, wrong contract and fake merchant input. Public transaction and intent evidence is stored in `config/testnet-smoke-evidence.json`; no private key is included.
+
 Before Testnet release, add device-level tests for signer cancellation, biometric failure, process death during authorization, deep-link spoofing, API timeout/retry and stale-ledger expiry.
 
 ## Operational rules

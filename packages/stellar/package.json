@@ -15,6 +15,7 @@
     "@noble/hashes": "^2.0.0",
     "@rosapay/protocol": "*",
     "@stellar/stellar-sdk": "16.2.0",
+    "buffer": "6.0.3",
     "js-base64": "^3.7.7",
     "zod": "^4.0.0"
   },

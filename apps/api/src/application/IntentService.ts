@@ -19,17 +19,23 @@ export class IntentService {
   constructor(private readonly repository: IntentRepository) {}
 
   async create(input: unknown, idempotencyKey: string): Promise<StoredIntent> {
-    const previous = await this.repository.findByIdempotencyKey(idempotencyKey);
-    if (previous) return previous;
-
     const payload = parseSignedPaymentIntent(input);
+    const payloadHash = hashPaymentIntent(payload.intent);
+    const previous = await this.repository.findByIdempotencyKey(idempotencyKey);
+    if (previous) {
+      if (previous.payloadHash !== payloadHash) {
+        throw new IntentConflictError('Idempotency key already used for a different intent');
+      }
+      return previous;
+    }
+
     if (await this.repository.findByIntentId(payload.intent.intentId)) {
       throw new IntentConflictError('Intent ID already exists');
     }
 
     const stored: StoredIntent = {
       payload,
-      payloadHash: hashPaymentIntent(payload.intent),
+      payloadHash,
       idempotencyKey,
       status: 'created',
     };
