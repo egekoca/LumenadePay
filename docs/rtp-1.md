@@ -1,6 +1,6 @@
 # RTP/1 Payment Intent
 
-RTP/1 is the transport contract between a Sora Pay merchant and customer. It is optimized for QR: the payload is self-contained, human-readable after decoding, and independently verifiable before a wallet asks the customer to authorize anything.
+RTP/1 is the transport contract between a Rosa Pay merchant and customer. It is optimized for QR: the payload is self-contained, human-readable after decoding, and independently verifiable before a wallet asks the customer to authorize anything.
 
 ## Shape
 
@@ -19,7 +19,7 @@ The signed payload contains:
 - UTC `createdAt`
 - base64 Ed25519 `signature`
 
-QR uses the URI scheme `sorapay://pay/<base64url-json>`. The payload is decoded, parsed with the Zod schema and policy-checked before signature verification. A QR is data, not authorization.
+QR uses the URI scheme `rosapay://pay/<base64url-json>`. The payload is decoded, parsed with the Zod schema and policy-checked before signature verification. A QR is data, not authorization.
 
 ## Canonical signing
 
@@ -31,7 +31,7 @@ The merchant signs the SHA-256 digest of the canonical intent object (the object
 - no insignificant whitespace is emitted;
 - numbers are not used for monetary values.
 
-The digest is prefixed with the UTF-8 domain `SoraPay/RTP/1/PaymentIntent\0` by the protocol hash helper. The signature is verified against the decoded StrKey merchant signing key. Any mutation to amount, recipient, nonce, expiry, network or asset changes the digest.
+The digest is prefixed with the UTF-8 domain `RosaPay/RTP/1/PaymentIntent\0` by the protocol hash helper. The signature is verified against the decoded StrKey merchant signing key. Any mutation to amount, recipient, nonce, expiry, network or asset changes the digest.
 
 ## Published test vector
 

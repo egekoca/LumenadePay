@@ -1,5 +1,5 @@
 import {create} from 'zustand';
-import type {PaymentStatus} from '@sorapay/domain';
+import type {PaymentStatus} from '@rosapay/domain';
 
 export type AppMode = 'customer' | 'merchant';
 export type LocalReceipt = {

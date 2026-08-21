@@ -1,5 +1,5 @@
 {
-  "name": "@sorapay/api",
+  "name": "@rosapay/api",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -10,8 +10,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@sorapay/protocol": "*",
-    "@sorapay/stellar": "*",
+    "@rosapay/protocol": "*",
+    "@rosapay/stellar": "*",
     "fastify": "^5.5.0",
     "zod": "^4.0.0"
   },

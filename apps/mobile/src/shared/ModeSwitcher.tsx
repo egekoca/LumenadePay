@@ -1,10 +1,14 @@
 import {Pressable, StyleSheet, Text, View} from 'react-native';
-import {colors, radius, spacing, typography} from '@sorapay/ui';
+import {colors, radius, spacing, typography} from '@rosapay/ui';
 import {useAppStore, type AppMode} from '../state/appStore';
 
 export function ModeSwitcher() {
   const {mode, merchantEnabled, setMode} = useAppStore();
-  const options: AppMode[] = merchantEnabled ? ['customer', 'merchant'] : ['customer'];
+  const options: AppMode[] = ['customer', 'merchant'];
+
+  if (!merchantEnabled) {
+    return null;
+  }
   return (
     <View accessibilityRole="tablist" style={styles.container}>
       {options.map(option => {
@@ -17,7 +21,7 @@ export function ModeSwitcher() {
             onPress={() => setMode(option)}
             style={[styles.option, selected && styles.selected]}>
             <Text style={[styles.label, selected && styles.selectedLabel]}>
-              {option === 'customer' ? 'Customer' : 'Merchant'}
+              {option === 'customer' ? 'Wallet' : 'Merchant'}
             </Text>
           </Pressable>
         );
@@ -27,9 +31,9 @@ export function ModeSwitcher() {
 }
 
 const styles = StyleSheet.create({
-  container: {backgroundColor: colors.roseSoft, borderRadius: radius.md, flexDirection: 'row', padding: spacing.xs},
-  option: {alignItems: 'center', borderRadius: radius.sm, flex: 1, minHeight: 38, justifyContent: 'center'},
-  selected: {backgroundColor: colors.surface},
-  label: {...typography.label, color: colors.inkMuted},
-  selectedLabel: {color: colors.roseDark},
+  container: {alignSelf: 'flex-start', backgroundColor: colors.surfaceRaised, borderColor: colors.line, borderRadius: radius.round, borderWidth: 1, flexDirection: 'row', padding: 3},
+  option: {alignItems: 'center', borderRadius: radius.round, justifyContent: 'center', minHeight: 30, paddingHorizontal: spacing.md},
+  selected: {backgroundColor: colors.amberSoft},
+  label: {...typography.label, color: colors.inkMuted, fontSize: 11},
+  selectedLabel: {color: colors.amber},
 });

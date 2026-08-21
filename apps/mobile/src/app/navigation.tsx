@@ -2,8 +2,8 @@ import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {CircleUserRound, History, House} from 'lucide-react-native';
-import {colors} from '@sorapay/ui';
-import type {SignedPaymentIntentV1} from '@sorapay/protocol';
+import {colors} from '@rosapay/ui';
+import type {SignedPaymentIntentV1} from '@rosapay/protocol';
 
 import {ActivityScreen} from '../features/activity/ActivityScreen';
 import {HomeScreen} from '../features/home/HomeScreen';

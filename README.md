@@ -1,6 +1,6 @@
-# Sora Pay
+# Rosa Pay
 
-Sora Pay is a non-custodial Stellar payment app for iOS and Android, built with React Native and TypeScript.
+Rosa Pay is a non-custodial Stellar payment app for iOS and Android, built with React Native and TypeScript.
 
 The product source of truth is [docs/PRD.md](docs/PRD.md). The implemented boundaries are documented in [architecture.md](docs/architecture.md), [rtp-1.md](docs/rtp-1.md), and [security-model.md](docs/security-model.md).
 
@@ -19,8 +19,8 @@ The Soroban contract builds to a 7,320-byte optimized WASM (`SHA-256 22b1d0638f6
 
 ## Product Terms
 
-- Product display name: `Sora Pay`
-- Application/package slug: `SoraPay`
+- Product display name: `Rosa Pay`
+- Application/package slug: `RosaPay`
 - Customer and merchant capabilities live in one mobile application.
 - Stellar Testnet is the first target network.
 
@@ -101,9 +101,9 @@ npm audit
 Configure a Stellar CLI Testnet identity and pass only public addresses through the deployment environment:
 
 ```bash
-SORAPAY_DEPLOYER=<cli-identity> \
-SORAPAY_ADMIN=<G-or-C-address> \
-SORAPAY_XLM_SAC=<verified-native-SAC-address> \
+ROSAPAY_DEPLOYER=<cli-identity> \
+ROSAPAY_ADMIN=<G-or-C-address> \
+ROSAPAY_XLM_SAC=<verified-native-SAC-address> \
 ./scripts/deploy-testnet.sh
 ```
 

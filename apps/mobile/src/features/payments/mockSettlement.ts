@@ -1,6 +1,6 @@
-import {hashPaymentIntent, type SignedPaymentIntentV1} from '@sorapay/protocol';
-import {transitionPayment, type Payment} from '@sorapay/domain';
-import type {PaymentAuthorizationRequest, SecureSigner, SignerIdentity} from '@sorapay/secure-signer';
+import {hashPaymentIntent, type SignedPaymentIntentV1} from '@rosapay/protocol';
+import {transitionPayment, type Payment} from '@rosapay/domain';
+import type {PaymentAuthorizationRequest, SecureSigner, SignerIdentity} from '@rosapay/secure-signer';
 import type {LocalReceipt} from '../../state/appStore';
 
 const wait = (duration: number) => new Promise(resolve => setTimeout(resolve, duration));

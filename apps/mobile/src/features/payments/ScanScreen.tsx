@@ -1,9 +1,9 @@
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {ScanLine} from 'lucide-react-native';
 import {StyleSheet, Text, View} from 'react-native';
-import {Button, colors, radius, spacing, typography} from '@sorapay/ui';
-import {decodePaymentQr, encodePaymentQr, validatePaymentIntent} from '@sorapay/protocol';
-import {verifyMerchantSignature} from '@sorapay/stellar/merchant-signature';
+import {Button, colors, radius, spacing, typography} from '@rosapay/ui';
+import {decodePaymentQr, encodePaymentQr, validatePaymentIntent} from '@rosapay/protocol';
+import {verifyMerchantSignature} from '@rosapay/stellar/merchant-signature';
 import type {RootStackParams} from '../../app/navigation';
 import {Screen} from '../../shared/Screen';
 import {mockSignedIntent} from './mockIntent';

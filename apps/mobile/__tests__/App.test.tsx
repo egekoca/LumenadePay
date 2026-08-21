@@ -22,7 +22,7 @@ jest.mock('react-native-safe-area-context', () => {
   };
 });
 
-test('renders the Sora Pay onboarding screen', async () => {
+test('renders the Rosa Pay onboarding screen', async () => {
   const Screen = WelcomeScreen as unknown as React.ComponentType<{
     navigation: {replace: jest.Mock};
   }>;
@@ -30,5 +30,7 @@ test('renders the Sora Pay onboarding screen', async () => {
   await ReactTestRenderer.act(() => {
     renderer = ReactTestRenderer.create(<Screen navigation={{replace: jest.fn()}} />);
   });
-  expect(JSON.stringify(renderer!.toJSON())).toContain('Pay the right merchant');
+  const tree = JSON.stringify(renderer!.toJSON());
+  expect(tree).toContain('Payments that feel certain.');
+  expect(tree).toContain('Create your wallet');
 });

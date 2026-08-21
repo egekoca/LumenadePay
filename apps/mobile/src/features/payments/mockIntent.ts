@@ -1,4 +1,4 @@
-import type {SignedPaymentIntentV1} from '@sorapay/protocol';
+import type {SignedPaymentIntentV1} from '@rosapay/protocol';
 
 export const mockSignedIntent: SignedPaymentIntentV1 = {
   intent: {
@@ -16,5 +16,5 @@ export const mockSignedIntent: SignedPaymentIntentV1 = {
     expiresAtLedger: 1_500_120,
     createdAt: '2026-08-21T00:00:00.000Z',
   },
-  signature: 'cdxmPD/uQ7C8L+OTxyBjuzFFvNz0zbdCN+ZzRIDeKeEavKe3SwKZm6tE2f3YY/peILOGLCh1r6Jk+ayiP04uCw==',
+  signature: '6yrxcjEiiNbaBYCDA4vhayb6ll75vBDsdiC4UysFEmX2K0YgpdRhqtvL6G51ztOqvKHp/24K8o4UXvJmBHG1Ag==',
 };

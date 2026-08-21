@@ -14,7 +14,7 @@ describe('RTP/1', () => {
     const canonical = canonicalizePaymentIntent(validSignedIntent.intent);
     expect(canonical).toContain('"amount":"24.5"');
     expect(hashPaymentIntent(validSignedIntent.intent)).toBe(
-      'd3f0cb03015ed0f63bc4ce656e47012847368eb3c5cf13ba5cc232781031b818',
+      '638c86388972d93c983c83adf8b472c7c698ccb66a918ea2a79b70430bbd0075',
     );
     expect(hashPaymentIntent({...validSignedIntent.intent})).toBe(hashPaymentIntent(validSignedIntent.intent));
   });

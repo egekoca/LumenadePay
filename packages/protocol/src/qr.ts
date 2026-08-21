@@ -2,7 +2,7 @@ import {parseSignedPaymentIntent} from './validation';
 import type {SignedPaymentIntentV1} from './schema';
 import {Base64} from 'js-base64';
 
-const RTP_SCHEME = 'sorapay://pay/';
+const RTP_SCHEME = 'rosapay://pay/';
 
 function encodeBase64Url(value: string): string {
   return Base64.encodeURI(value);

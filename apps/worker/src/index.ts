@@ -1,4 +1,4 @@
-import {createStellarConfig, StellarRpcClient} from '@sorapay/stellar';
+import {createStellarConfig, StellarRpcClient} from '@rosapay/stellar';
 
 const config = createStellarConfig(process.env.STELLAR_NETWORK ?? 'testnet', {
   rpcUrl: process.env.STELLAR_RPC_URL,

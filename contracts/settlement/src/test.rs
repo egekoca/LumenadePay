@@ -1,6 +1,5 @@
 use super::*;
 use ed25519_dalek::{Signer as _, SigningKey};
-use rand_core::OsRng;
 use soroban_sdk::{
     testutils::{Address as _, Ledger as _},
     token::StellarAssetClient,
@@ -32,7 +31,7 @@ fn fixture() -> Fixture {
     let contract_id = env.register(SettlementContract, (admin, token.clone()));
     let client = SettlementContractClient::new(&env, &contract_id);
     let merchant_id = BytesN::from_array(&env, &[3; 32]);
-    let signing_key = SigningKey::generate(&mut OsRng);
+    let signing_key = SigningKey::from_bytes(&[7; 32]);
     client.register_merchant(
         &merchant_id,
         &BytesN::from_array(&env, signing_key.verifying_key().as_bytes()),

@@ -1,4 +1,4 @@
-package com.sorapay
+package com.rosapay
 
 import android.app.Application
 import com.facebook.react.PackageList

@@ -5,7 +5,7 @@ import {paymentIntentV1Schema, type PaymentIntentV1} from './schema';
 
 type JsonValue = null | boolean | number | string | JsonValue[] | {[key: string]: JsonValue};
 
-export const RTP1_SIGNING_DOMAIN = 'SoraPay/RTP/1/PaymentIntent\0';
+export const RTP1_SIGNING_DOMAIN = 'RosaPay/RTP/1/PaymentIntent\0';
 
 function compareKeys(left: string, right: string): number {
   return left < right ? -1 : left > right ? 1 : 0;

@@ -1,5 +1,5 @@
 [package]
-name = "sorapay-settlement"
+name = "rosapay-settlement"
 version = "0.1.0"
 edition = "2021"
 publish = false
@@ -11,6 +11,5 @@ crate-type = ["lib", "cdylib"]
 soroban-sdk = "=27.0.6"
 
 [dev-dependencies]
-ed25519-dalek = { version = "=2.2.0", features = ["rand_core"] }
-rand_core = { version = "=0.6.4", features = ["getrandom"] }
+ed25519-dalek = "=2.2.0"
 soroban-sdk = { version = "=27.0.6", features = ["testutils"] }

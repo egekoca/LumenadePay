@@ -1,8 +1,8 @@
-# Sora Pay Architecture
+# Rosa Pay Architecture
 
 ## Status
 
-This document describes the implemented foundation and the boundaries that must remain stable as Sora Pay moves from a mocked QR payment to Testnet settlement. The product name is **Sora Pay** and the application/package slug is **SoraPay**.
+This document describes the implemented foundation and the boundaries that must remain stable as Rosa Pay moves from a mocked QR payment to Testnet settlement. The product name is **Rosa Pay** and the application/package slug is **RosaPay**.
 
 ## Runtime shape
 

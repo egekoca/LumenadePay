@@ -1,4 +1,4 @@
-# Sora Pay Security Model
+# Rosa Pay Security Model
 
 ## Trust boundaries
 

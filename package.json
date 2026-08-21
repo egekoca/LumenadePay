@@ -1,8 +1,8 @@
 {
-  "name": "sorapay",
+  "name": "rosapay",
   "version": "0.1.0",
   "private": true,
-  "description": "Sora Pay monorepo",
+  "description": "Rosa Pay monorepo",
   "packageManager": "npm@11.6.2",
   "engines": {
     "node": ">=22.11.0"
@@ -12,10 +12,10 @@
     "packages/*"
   ],
   "scripts": {
-    "android": "npm run android --workspace @sorapay/mobile",
-    "ios": "npm run ios --workspace @sorapay/mobile",
-    "start": "npm run start --workspace @sorapay/mobile",
-    "api": "npm run dev --workspace @sorapay/api",
+    "android": "npm run android --workspace @rosapay/mobile",
+    "ios": "npm run ios --workspace @rosapay/mobile",
+    "start": "npm run start --workspace @rosapay/mobile",
+    "api": "npm run dev --workspace @rosapay/api",
     "test": "npm run test --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",

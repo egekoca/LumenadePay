@@ -1,7 +1,7 @@
-# Sora Pay - Product Requirements Document
+# Rosa Pay - Product Requirements Document
 
 **Document status:** Implementation-ready draft  
-**Product name:** Sora Pay  
+**Product name:** Rosa Pay
 **Product type:** React Native mobile payment application for iOS and Android  
 **Network:** Stellar Testnet first, Mainnet-ready architecture  
 **Primary audience:** Customers and small merchants accepting fast Stellar payments  
@@ -10,9 +10,9 @@
 
 ## 1. Executive Summary
 
-Sora Pay is a non-custodial mobile payment application that lets a customer approve an exact payment to a verified merchant from a single React Native app. The customer uses a passkey and biometric confirmation. The merchant creates a signed payment intent containing the recipient, asset, amount, nonce, and expiry. Sora Pay transports that intent over QR on both platforms, with Android NFC as an optional fast path. A relayer simulates and submits the transaction on Stellar so the customer does not need to manage network fees during the demo.
+Rosa Pay is a non-custodial mobile payment application that lets a customer approve an exact payment to a verified merchant from a single React Native app. The customer uses a passkey and biometric confirmation. The merchant creates a signed payment intent containing the recipient, asset, amount, nonce, and expiry. Rosa Pay transports that intent over QR on both platforms, with Android NFC as an optional fast path. A relayer simulates and submits the transaction on Stellar so the customer does not need to manage network fees during the demo.
 
-Sora Pay is not a custodial wallet, an exchange, a new token, or a generic QR payment clone. Its differentiator is an open, verifiable payment-intent flow: the user approves exactly what the merchant requested, and the contract rejects altered, expired, replayed, or recipient-swapped requests.
+Rosa Pay is not a custodial wallet, an exchange, a new token, or a generic QR payment clone. Its differentiator is an open, verifiable payment-intent flow: the user approves exactly what the merchant requested, and the contract rejects altered, expired, replayed, or recipient-swapped requests.
 
 ## 2. Problem Statement
 
@@ -23,7 +23,7 @@ Stellar payments are fast and inexpensive, but a typical user still has to under
 3. A relayer can improve usability, but a compromised relayer must not be able to change the payment or spend customer funds.
 4. A hackathon demo can appear functional while lacking replay protection, merchant identity, negative tests, and observable on-chain proof.
 
-Sora Pay addresses these problems with a signed payment-intent protocol, a policy-aware customer wallet, a merchant profile, and a transparent settlement record.
+Rosa Pay addresses these problems with a signed payment-intent protocol, a policy-aware customer wallet, a merchant profile, and a transparent settlement record.
 
 ## 3. Product Vision
 
@@ -36,17 +36,17 @@ Make a Stellar payment feel like tapping a card while preserving the strongest p
 - Enable a customer to complete a testnet payment in under 30 seconds after scanning or tapping.
 - Make the exact merchant, recipient, asset, amount, and expiry visible before biometric approval.
 - Let one user account operate as a customer by default and activate a merchant profile without a second login.
-- Provide a merchant payment request that can be verified independently of Sora Pay's backend.
+- Provide a merchant payment request that can be verified independently of Rosa Pay's backend.
 - Produce a real Stellar testnet transaction and a receipt with a transaction hash.
 - Support iOS and Android from one React Native codebase.
-- Keep all UI text in English and use the Sora Pay dark near-black, amber and restrained rose brand system.
+- Keep all UI text in English and use the Rosa Pay dark near-black, amber and restrained rose brand system.
 
 ### 4.2 Technical goals
 
 - Use `@stellar/stellar-sdk` for transaction construction, simulation, authorization, and submission helpers.
 - Use Stellar RPC for new contract and transaction workflows; use Horizon only for legacy or historical data needs.
 - Keep private signing material out of JavaScript, the API, the database, and logs.
-- Define RTP/1 (Sora Pay Payment Intent Protocol) with canonical serialization and test vectors.
+- Define RTP/1 (Rosa Pay Payment Intent Protocol) with canonical serialization and test vectors.
 - Implement Soroban settlement with replay, expiry, recipient, asset, amount, and merchant validation.
 - Make the relayer untrusted: it may submit a valid authorization but may not alter authorization semantics.
 - Provide unit, integration, property, negative-path, and end-to-end tests.
@@ -55,11 +55,11 @@ Make a Stellar payment feel like tapping a card while preserving the strongest p
 
 - Custody of customer funds or pooled merchant funds.
 - Fiat on-ramp, KYC, or regulated money transmission.
-- Issuing a new Sora Pay token.
+- Issuing a new Rosa Pay token.
 - Cross-chain bridges, NFTs, loyalty points, AI features, or multi-chain support.
 - Full restaurant POS hardware integration.
 - Making iOS NFC card emulation a required dependency. iOS NFC availability depends on Apple entitlements and device support; QR must always work.
-- Supporting every Stellar wallet in the first release. The primary path is Sora Pay passkey smart wallet; external wallets are a later adapter.
+- Supporting every Stellar wallet in the first release. The primary path is Rosa Pay passkey smart wallet; external wallets are a later adapter.
 
 ## 6. Target Users
 
@@ -89,7 +89,7 @@ A technical evaluator who must be able to inspect the protocol, run the app, obs
 ### 8.1 Single account flow
 
 1. User selects `Create your wallet` or `Sign in with passkey`.
-2. Sora Pay creates or restores one customer smart wallet.
+2. Rosa Pay creates or restores one customer smart wallet.
 3. The default home screen is Customer mode.
 4. The user may select `Activate Merchant Mode`.
 5. Merchant onboarding creates a Merchant Profile linked to the same user account.
@@ -116,7 +116,7 @@ All visible product copy is English. The following labels are the canonical star
 
 ### 9.1 Entry and wallet setup
 
-- `Welcome to Sora Pay`
+- `Welcome to Rosa Pay`
 - `Create your wallet`
 - `Sign in with passkey`
 - `Your wallet is protected by your device`
@@ -126,7 +126,7 @@ All visible product copy is English. The following labels are the canonical star
 Requirements:
 
 - No password is required.
-- Explain that Sora Pay is non-custodial in one concise consent screen.
+- Explain that Rosa Pay is non-custodial in one concise consent screen.
 - Show the network (`Stellar Testnet` in development) before any transaction.
 - If wallet creation fails, show a recoverable error and do not create a partial local session.
 
@@ -162,7 +162,7 @@ Fields:
 
 - Business display name.
 - Optional logo or initials.
-- Stellar receiving address or Sora Pay smart-wallet address.
+- Stellar receiving address or Rosa Pay smart-wallet address.
 - Default asset (`XLM` initially; `USDC` after asset verification).
 - Optional default payment amount for a reusable demo QR.
 
@@ -247,7 +247,7 @@ The customer authorization binds the customer wallet and signer to the intent ha
 
 ### 11.1 Contract responsibility
 
-The Sora Pay settlement contract is intentionally narrow. It validates and settles a payment; it is not a general wallet, exchange, or token issuer.
+The Rosa Pay settlement contract is intentionally narrow. It validates and settles a payment; it is not a general wallet, exchange, or token issuer.
 
 The contract must enforce:
 
@@ -279,7 +279,7 @@ The `settle_payment` call must be atomic: either the full payment is transferred
 
 - First demo asset: XLM.
 - Second asset: a verified Stellar USDC asset on the target testnet, represented through its correct classic asset/SAC identity.
-- Do not create a Sora Pay token.
+- Do not create a Rosa Pay token.
 - Never identify a credit asset by code alone; always validate the issuer.
 - Add trustline onboarding only when USDC support is implemented.
 
@@ -334,7 +334,7 @@ iOS NFC behavior depends on Apple APIs, entitlements, region, and device support
 ### 14.1 Recommended repository structure
 
 ```text
-SoraPay/
+RosaPay/
 |- apps/
 |  |- mobile/                  # React Native iOS + Android
 |  |- api/                     # TypeScript API and relayer orchestration
@@ -524,7 +524,7 @@ The demo must expose enough evidence for a judge to verify the system:
 
 ### Phase 1 - Mobile foundation
 
-- Initialize React Native TypeScript application named `SoraPay`.
+- Initialize React Native TypeScript application named `RosaPay`.
 - Add navigation, theme tokens, English copy, logo asset, and error boundary.
 - Add environment-based network configuration.
 - Add session, capability, and mode-switch state.
@@ -608,7 +608,7 @@ These decisions must be recorded in `docs/architecture.md` before their implemen
 The next implementation session should execute this order:
 
 1. Verify local toolchain: Node 22+, Xcode, Android SDK, CocoaPods, Rust, Stellar CLI, and Testnet access.
-2. Scaffold the React Native TypeScript app as `SoraPay`.
+2. Scaffold the React Native TypeScript app as `RosaPay`.
 3. Create the monorepo directories and root scripts from Section 14.1.
 4. Add the dark amber/rose design tokens and English navigation shell.
 5. Add `packages/protocol` with RTP/1 types, Zod schemas, canonical hash, and test vectors.

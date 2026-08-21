@@ -1,7 +1,7 @@
 import {hashes, verify} from '@noble/ed25519';
 import {sha512} from '@noble/hashes/sha2.js';
 import {hexToBytes} from '@noble/hashes/utils.js';
-import {hashPaymentIntent, parseSignedPaymentIntent, type SignedPaymentIntentV1} from '@sorapay/protocol';
+import {hashPaymentIntent, parseSignedPaymentIntent, type SignedPaymentIntentV1} from '@rosapay/protocol';
 import {StrKey} from '@stellar/stellar-sdk';
 import {Base64} from 'js-base64';
 

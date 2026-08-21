@@ -1,6 +1,6 @@
 import React, {type ErrorInfo, type ReactNode} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
-import {Button, colors, spacing, typography} from '@sorapay/ui';
+import {Button, colors, spacing, typography} from '@rosapay/ui';
 import {logger} from '../shared/logger';
 
 type Props = {children: ReactNode};
@@ -21,7 +21,7 @@ export class AppErrorBoundary extends React.Component<Props, State> {
     if (this.state.hasError) {
       return (
         <View style={styles.container}>
-          <Text style={styles.title}>Sora Pay needs a fresh start</Text>
+          <Text style={styles.title}>Rosa Pay needs a fresh start</Text>
           <Text style={styles.body}>Your wallet and payment authorization were not changed.</Text>
           <Button onPress={() => this.setState({hasError: false})}>Try again</Button>
         </View>

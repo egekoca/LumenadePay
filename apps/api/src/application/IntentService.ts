@@ -1,4 +1,4 @@
-import {hashPaymentIntent, parseSignedPaymentIntent, type SignedPaymentIntentV1} from '@sorapay/protocol';
+import {hashPaymentIntent, parseSignedPaymentIntent, type SignedPaymentIntentV1} from '@rosapay/protocol';
 
 export type StoredIntent = {
   payload: SignedPaymentIntentV1;

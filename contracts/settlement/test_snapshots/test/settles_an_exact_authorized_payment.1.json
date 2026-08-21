@@ -61,7 +61,7 @@
                   "bytes": "0303030303030303030303030303030303030303030303030303030303030303"
                 },
                 {
-                  "bytes": "66c4375b9765742c3f4aa8da17c03cc2252f9489050d87192385ea65b50751d3"
+                  "bytes": "ea4a6c63e29c520abef5507b132ec5f9954776aebebe7b92421eea691446d22c"
                 },
                 {
                   "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M"
@@ -168,7 +168,7 @@
                   ]
                 },
                 {
-                  "bytes": "802451e1c64ddef141367def92cc5c5e070f48d2a9944ff081aecf77b83507442c5e28fabe51f54927c93add3456c30b6740bbd8ee343c8286c2639b56953909"
+                  "bytes": "06ea1216657c12105f77bdf3e7f36ecfdef9ef11d875a6a336dc849b9d5cffd62d354d2359221b30e95662a3ecccfd2e0a29c9f9a1cd9d3b84ba2ba44ebc2c0c"
                 }
               ]
             }
@@ -381,7 +381,7 @@
                       "symbol": "signing_key"
                     },
                     "val": {
-                      "bytes": "66c4375b9765742c3f4aa8da17c03cc2252f9489050d87192385ea65b50751d3"
+                      "bytes": "ea4a6c63e29c520abef5507b132ec5f9954776aebebe7b92421eea691446d22c"
                     }
                   }
                 ]

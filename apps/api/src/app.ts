@@ -1,6 +1,6 @@
 import Fastify from 'fastify';
 import {ZodError, z} from 'zod';
-import {createStellarConfig, StellarRpcClient} from '@sorapay/stellar';
+import {createStellarConfig, StellarRpcClient} from '@rosapay/stellar';
 import {IntentConflictError, IntentService} from './application/IntentService';
 import {InMemoryIntentRepository} from './infrastructure/InMemoryIntentRepository';
 
