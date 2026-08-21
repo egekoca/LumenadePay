@@ -57,6 +57,7 @@ The TypeScript settlement-envelope builder and generated contract binding now li
 - Native and classic assets derive their SAC contract ID for the target network. Explicit SAC assets retain their validated contract ID.
 - The generated binding comes from the optimized settlement WASM and exposes typed simulation, authorization and submission methods.
 - `packages/stellar/src/settlementPipeline.ts` codifies the write path: the generated client simulates first, the customer signer authorizes every non-invoker auth entry, the relayer signs the transaction envelope, and the receipt is accepted only after RPC reports `SUCCESS` with a ledger.
+- `packages/stellar/src/settlementService.ts` validates the QR/RTP payload and merchant signature before building the contract envelope. It requires a separate contract intent-digest signature, so the mobile QR signature cannot be accidentally reused as on-chain merchant authorization.
 
 The envelope retains the RTP/1 hash for audit correlation, but does not reuse the QR signature. The merchant must sign the digest returned by the contract's `intent_digest` method, and the customer must separately authorize the exact `settle_payment` invocation.
 

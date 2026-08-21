@@ -24,6 +24,7 @@ Status: `[x]` implemented and locally verified, `[~]` foundation or mocked slice
 - [x] Keep signing behind the `SecureSigner` TypeScript port with no private key exposed to JavaScript.
 - [x] Complete the iOS/Android passkey smart-wallet feasibility decision and record the selected account model in ADR 0001 (PRD 22.1).
 - [x] Define the generated-client settlement pipeline boundary for simulation, customer auth-entry signing, relayer submission and final confirmation.
+- [x] Add a fail-closed signed-intent settlement service that keeps RTP/1 and contract-digest signatures separate.
 - [x] Define first-release recovery and signer rotation requirements in ADR 0002 (PRD 22.5).
 - [ ] Implement native iOS signer storage and user-presence authorization.
 - [ ] Implement native Android signer storage and user-presence authorization.
