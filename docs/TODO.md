@@ -17,7 +17,7 @@ Status: `[x]` implemented and locally verified, `[~]` foundation or mocked slice
 - [x] Register native XLM as the initial asset and ephemeral smoke-test merchant keys/recipient.
 - [x] Add a scripted Testnet integration that settles XLM and rejects replay, amount, recipient, expiry, asset, network, contract and fake-merchant mutations.
 - [x] Run the mobile onboarding, Testnet health, QR, confirmation and receipt demo on Android Pixel 9 and launch the iOS iPhone 17 Pro Simulator build.
-- [ ] Replace the mobile mock settlement adapter with generated-client simulation, customer authorization, submission and confirmation polling.
+- [~] Route the mobile confirmation screen through an explicit adapter; mock remains the development default while the Testnet mode uses generated-client simulation, customer authorization, submission and confirmation polling.
 
 ## P0 - Wallet and Authorization
 
@@ -28,6 +28,7 @@ Status: `[x]` implemented and locally verified, `[~]` foundation or mocked slice
 - [x] Define first-release recovery and signer rotation requirements in ADR 0002 (PRD 22.5).
 - [ ] Implement native iOS signer storage and user-presence authorization.
 - [ ] Implement native Android signer storage and user-presence authorization.
+- [~] Register fail-closed `RosaPaySigner` modules on iOS and Android; credential storage and signing remain pending.
 - [ ] Implement wallet creation/restoration and recoverable failure states.
 - [ ] Add device tests for cancellation, biometric failure and process death during authorization.
 - [ ] Validate the selected native passkey bridge on physical iOS and Android devices.
