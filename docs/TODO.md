@@ -65,6 +65,7 @@ Status: `[x]` implemented and locally verified, `[~]` foundation or mocked slice
 - [ ] Implement worker confirmation/indexing, retry and notification hooks.
 - [ ] Add offline-safe retry using API idempotency keys.
 - [ ] Add contract-event reads and reconcile events with API settlement state.
+- [~] Add an RPC confirmation guard that accepts only `SUCCESS` with a valid ledger; worker reconciliation remains pending.
 - [ ] Add developer settings for network, contract ID and RPC status.
 - [ ] Add metrics for created, authorized, confirmed and failed payments plus median confirmation time.
 - [ ] Add tests for wrong contract/network, fake merchant, relayer alteration, polling failure and offline retry.

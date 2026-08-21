@@ -38,6 +38,9 @@ The API settlement record follows the domain state machine: `awaiting_approval`
 can become `authorized`, then `submitted`, and only an RPC-verified receipt may
 become `confirmed`. The current API exposes a read-only settlement status route;
 mutation and persistence will move behind authenticated relayer/worker ports.
+`StellarRpcClient.confirmTransaction` is the shared RPC guard for that receipt:
+it rejects malformed hashes, `NOT_FOUND`, `FAILED`, and incomplete success
+responses rather than allowing submission acceptance to masquerade as payment.
 
 ## Signing and passkeys
 
