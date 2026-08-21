@@ -31,7 +31,7 @@ The repository uses npm workspaces. Dependencies point inward: screens depend on
 - `packages/ui`: platform-neutral design tokens and small presentational components.
 - `apps/mobile`: navigation, screen orchestration, runtime-validated API/query boundaries, capability switching and the mocked QR vertical slice.
 - `apps/api`: Fastify transport, request validation, idempotency and repository ports.
-- `apps/worker`: background RPC health and submitted-settlement confirmation boundary. The confirmation runner is transport-agnostic and can be connected to the API service or a durable repository; scheduling, indexing and notifications remain later phases.
+- `apps/worker`: background RPC health and submitted-settlement confirmation boundary. The confirmation runner and non-overlapping interval lifecycle are transport-agnostic and can be connected to the API service or a durable repository; durable indexing and notifications remain later phases.
 - `contracts/settlement`: Soroban settlement policy and on-chain replay protection.
 
 The API settlement record follows the domain state machine: `awaiting_approval`

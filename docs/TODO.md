@@ -62,7 +62,7 @@ Status: `[x]` implemented and locally verified, `[~]` foundation or mocked slice
 
 ## P2 - Reliability and Evidence
 
-- [~] Implement the worker confirmation port: submitted settlements are listed from the API state service, checked through the RPC receipt guard, and reconciled to confirmed/failed; scheduling, durable indexing, retry and notification hooks remain.
+- [~] Implement the worker confirmation port and safe interval lifecycle: submitted settlements are listed from the API state service, checked through the RPC receipt guard, and reconciled to confirmed/failed; durable indexing, retry and notification hooks remain.
 - [ ] Add offline-safe retry using API idempotency keys.
 - [ ] Add contract-event reads and reconcile events with API settlement state.
 - [x] Add an RPC confirmation guard that accepts only `SUCCESS` with a valid ledger and rejects failed, missing or malformed receipts.
