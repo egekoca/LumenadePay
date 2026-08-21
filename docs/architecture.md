@@ -34,6 +34,11 @@ The repository uses npm workspaces. Dependencies point inward: screens depend on
 - `apps/worker`: background RPC health boundary; durable indexing is intentionally a later phase.
 - `contracts/settlement`: Soroban settlement policy and on-chain replay protection.
 
+The API settlement record follows the domain state machine: `awaiting_approval`
+can become `authorized`, then `submitted`, and only an RPC-verified receipt may
+become `confirmed`. The current API exposes a read-only settlement status route;
+mutation and persistence will move behind authenticated relayer/worker ports.
+
 ## Signing and passkeys
 
 JavaScript never receives a private key. `SecureSigner` accepts an opaque authorization request and returns an opaque signature or a typed error. A production native adapter must keep the key in Secure Enclave/Keychain (iOS) or Android Keystore, require user presence for payment authorization, and expose only public-key metadata to JS.

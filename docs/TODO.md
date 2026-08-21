@@ -45,6 +45,7 @@ Status: `[x]` implemented and locally verified, `[~]` foundation or mocked slice
 - [ ] Complete the PRD data model: devices, merchant keys, authorizations and audit events.
 - [ ] Add merchant profile create/get endpoints and receiving-address verification.
 - [ ] Add authorization, submission, payment status and activity endpoints.
+- [~] Add read-only settlement status and a domain-guarded in-memory state service; authenticated mutation and durable persistence remain pending.
 - [ ] Add rate limits, request correlation IDs and relayer-safe structured logs.
 
 ## P1 - Customer and Merchant Flows
