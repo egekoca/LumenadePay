@@ -51,6 +51,8 @@ so local emulators cannot accidentally depend on a missing database.
 Event pagination follows Stellar RPC's two modes: the first page uses a ledger
 range, and later pages use only the returned cursor. The worker persists the
 cursor after a page is reconciled, so a failed fetch does not advance the scan.
+`PostgresEventCursorStore` provides the durable adapter; the worker runtime still
+needs deployment-specific pool wiring before it is enabled in production.
 
 ## Signing and passkeys
 

@@ -54,4 +54,11 @@ CREATE TABLE IF NOT EXISTS settlements (
 CREATE INDEX IF NOT EXISTS settlements_status_idx ON settlements(status, intent_id);
 CREATE INDEX IF NOT EXISTS payment_intents_created_idx ON payment_intents(intent_id);
 
+CREATE TABLE IF NOT EXISTS worker_event_cursors (
+  name TEXT PRIMARY KEY,
+  cursor TEXT NOT NULL,
+  start_ledger BIGINT NOT NULL CHECK (start_ledger > 0),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
 -- Private keys, passkey secrets, biometric data, and raw auth payloads are forbidden here.
