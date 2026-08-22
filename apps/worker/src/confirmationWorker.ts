@@ -1,4 +1,4 @@
-import {StellarTransactionError} from '@rosapay/stellar';
+import {StellarTransactionError, type SettlementEvent} from '@rosapay/stellar';
 
 export type SubmittedSettlement = {
   intentId: string;
@@ -25,6 +25,14 @@ export type ConfirmationSummary = {
   confirmed: number;
   failed: number;
   pending: number;
+};
+
+export type EventConfirmationSummary = {
+  scanned: number;
+  confirmed: number;
+  failed: number;
+  pending: number;
+  ignored: number;
 };
 
 export type ConfirmationLoop = {
@@ -67,6 +75,75 @@ export async function confirmSubmittedSettlements(input: {
 
     if (receipt.txHash.toLowerCase() !== settlement.transactionHash.toLowerCase()) {
       await input.state.fail(settlement.intentId, 'STELLAR_INVALID_SUCCESS_RESPONSE');
+      summary.failed += 1;
+      continue;
+    }
+
+    await input.state.confirm(settlement.intentId, receipt.txHash, receipt.ledger);
+    summary.confirmed += 1;
+  }
+
+  return summary;
+}
+
+/**
+ * Reconciles contract events against submitted API records. Events are an
+ * audit/recovery signal; the transaction receipt is still checked before the
+ * API is allowed to enter `confirmed`.
+ */
+export async function reconcileSettlementEvents(input: {
+  state: SettlementConfirmationState;
+  rpc: TransactionConfirmationRpc;
+  events: ReadonlyArray<Pick<SettlementEvent, 'intentId' | 'transactionHash' | 'ledger'>>;
+}): Promise<EventConfirmationSummary> {
+  const submitted = await input.state.listSubmittedSettlements();
+  const byIntentId = new Map(submitted.map(settlement => [settlement.intentId, settlement]));
+  const seen = new Set<string>();
+  const summary: EventConfirmationSummary = {
+    scanned: input.events.length,
+    confirmed: 0,
+    failed: 0,
+    pending: 0,
+    ignored: 0,
+  };
+
+  for (const event of input.events) {
+    if (seen.has(event.intentId)) {
+      summary.ignored += 1;
+      continue;
+    }
+    seen.add(event.intentId);
+
+    const settlement = byIntentId.get(event.intentId);
+    if (!settlement) {
+      summary.ignored += 1;
+      continue;
+    }
+    if (settlement.transactionHash.toLowerCase() !== event.transactionHash.toLowerCase()) {
+      await input.state.fail(settlement.intentId, 'STELLAR_EVENT_TX_MISMATCH');
+      summary.failed += 1;
+      continue;
+    }
+
+    let receipt: TransactionConfirmation;
+    try {
+      receipt = await input.rpc.confirmTransaction(event.transactionHash);
+    } catch (error) {
+      if (error instanceof StellarTransactionError && error.code === 'NOT_FOUND') {
+        summary.pending += 1;
+        continue;
+      }
+      const code = error instanceof StellarTransactionError ? error.code : 'UNKNOWN';
+      await input.state.fail(settlement.intentId, `STELLAR_EVENT_${code}`);
+      summary.failed += 1;
+      continue;
+    }
+
+    if (
+      receipt.txHash.toLowerCase() !== event.transactionHash.toLowerCase() ||
+      receipt.ledger !== event.ledger
+    ) {
+      await input.state.fail(settlement.intentId, 'STELLAR_EVENT_RECEIPT_MISMATCH');
       summary.failed += 1;
       continue;
     }
