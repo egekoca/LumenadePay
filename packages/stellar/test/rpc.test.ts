@@ -113,4 +113,19 @@ describe('Stellar RPC confirmation guard', () => {
     await expect(client.getSettlementEvents({startLedger: 0})).rejects.toMatchObject({code: 'INVALID_LEDGER_RANGE'});
     expect(getEvents).not.toHaveBeenCalled();
   });
+
+  it('passes a persisted event cursor to RPC pagination', async () => {
+    const client = new StellarRpcClient(createStellarConfig('testnet'));
+    const getEvents = vi.spyOn(client.server, 'getEvents').mockResolvedValue({
+      events: [],
+      cursor: 'cursor-2',
+      latestLedger: 140,
+      oldestLedger: 100,
+      latestLedgerCloseTime: '2026-08-22T00:00:00Z',
+      oldestLedgerCloseTime: '2026-08-21T23:59:00Z',
+    } as never);
+
+    await client.getSettlementEvents({cursor: 'cursor-1', limit: 10});
+    expect(getEvents.mock.calls[0]?.[0]).toMatchObject({cursor: 'cursor-1', limit: 10});
+  });
 });

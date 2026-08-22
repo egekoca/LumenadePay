@@ -64,11 +64,11 @@ Status: `[x]` implemented and locally verified, `[~]` foundation or mocked slice
 
 - [~] Implement the worker confirmation port and safe interval lifecycle: submitted settlements are listed from the API state service, checked through the RPC receipt guard, and reconciled to confirmed/failed; durable indexing, retry and notification hooks remain.
 - [ ] Add offline-safe retry using API idempotency keys.
-- [~] Read `PaymentSettled` events through the generated contract spec and reconcile them against submitted API state only after a matching RPC receipt; cursor persistence and durable event indexing remain.
+- [~] Read `PaymentSettled` events through the generated contract spec and reconcile them against submitted API state only after a matching RPC receipt; worker cursor persistence is now a port, while durable cursor storage and event indexing remain.
 - [x] Add an RPC confirmation guard that accepts only `SUCCESS` with a valid ledger and rejects failed, missing or malformed receipts.
 - [ ] Add developer settings for network, contract ID and RPC status.
 - [ ] Add metrics for created, authorized, confirmed and failed payments plus median confirmation time.
-- [ ] Add tests for wrong contract/network, fake merchant, relayer alteration, polling failure and offline retry.
+- [~] Add tests for wrong contract/network, fake merchant, relayer alteration, polling failure and offline retry; RPC/event cursor and receipt mismatch paths are covered, while offline API retry remains.
 - [ ] Add static analysis, secret scanning and an independent contract review gate.
 
 ## P3 - Deferred Product Scope

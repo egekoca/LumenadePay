@@ -4,6 +4,7 @@ import {
   confirmSubmittedSettlements,
   createConfirmationLoop,
   reconcileSettlementEvents,
+  reconcileSettlementEventPage,
   type SettlementConfirmationState,
 } from '../src/confirmationWorker';
 
@@ -175,5 +176,56 @@ describe('submitted settlement confirmation worker', () => {
       ['intent-hash', 'STELLAR_EVENT_TX_MISMATCH'],
       ['intent-receipt', 'STELLAR_EVENT_RECEIPT_MISMATCH'],
     ]);
+  });
+
+  it('loads and advances the event cursor after a page is reconciled', async () => {
+    const state = stateFor([{intentId: 'intent-cursor', transactionHash: hash}]);
+    const requested: Array<unknown> = [];
+    const saved: Array<unknown> = [];
+    const result = await reconcileSettlementEventPage({
+      state,
+      rpc: {confirmTransaction: async () => ({txHash: hash, ledger: 121})},
+      source: {
+        async getSettlementEvents(input) {
+          requested.push(input);
+          return {
+            events: [{intentId: 'intent-cursor', transactionHash: hash, ledger: 121, eventId: 'event-1', merchantId: 'merchant', customer: 'customer', recipient: 'recipient', token: 'token', amount: '1'}],
+            cursor: 'cursor-2',
+            latestLedger: 121,
+            oldestLedger: 100,
+          };
+        },
+      },
+      cursorStore: {
+        async load() { return {cursor: 'cursor-1', startLedger: 100}; },
+        async save(next) { saved.push(next); },
+      },
+      startLedger: 90,
+      limit: 50,
+    });
+
+    expect(result).toMatchObject({confirmed: 1, cursor: 'cursor-2', latestLedger: 121});
+    expect(requested).toEqual([{cursor: 'cursor-1', limit: 50}]);
+    expect(saved).toEqual([{cursor: 'cursor-2', startLedger: 121}]);
+  });
+
+  it('does not advance the event cursor when fetching a page fails', async () => {
+    const state = stateFor([]);
+    const saved: Array<unknown> = [];
+    await expect(reconcileSettlementEventPage({
+      state,
+      rpc: {confirmTransaction: async () => ({txHash: hash, ledger: 122})},
+      source: {
+        async getSettlementEvents() {
+          throw new Error('temporary RPC outage');
+        },
+      },
+      cursorStore: {
+        async load() { return null; },
+        async save(next) { saved.push(next); },
+      },
+      startLedger: 100,
+    })).rejects.toThrow('temporary RPC outage');
+    expect(saved).toEqual([]);
   });
 });

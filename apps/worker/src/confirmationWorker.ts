@@ -1,4 +1,4 @@
-import {StellarTransactionError, type SettlementEvent} from '@rosapay/stellar';
+import {StellarTransactionError, type SettlementEvent, type SettlementEventPage} from '@rosapay/stellar';
 
 export type SubmittedSettlement = {
   intentId: string;
@@ -33,6 +33,24 @@ export type EventConfirmationSummary = {
   failed: number;
   pending: number;
   ignored: number;
+};
+
+export type EventCursor = {
+  cursor: string;
+  startLedger: number;
+};
+
+export type EventCursorStore = {
+  load(): Promise<EventCursor | null>;
+  save(cursor: EventCursor): Promise<void>;
+};
+
+export type SettlementEventSource = {
+  getSettlementEvents(input: {
+    startLedger?: number;
+    cursor?: string;
+    limit?: number;
+  }): Promise<SettlementEventPage>;
 };
 
 export type ConfirmationLoop = {
@@ -153,6 +171,24 @@ export async function reconcileSettlementEvents(input: {
   }
 
   return summary;
+}
+
+/** Reads one RPC event page, reconciles it, then advances the cursor. */
+export async function reconcileSettlementEventPage(input: {
+  state: SettlementConfirmationState;
+  rpc: TransactionConfirmationRpc;
+  source: SettlementEventSource;
+  cursorStore: EventCursorStore;
+  startLedger: number;
+  limit?: number;
+}): Promise<EventConfirmationSummary & {cursor: string; latestLedger: number}> {
+  const checkpoint = await input.cursorStore.load();
+  const page = checkpoint?.cursor
+    ? await input.source.getSettlementEvents({cursor: checkpoint.cursor, ...(input.limit === undefined ? {} : {limit: input.limit})})
+    : await input.source.getSettlementEvents({startLedger: input.startLedger, ...(input.limit === undefined ? {} : {limit: input.limit})});
+  const summary = await reconcileSettlementEvents({state: input.state, rpc: input.rpc, events: page.events});
+  await input.cursorStore.save({cursor: page.cursor, startLedger: page.latestLedger});
+  return {...summary, cursor: page.cursor, latestLedger: page.latestLedger};
 }
 
 /** Runs reconciliation on a bounded interval and never overlaps cycles. */

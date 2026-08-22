@@ -31,7 +31,7 @@ The repository uses npm workspaces. Dependencies point inward: screens depend on
 - `packages/ui`: platform-neutral design tokens and small presentational components.
 - `apps/mobile`: navigation, screen orchestration, runtime-validated API/query boundaries, capability switching and the mocked QR vertical slice.
 - `apps/api`: Fastify transport, request validation, idempotency and repository ports.
-- `apps/worker`: background RPC health, submitted-settlement confirmation and contract-event reconciliation boundary. Event data is treated as an audit/recovery signal and must match the submitted transaction plus an RPC `SUCCESS` receipt before state changes; durable cursor/index storage and notifications remain later phases.
+- `apps/worker`: background RPC health, submitted-settlement confirmation and contract-event reconciliation boundary. Event data is treated as an audit/recovery signal and must match the submitted transaction plus an RPC `SUCCESS` receipt before state changes; cursor persistence is exposed as a port and durable storage/indexing plus notifications remain later phases.
 - `contracts/settlement`: Soroban settlement policy and on-chain replay protection.
 
 The API settlement record follows the domain state machine: `awaiting_approval`
@@ -47,6 +47,10 @@ The PostgreSQL adapter uses `withTransaction` when the injected driver exposes i
 the in-memory and test adapters retain a deterministic fallback. The server still
 defaults to memory until a deployment supplies a transaction-capable `pg` pool,
 so local emulators cannot accidentally depend on a missing database.
+
+Event pagination follows Stellar RPC's two modes: the first page uses a ledger
+range, and later pages use only the returned cursor. The worker persists the
+cursor after a page is reconciled, so a failed fetch does not advance the scan.
 
 ## Signing and passkeys
 

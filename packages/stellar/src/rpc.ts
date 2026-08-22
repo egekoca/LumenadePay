@@ -101,35 +101,49 @@ export class StellarRpcClient {
   }
 
   async getSettlementEvents(input: {
-    startLedger: number;
+    startLedger?: number;
     endLedger?: number;
+    cursor?: string;
     limit?: number;
   }): Promise<SettlementEventPage> {
     const contractId = this.config.settlementContractId;
     if (!contractId) {
       throw new StellarEventQueryError('CONTRACT_UNAVAILABLE', 'A settlement contract ID is required to query events');
     }
-    if (!Number.isSafeInteger(input.startLedger) || input.startLedger <= 0) {
+    if (input.cursor === undefined && (!Number.isSafeInteger(input.startLedger) || input.startLedger! <= 0)) {
       throw new StellarEventQueryError('INVALID_LEDGER_RANGE', 'Event start ledger must be a positive integer');
     }
-    if (input.endLedger !== undefined && (!Number.isSafeInteger(input.endLedger) || input.endLedger < input.startLedger)) {
+    if (input.cursor !== undefined && (input.endLedger !== undefined || input.startLedger !== undefined)) {
+      throw new StellarEventQueryError('INVALID_LEDGER_RANGE', 'Event cursor cannot be combined with a ledger range');
+    }
+    if (input.endLedger !== undefined && (!Number.isSafeInteger(input.endLedger) || input.endLedger < input.startLedger!)) {
       throw new StellarEventQueryError('INVALID_LEDGER_RANGE', 'Event end ledger must be greater than or equal to the start ledger');
     }
     if (input.limit !== undefined && (!Number.isSafeInteger(input.limit) || input.limit <= 0)) {
       throw new StellarEventQueryError('INVALID_LEDGER_RANGE', 'Event limit must be a positive integer');
     }
+    if (input.cursor !== undefined && input.cursor.trim().length === 0) {
+      throw new StellarEventQueryError('INVALID_LEDGER_RANGE', 'Event cursor must not be empty');
+    }
 
     const spec = createSettlementContractSpec(this.config);
-    const request = {
-      startLedger: input.startLedger,
-      ...(input.endLedger === undefined ? {} : {endLedger: input.endLedger}),
-      ...(input.limit === undefined ? {} : {limit: input.limit}),
-      filters: [{
-        type: 'contract' as const,
-        contractIds: [contractId],
-        topics: [spec.eventTopicFilter('PaymentSettled')],
-      }],
-    };
+    const filters = [{
+      type: 'contract' as const,
+      contractIds: [contractId],
+      topics: [spec.eventTopicFilter('PaymentSettled')],
+    }];
+    const request = input.cursor === undefined
+      ? {
+          filters,
+          startLedger: input.startLedger!,
+          ...(input.endLedger === undefined ? {} : {endLedger: input.endLedger}),
+          ...(input.limit === undefined ? {} : {limit: input.limit}),
+        }
+      : {
+          filters,
+          cursor: input.cursor,
+          ...(input.limit === undefined ? {} : {limit: input.limit}),
+        };
     const response = await this.server.getEvents(request);
     const events = response.events.flatMap(event => {
       if (!event.inSuccessfulContractCall) return [];
