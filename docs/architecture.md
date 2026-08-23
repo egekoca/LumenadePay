@@ -124,6 +124,15 @@ merchant profile is present and signs it locally; a request signed by another
 device fails closed with `MERCHANT_KEY_UNAVAILABLE` until the second transport
 leg (the NFC round trip in the plan) exists.
 
+The app mirrors each settlement into the API as it happens: it publishes the
+intent when the merchant creates a request, records the authorizing address once
+the customer signs the authorization entry, and records the transaction hash once
+the relayer submits it. Reporting is strictly ordered and best effort — the chain
+already holds the truth, so a failed report is logged and never fails a payment.
+Only the worker's RPC-verified receipt moves a settlement to `confirmed`, which is
+why the merchant request screen can poll the API and show a status the customer's
+device did not assert on its own.
+
 `scripts/testnet-relayed-settlement.mts` proves the model on-chain: it asserts
 that the transaction source and fee account are the relayer, that the customer is
 debited the amount and nothing more, and that the recipient receives it.
