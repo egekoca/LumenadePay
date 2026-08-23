@@ -68,12 +68,16 @@ export function RootNavigator() {
         headerShadowVisible: false,
         headerStyle: {backgroundColor: colors.canvas},
         headerTintColor: colors.ink,
+        // Native-driven transitions so they behave identically on iOS and Android.
+        animation: 'slide_from_right',
+        animationDuration: 260,
+        animationTypeForReplace: 'push',
       }}>
-      <Stack.Screen name="Welcome" component={WelcomeScreen} options={{headerShown: false}} />
-      <Stack.Screen name="Main" component={MainTabs} options={{headerShown: false}} />
-      <Stack.Screen name="Scan" component={ScanScreen} options={{title: 'Scan QR'}} />
-      <Stack.Screen name="Confirm" component={PaymentConfirmationScreen} options={{title: 'Review payment'}} />
-      <Stack.Screen name="Receipt" component={ReceiptScreen} options={{title: 'Receipt', headerBackVisible: false}} />
+      <Stack.Screen name="Welcome" component={WelcomeScreen} options={{headerShown: false, animation: 'fade'}} />
+      <Stack.Screen name="Main" component={MainTabs} options={{headerShown: false, animation: 'fade'}} />
+      <Stack.Screen name="Scan" component={ScanScreen} options={{title: 'Scan QR', animation: 'fade_from_bottom'}} />
+      <Stack.Screen name="Confirm" component={PaymentConfirmationScreen} options={{title: 'Review payment', animation: 'slide_from_bottom'}} />
+      <Stack.Screen name="Receipt" component={ReceiptScreen} options={{title: 'Receipt', headerBackVisible: false, animation: 'fade'}} />
       <Stack.Screen name="DeveloperSettings" component={DeveloperSettingsScreen} options={{title: 'Developer settings'}} />
       <Stack.Screen name="MerchantOnboarding" component={MerchantOnboardingScreen} options={{title: 'Business profile'}} />
       <Stack.Screen name="MerchantRequest" component={MerchantRequestScreen} options={{title: 'Payment request'}} />

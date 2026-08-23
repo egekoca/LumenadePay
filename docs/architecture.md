@@ -143,6 +143,26 @@ JavaScript never receives a private key. `SecureSigner` accepts an opaque author
 
 The account decision is recorded in [ADR 0001](adr/0001-passkey-account-and-native-signer.md): use a Smart Account Kit/OpenZeppelin context-rule-compatible Soroban account, but keep React Native integration provider-neutral through a native bridge. Browser IndexedDB/WebAuthn storage is not used in React Native. Recovery and signer rotation are intentionally single-device for the Testnet demo and gated for production by [ADR 0002](adr/0002-recovery-and-signer-rotation.md). The bridge exposes Stellar SDK-compatible `signAuthEntry` and `signTransaction` operations so the generated contract client can separate customer auth-entry signing from relayer fee-payer signing. The iOS and Android `RosaPaySigner` modules are now registered fail-closed; they return `UNAVAILABLE` until platform credential storage and user-presence signing are implemented.
 
+## Interface and motion
+
+`packages/ui` is the platform-neutral design system. Its motion primitives are
+React Native ports of React Bits components — `AnimatedContent`, `FadeContent`,
+`SplitText`, `AnimatedList`, `CountUp`, `Stepper`, `PressScale` and `Pulse`.
+React Bits itself is a React DOM library built on CSS and web animation
+libraries, so its components cannot be dropped into React Native; each one here
+reimplements the same effect with the `Animated` API and native drivers, which
+keeps behaviour identical on iOS and Android without adding a native dependency.
+Every primitive renders its plain, un-animated content under test so assertions
+and screen readers always see one string.
+
+Screen transitions come from the native stack (`slide_from_right` by default,
+`fade` for root swaps, `slide_from_bottom` for the payment review) rather than a
+JS animation loop, again so both platforms behave the same.
+
+`Stepper` carries the settlement stages — Prepare, Authorize, Submit, Confirm —
+so a payment in flight never looks stalled or finished early, and the transaction
+hash appears as soon as Stellar accepts it rather than only after confirmation.
+
 ## RTP/1 to settlement boundary
 
 RTP/1 signs a canonical JSON payment intent and is the QR transport artifact. Soroban verifies a different, typed XDR preimage containing the exact on-chain payment fields. The implementation keeps these artifacts separate on purpose:
