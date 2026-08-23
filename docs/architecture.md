@@ -183,6 +183,17 @@ and both the tests and the script normalize for.
 
 JavaScript never receives a private key. `SecureSigner` accepts an opaque authorization request and returns an opaque signature or a typed error. A production native adapter must keep the key in Secure Enclave/Keychain (iOS) or Android Keystore, require user presence for payment authorization, and expose only public-key metadata to JS.
 
+The platform modules implement exactly one signing operation: `signDigest`
+proves user presence and signs an opaque 32-byte digest with a hardware key.
+Android generates a secp256r1 key in the Keystore with
+`setUserAuthenticationRequired`, so every signature is bound to a fresh
+BiometricPrompt; iOS generates the key in the Secure Enclave with a
+`.userPresence` access control and falls back to a keychain-held key on the
+Simulator, which has no enclave. Neither module knows what a payment is: the
+authorization entry, its preimage and the XDR are assembled in JavaScript, which
+never sees the key, and `signWalletAuthPayload` converts the platform's DER
+signature into the low-S 64-byte form the wallet contract verifies.
+
 The account decision is recorded in [ADR 0001](adr/0001-passkey-account-and-native-signer.md): use a Smart Account Kit/OpenZeppelin context-rule-compatible Soroban account, but keep React Native integration provider-neutral through a native bridge. Browser IndexedDB/WebAuthn storage is not used in React Native. Recovery and signer rotation are intentionally single-device for the Testnet demo and gated for production by [ADR 0002](adr/0002-recovery-and-signer-rotation.md). The bridge exposes Stellar SDK-compatible `signAuthEntry` and `signTransaction` operations so the generated contract client can separate customer auth-entry signing from relayer fee-payer signing. The iOS and Android `RosaPaySigner` modules are now registered fail-closed; they return `UNAVAILABLE` until platform credential storage and user-presence signing are implemented.
 
 ## Interface and motion
