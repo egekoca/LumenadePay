@@ -45,3 +45,14 @@ export function useMerchantPayments(merchantProfileId: string | undefined) {
     retry: false,
   });
 }
+
+/** Whether the API is keeping records or holding them in memory. */
+export function useApiHealth() {
+  const apiBaseUrl = useAppStore(state => state.apiBaseUrl);
+  return useQuery({
+    queryKey: ['api-health', apiBaseUrl],
+    queryFn: () => apiClient().health(),
+    refetchInterval: 30_000,
+    retry: false,
+  });
+}
