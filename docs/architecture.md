@@ -159,6 +159,26 @@ reads every XDR string through `subarray().toString('utf8')`; without the
 alignment, contract method names decode as comma-separated byte codes and the
 generated client is constructed with no callable methods.
 
+## Rosa smart wallet
+
+`contracts/wallet` is the customer's account as a contract. It verifies
+secp256r1 signatures in `__check_auth`, which is what a platform key can produce:
+Secure Enclave on iOS and the Android Keystore both hold P-256 keys and never
+release them, so the account can be controlled by hardware the app cannot export.
+Adding or removing a signer is a wallet decision and runs through the same
+authorization path, and the wallet refuses to remove its last signer because that
+would make it permanently unspendable.
+
+Recovery is a narrower authority, not a second full signer: the recovery key may
+authorize `rotate` on the wallet itself and nothing else, enforced by inspecting
+the authorization contexts. A recovery key that is asked to approve a payment is
+rejected with `RecoveryScopeExceeded`.
+
+`npm run testnet:wallet` proves this on-chain: a device key authorizes a wallet
+operation through `__check_auth` while the relayer pays the fee, and the change
+is read back from the contract. Signatures must be low-S, which the host enforces
+and both the tests and the script normalize for.
+
 ## Signing and passkeys
 
 JavaScript never receives a private key. `SecureSigner` accepts an opaque authorization request and returns an opaque signature or a typed error. A production native adapter must keep the key in Secure Enclave/Keychain (iOS) or Android Keystore, require user presence for payment authorization, and expose only public-key metadata to JS.
