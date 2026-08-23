@@ -205,6 +205,26 @@ uses.
 
 The account decision is recorded in [ADR 0001](adr/0001-passkey-account-and-native-signer.md): use a Smart Account Kit/OpenZeppelin context-rule-compatible Soroban account, but keep React Native integration provider-neutral through a native bridge. Browser IndexedDB/WebAuthn storage is not used in React Native. Recovery and signer rotation are intentionally single-device for the Testnet demo and gated for production by [ADR 0002](adr/0002-recovery-and-signer-rotation.md). The bridge exposes Stellar SDK-compatible `signAuthEntry` and `signTransaction` operations so the generated contract client can separate customer auth-entry signing from relayer fee-payer signing. The iOS and Android `RosaPaySigner` modules are now registered fail-closed; they return `UNAVAILABLE` until platform credential storage and user-presence signing are implemented.
 
+### Paying from the smart wallet
+
+`POST /v1/wallets` deploys a customer's wallet with the device key as its only
+signer and gives it a starting balance, so the deployer can create the account
+but can never spend from it. The app provisions that wallet the first time it
+pays, then settles with the wallet as the customer: the hardware key authorizes
+the exact invocation and the relayer remains the transaction source and fee payer.
+
+Contract accounts need two things a classic account does not. The generated
+client's `signAuthEntry` callback receives a preimage, which only fits an
+Ed25519 account, so the wallet supplies the whole `authorizeEntry` step instead.
+And because the first simulation never runs `__check_auth`, the signer read it
+performs is missing from the footprint; the pipeline therefore simulates again
+once the entries are signed, or the ledger rejects the transaction for touching
+data outside its footprint.
+
+Evidence is in `config/testnet-hardware-wallet-evidence.json`: the wallet is
+debited the amount and nothing else, the merchant is credited it, and the relayer
+pays the fee.
+
 ## Interface and motion
 
 `packages/ui` is the platform-neutral design system. Its motion primitives are

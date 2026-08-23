@@ -21,7 +21,7 @@ Status: `[x]` implemented and locally verified, `[~]` foundation or mocked slice
 
 ## P0 - Wallet and Authorization
 
-- [x] Keep signing behind the `SecureSigner` TypeScript port with no private key exposed to JavaScript.
+- [x] Keep signing behind the `SecureSigner` TypeScript port with no private key exposed to JavaScript; a Testnet payment is now authorized by the Keystore key and paid from the smart wallet (tx `9417138c…`, ledger 4295728).
 - [x] Complete the iOS/Android passkey smart-wallet feasibility decision and record the selected account model in ADR 0001 (PRD 22.1); the account is now implemented as `contracts/wallet` and deployed to Testnet.
 - [x] Define the generated-client settlement pipeline boundary for simulation, customer auth-entry signing, relayer submission and final confirmation; the relayer is now the transaction source and fee payer, verified on-chain by `npm run testnet:relayed`.
 - [x] Add a fail-closed signed-intent settlement service that keeps RTP/1 and contract-digest signatures separate.
@@ -29,7 +29,7 @@ Status: `[x]` implemented and locally verified, `[~]` foundation or mocked slice
 - [~] Implement native iOS signer storage and user-presence authorization; the Secure Enclave module is implemented as a local pod and builds, while on-device verification remains.
 - [x] Implement native Android signer storage and user-presence authorization; a Keystore secp256r1 key signs only behind a device-credential prompt, verified on the Pixel 9 emulator against the exported public key.
 - [x] Register fail-closed `RosaPaySigner` modules on iOS and Android; both now generate a hardware secp256r1 key and sign a digest behind a user-presence prompt.
-- [~] Implement wallet creation/restoration and recoverable failure states; the wallet contract supports adding, removing and rotating signers, while the mobile creation and restore flows remain.
+- [x] Implement wallet creation/restoration and recoverable failure states; the app provisions a device-controlled smart wallet, restores it with the session, and every failure maps to a specific message.
 - [~] Add device tests for cancellation, biometric failure and process death during authorization; developer settings run a real signature self-test and every failure maps to a typed signer error, while scripted cancellation and process-death cases remain.
 - [ ] Validate the selected native passkey bridge on physical iOS and Android devices.
 
