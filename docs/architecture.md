@@ -150,6 +150,14 @@ sees onboarding or the home screen. Developer settings report whether the sessio
 is actually being saved, so a device where the store is unavailable says so
 instead of silently losing the wallet on restart.
 
+### Configuration on device
+
+React Native only populates `process.env.NODE_ENV`, so a build-time variable for
+the API address would silently do nothing. The address is a runtime setting
+stored with the session instead, which is also what a physical device needs: a
+phone cannot reach the development machine on localhost, and pointing it at a
+different host must not require a rebuild.
+
 ### React Native and the Buffer polyfill
 
 `apps/mobile/src/shared/polyfills.ts` must be the first import in the app entry.
