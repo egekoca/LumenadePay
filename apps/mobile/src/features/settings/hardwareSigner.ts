@@ -3,11 +3,14 @@ import {Buffer} from 'buffer';
 import {derToCompactSignature, uncompressedPointFromSpki, SecureSignerError} from '@rosapay/secure-signer';
 import {createNativeRosaPaySigner} from '../../native/nativeSigner';
 import {logger} from '../../shared/logger';
+import {ensureSmartWallet} from '../payments/smartWalletSettlement';
+import {useAppStore} from '../../state/appStore';
 
 export type HardwareSignerReport = {
   state: 'ready' | 'created' | 'unavailable';
   publicKey?: string;
   detail?: string;
+  walletContractId?: string;
 };
 
 const signer = createNativeRosaPaySigner();
@@ -25,12 +28,34 @@ export async function inspectHardwareSigner(): Promise<HardwareSignerReport> {
 }
 
 export async function createHardwareSigner(): Promise<HardwareSignerReport> {
+  let publicKey: string;
   try {
     const identity = await signer.createIdentity('Rosa Pay');
     logger.info('hardware_signer_created', {kind: identity.kind});
-    return {state: 'created', publicKey: identity.publicKey};
+    publicKey = identity.publicKey;
   } catch (error) {
     return {state: 'unavailable', detail: describe(error)};
+  }
+
+  // Deploying the wallet takes two Testnet transactions, so it happens here
+  // rather than in the middle of a payment.
+  if (useAppStore.getState().settlementMode !== 'testnet') {
+    return {state: 'created', publicKey};
+  }
+  try {
+    const wallet = await ensureSmartWallet();
+    return {
+      state: 'created',
+      publicKey,
+      walletContractId: wallet.contractId,
+      detail: 'Wallet created and funded on Testnet',
+    };
+  } catch (error) {
+    return {
+      state: 'created',
+      publicKey,
+      detail: `Key created, but the wallet could not be set up yet: ${describe(error)}`,
+    };
   }
 }
 

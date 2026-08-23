@@ -35,7 +35,7 @@ Status: `[x]` implemented and locally verified, `[~]` foundation or mocked slice
 
 ## P1 - Application and API Foundation
 
-- [x] Add the React Native shell, navigation, design system, English copy and error boundary; motion primitives are React Native ports of React Bits components and screen transitions run on the native stack.
+- [x] Add the React Native shell, navigation, design system, English copy and error boundary; motion primitives are React Native ports of React Bits components, screen transitions run on the native stack, and the home balance is the wallet's real on-chain balance rather than a fixture.
 - [x] Add Zustand capability/mode state, TanStack Query and structured redacted logging boundaries, with the session persisted in encrypted device storage.
 - [x] Add a runtime-validated mobile API client with stable error handling.
 - [~] Keep API intent creation/get and in-memory idempotency for local development.

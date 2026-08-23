@@ -221,6 +221,12 @@ performs is missing from the footprint; the pipeline therefore simulates again
 once the entries are signed, or the ledger rejects the transaction for touching
 data outside its footprint.
 
+A contract balance is not indexed by Horizon, so the wallet's XLM is read
+through the asset contract; the home screen shows that number and says plainly
+when the network could not be reached instead of implying a zero balance. The
+wallet itself is created when the device key is created rather than during a
+payment, because deploying and funding it takes two Testnet transactions.
+
 Evidence is in `config/testnet-hardware-wallet-evidence.json`: the wallet is
 debited the amount and nothing else, the merchant is credited it, and the relayer
 pays the fee.

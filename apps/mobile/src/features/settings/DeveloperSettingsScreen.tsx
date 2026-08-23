@@ -32,7 +32,8 @@ const modes: {value: SettlementMode; title: string; hint: string}[] = [
 ];
 
 export function DeveloperSettingsScreen(_props: Props) {
-  const {settlementMode, setSettlementMode, customerWallet, merchantProfile, merchantRegisteredOnChain} = useAppStore();
+  const {settlementMode, setSettlementMode, customerWallet, merchantProfile, merchantRegisteredOnChain, smartWallet} =
+    useAppStore();
   const stellarHealth = useStellarHealth();
   const config = createStellarConfig('testnet');
   const [walletError, setWalletError] = useState<string | undefined>();
@@ -136,6 +137,11 @@ export function DeveloperSettingsScreen(_props: Props) {
                   : 'Saved on this device'
           }
           ok={session.state === 'saved' || session.state === 'restored'}
+        />
+        <StatusRow
+          label="Device wallet"
+          value={smartWallet ? shorten(smartWallet.contractId) : 'Created with the device key'}
+          ok={Boolean(smartWallet)}
         />
         <StatusRow
           label="Merchant on-chain"
