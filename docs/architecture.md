@@ -242,6 +242,22 @@ Evidence is in `config/testnet-hardware-wallet-evidence.json`: the wallet is
 debited the amount and nothing else, the merchant is credited it, and the relayer
 pays the fee.
 
+## What the record keeps
+
+Every mutation appends an audit event: the intent that was created, who
+authorized it, the transaction that was submitted, the merchant key that was
+registered, the wallet that was provisioned and each settlement the relayer
+signed. The table is append-only and holds identifiers and Stellar addresses that
+are already public on the ledger; a detail whose name suggests a secret is
+dropped before it is written rather than masked afterwards, so a leak cannot
+happen through a caller passing the wrong field.
+
+`GET /v1/payment-intents/:id/history` reads a payment's trail, and
+`GET /v1/merchant-profiles/:id/payments` lists what a merchant has been asked to
+be paid with the outcome of each request. The merchant home reads the second one,
+so it reports every request that merchant made rather than only the ones this
+device recorded, and says so when the API cannot be reached.
+
 ## Interface and motion
 
 `packages/ui` is the platform-neutral design system. Its motion primitives are

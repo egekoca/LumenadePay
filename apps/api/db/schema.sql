@@ -76,3 +76,15 @@ CREATE TABLE worker_event_cursors (
 );
 
 -- Private keys, passkey secrets, biometric data, and raw auth payloads are forbidden here.
+
+CREATE TABLE audit_events (
+  id BIGSERIAL PRIMARY KEY,
+  occurred_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  event TEXT NOT NULL,
+  subject TEXT NOT NULL,
+  actor TEXT,
+  detail JSONB NOT NULL DEFAULT '{}'::jsonb
+);
+
+CREATE INDEX audit_events_subject_idx ON audit_events(subject, occurred_at DESC);
+CREATE INDEX audit_events_event_idx ON audit_events(event, occurred_at DESC);

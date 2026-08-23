@@ -42,9 +42,9 @@ Status: `[x]` implemented and locally verified, `[~]` foundation or mocked slice
 - [~] Add authenticated passkey session start/complete and `GET /v1/me`; the API now has a fail-closed auth resolver boundary and request IDs, while passkey session issuance remains.
 - [~] Enforce capability and resource ownership on every mutating endpoint; merchant intent creation now checks the authenticated merchant capability and owned profile when auth is required.
 - [x] Add PostgreSQL migrations and a durable repository adapter; `packages/postgres` wraps a transaction-capable `pg` pool, `createApiRuntime` selects it from `DATABASE_URL` (and refuses memory when `API_REQUIRE_DATABASE=true`), and `npm run db:migrate` applies checksum-guarded migrations.
-- [~] Complete the PRD data model: devices, merchant keys, authorizations and audit events; merchant signing keys (`002`), authorization records (`003`) and device wallets (`004`) persist, while audit events remain.
+- [x] Complete the PRD data model: merchant keys (`002`), authorization records (`003`), device wallets (`004`) and audit events (`005`) all persist, with the audit trail refusing to store anything that names a secret.
 - [x] Add merchant profile create/get endpoints and receiving-address verification; creation is idempotent, checks the Stellar receiving address and signing key, and reads are ownership-guarded.
-- [~] Add authorization, submission, payment status and activity endpoints; `POST /v1/payment-intents/:id/authorize` records who authorized a payment, `/submit` records the relayed transaction, and both settlement and authorization are readable. An account-wide activity endpoint remains.
+- [x] Add authorization, submission, payment status and activity endpoints; authorize/submit record the payment, settlement and authorization are readable, `/history` returns a payment's audit trail and merchant profiles list their payments.
 - [~] Add read-only settlement status and a domain-guarded in-memory state service; authenticated mutation and durable persistence remain pending.
 - [x] Add rate limits, request correlation IDs and relayer-safe structured logs; the endpoints that spend funds are rate limited per caller, every response carries a validated `x-request-id`, and the logger redacts authorization/signature fields.
 
@@ -57,7 +57,7 @@ Status: `[x]` implemented and locally verified, `[~]` foundation or mocked slice
 - [~] Include ledger, confirmation timestamp and a validated transaction hash in receipts; the Testnet path now records ledger and confirmation time, while hash re-validation against RPC remains.
 - [x] Implement Merchant Profile onboarding instead of the current capability toggle; the business name and receiving address are verified before a profile exists.
 - [x] Create and sign payment intents from merchant data rather than a fixture; amounts are canonicalized, expiry comes from the live ledger and the customer verifies the merchant signature.
-- [~] Add merchant request status and receipt lookup; the merchant request screen polls the API settlement for its live request, while receipt lookup by merchant remains.
+- [x] Add merchant request status and receipt lookup; the request screen polls the API settlement, and the merchant home lists every request that merchant made with its outcome.
 - [x] Persist local session and pending payment recovery across app restarts; the merchant profile, demo wallet, open request and receipts survive a restart in the platform's encrypted store, and a returning user skips onboarding.
 
 ## P2 - Reliability and Evidence

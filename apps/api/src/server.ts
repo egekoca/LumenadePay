@@ -8,6 +8,7 @@ const app = buildApp({
   repository: runtime.repository,
   merchantProfiles: runtime.merchantProfiles,
   walletRepository: runtime.wallets,
+  auditLog: runtime.auditLog,
 });
 
 app.log.info({

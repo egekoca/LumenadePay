@@ -33,3 +33,14 @@ export function usePaymentRequestStatus(intentId: string) {
     retry: false,
   });
 }
+
+/** Every payment this merchant has been asked for, not only this device's. */
+export function useMerchantPayments(merchantProfileId: string | undefined) {
+  return useQuery({
+    queryKey: ['merchant-payments', merchantProfileId],
+    enabled: Boolean(merchantProfileId),
+    queryFn: () => apiClient().listMerchantPayments(merchantProfileId!),
+    refetchInterval: 15_000,
+    retry: false,
+  });
+}
