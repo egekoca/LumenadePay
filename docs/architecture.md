@@ -209,7 +209,10 @@ The account decision is recorded in [ADR 0001](adr/0001-passkey-account-and-nati
 
 `POST /v1/wallets` deploys a customer's wallet with the device key as its only
 signer and gives it a starting balance, so the deployer can create the account
-but can never spend from it. The app provisions that wallet the first time it
+but can never spend from it. A device key controls exactly one wallet, which the
+API records, so a repeated call returns the existing wallet and funds nothing;
+that endpoint and the relayer's signing endpoint are also rate limited, because
+they are the two that spend real funds. The app provisions that wallet the first time it
 pays, then settles with the wallet as the customer: the hardware key authorizes
 the exact invocation and the relayer remains the transaction source and fee payer.
 

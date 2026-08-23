@@ -6,16 +6,19 @@ import {
 } from '@rosapay/postgres';
 import type {IntentRepository} from './application/IntentService';
 import type {MerchantProfileRepository} from './application/MerchantProfileService';
+import {InMemoryWalletRepository, type WalletRepository} from './application/WalletRepository';
 import {InMemoryIntentRepository} from './infrastructure/InMemoryIntentRepository';
 import {InMemoryMerchantProfileRepository} from './infrastructure/InMemoryMerchantProfileRepository';
 import {PostgresIntentRepository} from './infrastructure/PostgresIntentRepository';
 import {PostgresMerchantProfileRepository} from './infrastructure/PostgresMerchantProfileRepository';
+import {PostgresWalletRepository} from './infrastructure/PostgresWalletRepository';
 
 export type ApiStorageMode = 'postgres' | 'memory';
 
 export type ApiRuntime = {
   repository: IntentRepository;
   merchantProfiles: MerchantProfileRepository;
+  wallets: WalletRepository;
   storage: ApiStorageMode;
   close(): Promise<void>;
 };
@@ -43,6 +46,7 @@ export function createApiRuntime({
     return {
       repository: new InMemoryIntentRepository(),
       merchantProfiles: new InMemoryMerchantProfileRepository(),
+      wallets: new InMemoryWalletRepository(),
       storage: 'memory',
       close: async () => undefined,
     };
@@ -52,6 +56,7 @@ export function createApiRuntime({
   return {
     repository: new PostgresIntentRepository(connection),
     merchantProfiles: new PostgresMerchantProfileRepository(connection),
+    wallets: new PostgresWalletRepository(connection),
     storage: 'postgres',
     close: () => connection.close(),
   };

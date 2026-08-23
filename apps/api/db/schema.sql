@@ -8,11 +8,12 @@ CREATE TABLE users (
 
 CREATE TABLE wallets (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id),
-  contract_address TEXT NOT NULL,
+  user_id UUID REFERENCES users(id),
+  contract_address TEXT NOT NULL UNIQUE,
   network TEXT NOT NULL,
-  public_signer TEXT NOT NULL,
-  status TEXT NOT NULL
+  -- The device key is the wallet's only signer, so it identifies the wallet.
+  public_signer TEXT NOT NULL UNIQUE,
+  status TEXT NOT NULL CHECK (status IN ('active', 'revoked'))
 );
 
 CREATE TABLE merchant_profiles (

@@ -27,6 +27,8 @@ import {
 } from './application/MerchantProfileService';
 import {RelayerError, RelayerService} from './application/RelayerService';
 import {WalletProvisioningError, WalletProvisioningService} from './application/WalletProvisioningService';
+import type {WalletRepository} from './application/WalletRepository';
+import {RateLimiter, RateLimitError} from './application/RateLimiter';
 import {InMemoryIntentRepository} from './infrastructure/InMemoryIntentRepository';
 import {InMemoryMerchantProfileRepository} from './infrastructure/InMemoryMerchantProfileRepository';
 
@@ -47,6 +49,7 @@ export type BuildAppOptions = {
   auth?: ApiAuthOptions;
   relayer?: RelayerService;
   wallets?: WalletProvisioningService;
+  walletRepository?: WalletRepository;
 };
 
 export function buildApp({
@@ -55,6 +58,7 @@ export function buildApp({
   auth,
   relayer,
   wallets,
+  walletRepository,
 }: BuildAppOptions = {}) {
   const app = Fastify({logger: {redact: ['req.headers.authorization', 'req.body.signature', 'req.body.authorization']}});
   const intents = new IntentService(repository);
@@ -67,10 +71,16 @@ export function buildApp({
   const stellar = new StellarRpcClient(stellarConfig);
   const walletService = wallets ?? new WalletProvisioningService({
     config: stellarConfig,
+    ...(walletRepository ? {wallets: walletRepository} : {}),
     ...(process.env.STELLAR_WALLET_WASM_HASH ? {walletWasmHash: process.env.STELLAR_WALLET_WASM_HASH} : {}),
     ...(process.env.STELLAR_ADMIN_SECRET ? {deployerSecret: process.env.STELLAR_ADMIN_SECRET} : {}),
     ...(process.env.STELLAR_WALLET_FUNDING ? {fundingAmount: process.env.STELLAR_WALLET_FUNDING} : {}),
   });
+  // The endpoints that spend funds are the ones worth limiting.
+  const walletLimiter = new RateLimiter({limit: 3, windowMs: 60 * 60 * 1000});
+  const relayerLimiter = new RateLimiter({limit: 30, windowMs: 60 * 1000});
+  const callerKey = (request: FastifyRequest) => request.ip ?? 'unknown';
+
   const relayerService = relayer ?? new RelayerService({
     config: stellarConfig,
     ...(process.env.STELLAR_RELAYER_SECRET ? {relayerSecret: process.env.STELLAR_RELAYER_SECRET} : {}),
@@ -116,11 +126,13 @@ export function buildApp({
   app.post('/v1/wallets', async (request, reply) => {
     const {devicePublicKey} = walletSchema.parse(request.body);
     await requireAuthenticatedPrincipal(request, authOptions);
+    walletLimiter.assert(`${callerKey(request)}:${devicePublicKey}`);
     const wallet = await walletService.provision(devicePublicKey);
     return reply.code(201).send(wallet);
   });
   app.post('/v1/relayer/transactions', async (request, reply) => {
     const {xdr} = relayerTransactionSchema.parse(request.body);
+    relayerLimiter.assert(callerKey(request));
     return reply.send(relayerService.signSettlementTransaction(xdr));
   });
   app.post('/v1/merchant-profiles/:merchantProfileId/registration', async (request, reply) => {
@@ -185,6 +197,12 @@ export function buildApp({
     }
     if (error instanceof MerchantProfileNotFoundError) {
       return reply.code(404).send({code: 'MERCHANT_PROFILE_NOT_FOUND', message: error.message});
+    }
+    if (error instanceof RateLimitError) {
+      return reply
+        .code(429)
+        .header('retry-after', String(error.retryAfterSeconds))
+        .send({code: 'RATE_LIMITED', message: 'Too many requests; try again shortly'});
     }
     if (error instanceof WalletProvisioningError) {
       const status = error.code === 'WALLET_PROVISIONING_DISABLED'
