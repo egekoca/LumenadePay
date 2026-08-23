@@ -194,6 +194,15 @@ authorization entry, its preimage and the XDR are assembled in JavaScript, which
 never sees the key, and `signWalletAuthPayload` converts the platform's DER
 signature into the low-S 64-byte form the wallet contract verifies.
 
+Both modules sign the payload bytes directly rather than hashing them again:
+Android uses `NONEwithECDSA` with a key that allows the `NONE` digest, and iOS
+uses `ecdsaSignatureDigestX962SHA256`, which takes a digest as input. Signing with
+`SHA256withECDSA` would hash the authorization payload a second time and produce
+a signature the contract can never verify — the device self-test in developer
+settings exists to catch exactly that class of mistake, by verifying a real
+signature against the exported public key with the same curve math the contract
+uses.
+
 The account decision is recorded in [ADR 0001](adr/0001-passkey-account-and-native-signer.md): use a Smart Account Kit/OpenZeppelin context-rule-compatible Soroban account, but keep React Native integration provider-neutral through a native bridge. Browser IndexedDB/WebAuthn storage is not used in React Native. Recovery and signer rotation are intentionally single-device for the Testnet demo and gated for production by [ADR 0002](adr/0002-recovery-and-signer-rotation.md). The bridge exposes Stellar SDK-compatible `signAuthEntry` and `signTransaction` operations so the generated contract client can separate customer auth-entry signing from relayer fee-payer signing. The iOS and Android `RosaPaySigner` modules are now registered fail-closed; they return `UNAVAILABLE` until platform credential storage and user-presence signing are implemented.
 
 ## Interface and motion
