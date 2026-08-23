@@ -15,7 +15,7 @@ import {ReceiptScreen} from '../features/payments/ReceiptScreen';
 import {DeveloperSettingsScreen} from '../features/settings/DeveloperSettingsScreen';
 import {MerchantOnboardingScreen} from '../features/merchant/MerchantOnboardingScreen';
 import {MerchantRequestScreen} from '../features/merchant/MerchantRequestScreen';
-import type {LocalReceipt} from '../state/appStore';
+import {hasRestorableSession, useAppStore, type LocalReceipt} from '../state/appStore';
 
 export type RootStackParams = {
   Welcome: undefined;
@@ -60,9 +60,12 @@ function MainTabs() {
 }
 
 export function RootNavigator() {
+  // A returning session skips onboarding and lands where the user left off.
+  const returning = useAppStore(hasRestorableSession);
+
   return (
     <Stack.Navigator
-      initialRouteName="Welcome"
+      initialRouteName={returning ? 'Main' : 'Welcome'}
       screenOptions={{
         contentStyle: {backgroundColor: colors.canvas},
         headerShadowVisible: false,

@@ -137,6 +137,19 @@ device did not assert on its own.
 that the transaction source and fee account are the relayer, that the customer is
 debited the amount and nothing more, and that the recipient receives it.
 
+### Session persistence
+
+The app keeps its session in the platform's encrypted store (iOS Keychain,
+Android Keystore-backed storage) rather than plain app storage, because the
+session carries the development signer secrets alongside the merchant profile,
+demo wallet, open request and receipts. Secrets are byte arrays, so they are
+written as hex and restored in place; receipts are capped so a long-lived session
+cannot outgrow the store. Reading it back is asynchronous, so the app renders a
+splash until hydration finishes and only then decides whether a returning user
+sees onboarding or the home screen. Developer settings report whether the session
+is actually being saved, so a device where the store is unavailable says so
+instead of silently losing the wallet on restart.
+
 ### React Native and the Buffer polyfill
 
 `apps/mobile/src/shared/polyfills.ts` must be the first import in the app entry.

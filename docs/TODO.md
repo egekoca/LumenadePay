@@ -36,7 +36,7 @@ Status: `[x]` implemented and locally verified, `[~]` foundation or mocked slice
 ## P1 - Application and API Foundation
 
 - [x] Add the React Native shell, navigation, design system, English copy and error boundary; motion primitives are React Native ports of React Bits components and screen transitions run on the native stack.
-- [~] Add Zustand capability/mode state, TanStack Query and structured redacted logging boundaries; session persistence remains pending.
+- [x] Add Zustand capability/mode state, TanStack Query and structured redacted logging boundaries, with the session persisted in encrypted device storage.
 - [x] Add a runtime-validated mobile API client with stable error handling.
 - [~] Keep API intent creation/get and in-memory idempotency for local development.
 - [~] Add authenticated passkey session start/complete and `GET /v1/me`; the API now has a fail-closed auth resolver boundary and request IDs, while passkey session issuance remains.
@@ -58,7 +58,7 @@ Status: `[x]` implemented and locally verified, `[~]` foundation or mocked slice
 - [x] Implement Merchant Profile onboarding instead of the current capability toggle; the business name and receiving address are verified before a profile exists.
 - [x] Create and sign payment intents from merchant data rather than a fixture; amounts are canonicalized, expiry comes from the live ledger and the customer verifies the merchant signature.
 - [~] Add merchant request status and receipt lookup; the merchant request screen polls the API settlement for its live request, while receipt lookup by merchant remains.
-- [ ] Persist local session and pending payment recovery across app restarts.
+- [x] Persist local session and pending payment recovery across app restarts; the merchant profile, demo wallet, open request and receipts survive a restart in the platform's encrypted store, and a returning user skips onboarding.
 
 ## P2 - Reliability and Evidence
 
@@ -104,6 +104,6 @@ Status: `[x]` implemented and locally verified, `[~]` foundation or mocked slice
 ## Next Execution Order
 
 1. Implement the native iOS and Android signer adapters (including a real CSPRNG) and replace the development merchant and customer keys.
-2. Record intents and settlements through the API during the Testnet flow so the worker reconciles what the app actually settled.
+2. Add the NFC transport for RTP/1 so the merchant signature round trip works across two devices.
 3. Issue authenticated passkey sessions, then extend capability checks to every mutating endpoint.
-4. Add the NFC transport for RTP/1 so the merchant signature round trip works across two devices.
+4. Add real camera QR capture, rate limits and payment metrics.
