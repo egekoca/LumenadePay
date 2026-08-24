@@ -113,6 +113,24 @@ Status: `[x]` implemented and locally verified, `[~]` foundation or mocked slice
   Native ships no CSPRNG and the native signer is not implemented yet. The
   insecure randomness fallback is logged and refused outside mock mode.
 
+## Getting in
+
+Rosa Pay is non-custodial, so there is no server account for an email and
+password to unlock. The device key is the account. Onboarding says that plainly
+instead of offering wallet vocabulary a customer has no reason to know:
+
+- One way in. The old screen offered "Create your wallet" and "Sign in with
+  passkey" side by side; both called the same function and neither told anyone
+  which was theirs.
+- Setting up asks for a name — what a merchant sees on a receipt — and an
+  optional email for sending one. The screen says the email is not a login,
+  because it is not.
+- Returning asks the device. The hardware key signs a fresh random challenge and
+  the app verifies it, so unlocking is the same guarantee that protects a
+  payment rather than a decorative prompt.
+- Locking is the initial route, not an overlay, so no balance, receipt or open
+  request is ever mounted before the device says yes.
+
 ## Store readiness
 
 Both stores need the app to declare what it takes and to work without the
