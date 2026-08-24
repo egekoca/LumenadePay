@@ -51,7 +51,7 @@ Status: `[x]` implemented and locally verified, `[~]` foundation or mocked slice
 ## P1 - Customer and Merchant Flows
 
 - [x] QR encode/decode, signature validation, confirmation and local receipt flow now run on merchant-created, merchant-signed requests instead of fixtures.
-- [ ] Integrate a real camera QR scanner with size limits and malformed-payload recovery.
+- [x] Integrate a real camera QR scanner with size limits and malformed-payload recovery; the customer screen runs the device camera, the decoder refuses anything over 4 kB and reports a corrupted scan as a retry rather than a parser error, and permission is asked with the platform's own API because the camera library's Android request never settles.
 - [x] Show full/copyable recipient details, non-native issuer, live expiry and verification state on confirmation; approval is blocked when the signature fails or the request has expired against the live ledger.
 - [~] Track pending, confirmed and failed settlement states without false success; the settlement stepper reports Prepare/Authorize/Submit/Confirm, the submitted hash is shown before confirmation, demo settlements are labelled `DEMO ONLY`, and every failure maps to a specific message. Cross-device status still needs the API endpoints.
 - [~] Include ledger, confirmation timestamp and a validated transaction hash in receipts; the Testnet path now records ledger and confirmation time, while hash re-validation against RPC remains.
@@ -75,8 +75,8 @@ Status: `[x]` implemented and locally verified, `[~]` foundation or mocked slice
 
 - [!] Verify a Testnet USDC issuer/SAC and decimal policy before enabling USDC (PRD 22.2).
 - [ ] Add USDC trustline onboarding only after the asset decision is recorded.
-- [ ] Implement Android NFC HCE as an optional transport over the same RTP/1 flow.
-- [ ] Keep QR visible as the iOS and unsupported-device fallback.
+- [x] Implement Android NFC HCE as an optional transport over the same RTP/1 flow; a merchant publishes the request it is already showing as a QR, a customer reads it in reader mode, and a paid or expired request stops being offered.
+- [x] Keep QR visible as the iOS and unsupported-device fallback; NFC is additive on both screens and iOS reports it unavailable rather than degrading.
 - [ ] Record 100+ successful Testnet settlements and publish anonymized demo metrics.
 - [ ] Prepare the architecture diagram, three-minute demo script and failure-path demo.
 
@@ -113,9 +113,30 @@ Status: `[x]` implemented and locally verified, `[~]` foundation or mocked slice
   Native ships no CSPRNG and the native signer is not implemented yet. The
   insecure randomness fallback is logged and refused outside mock mode.
 
+## Store readiness
+
+Both stores need the app to declare what it takes and to work without the
+laptop. What is in place:
+
+- Android declares `CAMERA`, `USE_BIOMETRIC` and `NFC`, and removes the storage
+  permissions the camera library adds for a photo feature Rosa Pay does not use —
+  a payment app asking to read the gallery is a review risk it does not need.
+- Camera and NFC are declared `required="false"`, so a phone without either can
+  still install and still receive payments.
+- iOS carries `NSCameraUsageDescription` and `NSFaceIDUsageDescription`.
+
+What still stands between here and a store build:
+
+- A release build with the JS bundle embedded; the debug build loads from Metro
+  and cannot run away from the development machine.
+- Signing identities: a Play upload key and an Apple distribution certificate.
+- The API, worker and database must run somewhere other than the laptop before
+  Testnet mode works for anyone else (`docs/deployment.md`).
+- Privacy declarations: Apple's nutrition label and Play's Data Safety form.
+
 ## Next Execution Order
 
-1. Implement the native iOS and Android signer adapters (including a real CSPRNG) and replace the development merchant and customer keys.
-2. Add the NFC transport for RTP/1 so the merchant signature round trip works across two devices.
-3. Issue authenticated passkey sessions, then extend capability checks to every mutating endpoint.
-4. Add real camera QR capture, rate limits and payment metrics.
+1. Verify the NFC transport across two physical Android devices.
+2. Issue authenticated passkey sessions, then extend capability checks to every mutating endpoint.
+3. Produce signed release builds for both stores and deploy the API.
+4. Add payment metrics and the demo evidence set.
