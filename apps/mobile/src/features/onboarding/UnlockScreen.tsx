@@ -1,16 +1,17 @@
-import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {Fingerprint, ScanFace} from 'lucide-react-native';
 import {useCallback, useEffect, useState} from 'react';
 import {Image, Platform, Pressable, StyleSheet, Text, View} from 'react-native';
 import {AnimatedContent, Button, colors, radius, spacing, typography} from '@rosapay/ui';
-import type {RootStackParams} from '../../app/navigation';
 import {Screen} from '../../shared/Screen';
 import {useAppStore} from '../../state/appStore';
 import {unlockWithDevice} from './deviceUnlock';
 
-type Props = NativeStackScreenProps<RootStackParams, 'Unlock'>;
-
-export function UnlockScreen({navigation}: Props) {
+/**
+ * Shown in place of the whole app while it is locked, so there is nothing behind
+ * it to reveal — not a balance, not a receipt, not the request someone was in
+ * the middle of paying.
+ */
+export function UnlockScreen() {
   const account = useAppStore(state => state.account);
   const unlock = useAppStore(state => state.unlock);
   const signOut = useAppStore(state => state.signOut);
@@ -25,7 +26,6 @@ export function UnlockScreen({navigation}: Props) {
       const result = await unlockWithDevice();
       if (result.ok) {
         unlock();
-        navigation.replace('Main');
         return;
       }
       // A session whose key is gone can never be unlocked, so the only honest
@@ -38,7 +38,7 @@ export function UnlockScreen({navigation}: Props) {
     } finally {
       setBusy(false);
     }
-  }, [navigation, unlock]);
+  }, [unlock]);
 
   // Ask straight away, so returning is one prompt rather than a tap then a prompt.
   useEffect(() => {
@@ -79,14 +79,7 @@ export function UnlockScreen({navigation}: Props) {
           </Button>
           <Pressable
             accessibilityRole="button"
-            onPress={() => {
-              if (!confirmingSignOut) {
-                setConfirmingSignOut(true);
-                return;
-              }
-              signOut();
-              navigation.replace('Welcome');
-            }}
+            onPress={() => (confirmingSignOut ? signOut() : setConfirmingSignOut(true))}
             testID="sign-out">
             <Text style={[styles.signOut, confirmingSignOut && styles.signOutConfirm]}>
               {confirmingSignOut

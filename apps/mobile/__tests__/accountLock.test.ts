@@ -77,3 +77,18 @@ describe('the account and its lock', () => {
     expect(hasRestorableSession(useAppStore.getState())).toBe(true);
   });
 });
+
+describe('what the lock protects', () => {
+  it('keeps the session while locked, so unlocking restores rather than rebuilds', () => {
+    useAppStore.getState().createAccount({name: 'Ege'});
+    useAppStore.setState({smartWallet: {contractId: 'C', devicePublicKey: 'k'}});
+
+    useAppStore.getState().lock();
+    const locked = useAppStore.getState();
+
+    expect(locked.locked).toBe(true);
+    // Locking hides the session; it must never quietly discard it.
+    expect(locked.account).not.toBeNull();
+    expect(locked.smartWallet).not.toBeNull();
+  });
+});

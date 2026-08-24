@@ -10,7 +10,6 @@ import {HomeScreen} from '../features/home/HomeScreen';
 import {WalletScreen} from '../features/wallet/WalletScreen';
 import {WelcomeScreen} from '../features/onboarding/WelcomeScreen';
 import {CreateAccountScreen} from '../features/onboarding/CreateAccountScreen';
-import {UnlockScreen} from '../features/onboarding/UnlockScreen';
 import {ScanScreen} from '../features/payments/ScanScreen';
 import {PaymentConfirmationScreen} from '../features/payments/PaymentConfirmationScreen';
 import {ReceiptScreen} from '../features/payments/ReceiptScreen';
@@ -22,7 +21,6 @@ import {hasRestorableSession, useAppStore, type LocalReceipt} from '../state/app
 export type RootStackParams = {
   Welcome: undefined;
   CreateAccount: undefined;
-  Unlock: undefined;
   Main: undefined;
   Scan: undefined;
   Confirm: {payload: SignedPaymentIntentV1};
@@ -66,17 +64,10 @@ function MainTabs() {
 export function RootNavigator() {
   // A returning session skips onboarding and lands where the user left off.
   const returning = useAppStore(hasRestorableSession);
-  const locked = useAppStore(state => state.locked);
-
-  // Locking is the initial route rather than an overlay or a second navigator:
-  // nothing behind it — balances, receipts, an open request — is ever mounted
-  // before the device says yes, and there is one navigator whose history is
-  // predictable rather than two that swap under React.
-  const initialRouteName = locked ? 'Unlock' : returning ? 'Main' : 'Welcome';
 
   return (
     <Stack.Navigator
-      initialRouteName={initialRouteName}
+      initialRouteName={returning ? 'Main' : 'Welcome'}
       screenOptions={{
         contentStyle: {backgroundColor: colors.canvas},
         headerShadowVisible: false,
@@ -87,7 +78,6 @@ export function RootNavigator() {
         animationDuration: 260,
         animationTypeForReplace: 'push',
       }}>
-      <Stack.Screen name="Unlock" component={UnlockScreen} options={{headerShown: false, animation: 'fade'}} />
       <Stack.Screen name="Welcome" component={WelcomeScreen} options={{headerShown: false, animation: 'fade'}} />
       <Stack.Screen name="CreateAccount" component={CreateAccountScreen} options={{title: 'Create account', headerBackTitle: 'Back'}} />
       <Stack.Screen name="Main" component={MainTabs} options={{headerShown: false, animation: 'fade'}} />

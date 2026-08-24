@@ -63,11 +63,11 @@ Status: `[x]` implemented and locally verified, `[~]` foundation or mocked slice
 ## P2 - Reliability and Evidence
 
 - [~] Implement the worker confirmation port and safe interval lifecycle: the runtime reconciles submitted settlements through the RPC receipt guard and closes out requests whose expiry ledger has passed, on a non-overlapping interval with graceful shutdown; durable indexing, retry and notification hooks remain.
-- [ ] Add offline-safe retry using API idempotency keys.
+- [x] Add offline-safe retry using API idempotency keys; a dropped connection, a timeout, a 5xx or a 429 is tried again with backoff, every retried call is idempotent on the server, and the two that spend funds — wallet provisioning and on-chain merchant registration — are deliberately left alone.
 - [~] Read `PaymentSettled` events through the generated contract spec and reconcile them against submitted API state only after a matching RPC receipt; cursor persistence and runtime wiring are in place behind `WORKER_EVENT_START_LEDGER`, while durable event indexing remains.
 - [x] Add an RPC confirmation guard that accepts only `SUCCESS` with a valid ledger and rejects failed, missing or malformed receipts.
 - [x] Add developer settings for network, contract ID and RPC status; the screen also switches settlement mode, shows the relayer and merchant registration state, and manages the demo wallet.
-- [ ] Add metrics for created, authorized, confirmed and failed payments plus median confirmation time.
+- [x] Add metrics for created, authorized, confirmed and failed payments plus median confirmation time; `GET /v1/metrics` counts settlements by outcome and reports the median from two server-observed timestamps, excluding rows that appear to have confirmed before they were requested.
 - [~] Add tests for wrong contract/network, fake merchant, relayer alteration, polling failure and offline retry; RPC/event cursor and receipt mismatch paths are covered, while offline API retry remains.
 - [ ] Add static analysis, secret scanning and an independent contract review gate.
 
@@ -128,8 +128,14 @@ instead of offering wallet vocabulary a customer has no reason to know:
 - Returning asks the device. The hardware key signs a fresh random challenge and
   the app verifies it, so unlocking is the same guarantee that protects a
   payment rather than a decorative prompt.
-- Locking is the initial route, not an overlay, so no balance, receipt or open
-  request is ever mounted before the device says yes.
+- Locking stands in for the whole app rather than covering it, so no balance,
+  receipt or open request is mounted while it is locked.
+- A session locks again after a minute in the background. Zero would be safest
+  and unusable; a minute covers stepping out to read a message without covering
+  someone picking up a phone left on the counter. Only a real background counts,
+  because iOS reports `inactive` for the Face ID prompt itself.
+- The account, "Lock now" and sign-out live on the wallet screen. They used to be
+  reachable only from the lock screen, which you see only when locked.
 
 ## Store readiness
 
