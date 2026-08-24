@@ -113,6 +113,23 @@ Status: `[x]` implemented and locally verified, `[~]` foundation or mocked slice
   Native ships no CSPRNG and the native signer is not implemented yet. The
   insecure randomness fallback is logged and refused outside mock mode.
 
+## Paying between two devices
+
+A customer's phone does not hold the merchant's signing key, and the settlement
+contract needs a merchant signature naming the payer. The two devices now meet
+through the API: the customer claims a request, the merchant's device signs for
+that exact customer, and the customer collects the signature and pays.
+
+Proven on Testnet by `npm run testnet:two-device`, which plays both sides with
+the merchant's signing secret confined to the merchant half: tx
+`3b4e4267…` at ledger 4312773.
+
+Still open on this path:
+
+- The customer's device is the orchestrator, so it needs the network. The plan's
+  airplane-mode demo needs the merchant to orchestrate instead.
+- The signed authorization returns over the API rather than over NFC.
+
 ## Getting in
 
 Rosa Pay is non-custodial, so there is no server account for an email and
