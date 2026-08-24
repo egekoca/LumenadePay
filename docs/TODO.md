@@ -124,11 +124,19 @@ Proven on Testnet by `npm run testnet:two-device`, which plays both sides with
 the merchant's signing secret confined to the merchant half: tx
 `3b4e4267…` at ledger 4312773.
 
+The protocol can now also authorize without a network: the merchant prepares the
+authorization entry, the customer verifies it against the intent on screen and
+signs it locally, and the merchant submits. Proven on Testnet by
+`npm run testnet:offline` — the customer's half runs with `fetch` taken away, so
+offline is enforced rather than asserted. Wallet
+`CCAATSIE…` paid 0.4 XLM without connecting, tx `89022bee…` at ledger 4313141.
+
 Still open on this path:
 
-- The customer's device is the orchestrator, so it needs the network. The plan's
-  airplane-mode demo needs the merchant to orchestrate instead.
-- The signed authorization returns over the API rather than over NFC.
+- The mobile app still orchestrates from the customer's side, so the app itself
+  is not yet the airplane-mode demo; the capability exists and is unwired.
+- Carrying the exchange over NFC needs a stateful APDU session: intent out,
+  customer address back, authorization request out, signature back.
 
 ## Getting in
 
