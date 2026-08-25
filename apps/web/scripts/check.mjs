@@ -13,6 +13,7 @@ await Promise.all(requiredFiles.map(file => access(new URL(`../${file}`, import.
 const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
 const requiredCopy = [
   'Lumenade Pay',
+  'Lumen meets lemonade.',
   'Stellar Testnet',
   'CBX7XUIEFWMRBZBEJGZ7SJAFJXFCAB6VFJKOAFMUFAEXML2UVOAZFAQO',
   'c8414bdabd495b987a45588a09dc95ef3b4a821c39f08696895ea3720025a777',

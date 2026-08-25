@@ -35,6 +35,7 @@ Status: `[x]` implemented and locally verified, `[~]` foundation or mocked slice
 
 ## P1 - Application and API Foundation
 
+- [x] Replace the legacy blue-gray/rose palette with the black, lemon-yellow and white Lumenade system; add an animated lemon/XLM mark for hydration, unlock, camera startup and final-status settlement waiting.
 - [x] Add the React Native shell, navigation, design system, English copy and error boundary; motion primitives are React Native ports of React Bits components, screen transitions run on the native stack, and the home balance is the wallet's real on-chain balance rather than a fixture.
 - [x] Add Zustand capability/mode state, TanStack Query and structured redacted logging boundaries, with the session persisted in encrypted device storage.
 - [x] Add a runtime-validated mobile API client with stable error handling.

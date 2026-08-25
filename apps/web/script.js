@@ -17,6 +17,7 @@ if (menuButton && menu) {
 }
 
 const statusLabel = document.querySelector('[data-network-status]');
+const networkProof = document.querySelector('[data-network-proof]');
 
 async function refreshNetworkStatus() {
   if (!statusLabel) return;
@@ -40,6 +41,7 @@ async function refreshNetworkStatus() {
     statusLabel.textContent = 'Verified Testnet deployment';
   } finally {
     clearTimeout(timeout);
+    if (networkProof) networkProof.dataset.checking = 'false';
   }
 }
 

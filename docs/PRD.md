@@ -43,7 +43,8 @@ Make a Stellar payment feel like tapping a card while preserving the strongest p
 - Produce a real Stellar testnet transaction and a receipt with a transaction hash.
 - Support iOS and Android from one React Native codebase.
 - Publish a responsive website that presents the mobile product and links every Testnet claim to reproducible evidence.
-- Keep all UI text in English and use the Lumenade Pay dark near-black, amber and restrained rose brand system.
+- Keep all UI text in English and use the Lumenade Pay black, lemon-yellow and white brand system. Green and red are reserved for semantic success and failure states.
+- Express the Lumen + lemonade name through the lemon/XLM mark, using restrained rotation and orbit motion during loading, settlement and selected transitions without implying success before final confirmation.
 
 ### 4.2 Technical goals
 

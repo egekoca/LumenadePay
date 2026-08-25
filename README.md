@@ -11,7 +11,7 @@ The product source of truth is [docs/PRD.md](docs/PRD.md), with implementation s
 The foundation and first vertical slice are implemented:
 
 - Bare React Native 0.85 app for iOS and Android, with one account and Customer/Merchant capability switching.
-- English dark near-black, amber and restrained rose design system with a complete mocked QR request, scan, confirm and receipt flow.
+- Black, lemon-yellow and white brand system with an animated lemon/XLM mark across onboarding, camera startup and settlement loading states.
 - RTP/1 schema, QR codec, canonical hashing, merchant signature verification and policy tests.
 - Stellar RPC adapter with live Testnet health checking.
 - Typed RTP/1-to-settlement envelope conversion and a Stellar CLI-generated contract client binding.
