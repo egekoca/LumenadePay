@@ -11,8 +11,10 @@ import {
   isTrustedAnchorUrl,
   needsCustomerAction,
   parseStellarToml,
+  pollTransaction,
   readTransaction,
   startInteractive,
+  transactionPhase,
   type AnchorInfo,
 } from '../src';
 
@@ -117,6 +119,12 @@ describe('discovering an anchor', () => {
     const fetcher = fetcherFor({'https://': () => new Response('missing', {status: 404})});
     await expect(discoverAnchor(homeDomain, {fetcher})).rejects.toThrow(/did not publish/);
   });
+
+  it('refuses insecure endpoints published by an anchor', async () => {
+    const source = `SIGNING_KEY = "${anchorKey.publicKey()}"\nNETWORK_PASSPHRASE = "${Networks.TESTNET}"\nTRANSFER_SERVER_SEP0024 = "http://${homeDomain}/sep24"`;
+    const fetcher = fetcherFor({'https://': () => new Response(source)});
+    await expect(discoverAnchor(homeDomain, {fetcher})).rejects.toThrow(/HTTPS TRANSFER_SERVER_SEP0024/);
+  });
 });
 
 describe('authenticating with an anchor', () => {
@@ -133,7 +141,12 @@ describe('authenticating with an anchor', () => {
       : json({token: 'jwt-token'}))) as unknown as typeof fetch;
 
     const session = await authenticate(anchorInfo(), client, {fetcher: both});
-    expect(session).toEqual({token: 'jwt-token', account: customer.publicKey(), homeDomain});
+    expect(session).toEqual({
+      token: 'jwt-token',
+      account: customer.publicKey(),
+      homeDomain,
+      authProtocol: 'SEP-10',
+    });
     expect(client.signTransaction).toHaveBeenCalledTimes(1);
     void fetcher;
   });
@@ -179,7 +192,12 @@ describe('authenticating with an anchor', () => {
 });
 
 describe('opening the anchor’s own pages', () => {
-  const session = {token: 'jwt', account: customer.publicKey(), homeDomain};
+  const session = {
+    token: 'jwt',
+    account: customer.publicKey(),
+    homeDomain,
+    authProtocol: 'SEP-10' as const,
+  };
 
   it('returns the URL and the transaction to follow', async () => {
     const fetcher = vi.fn(async () =>
@@ -218,6 +236,15 @@ describe('opening the anchor’s own pages', () => {
     expect(isTrustedAnchorUrl('not a url', anchor)).toBe(false);
   });
 
+  it('accepts a separately hosted UI only through an exact configured HTTPS origin', () => {
+    const anchor = anchorInfo();
+    const approved = ['https://approved-ui.example.net'];
+    expect(isTrustedAnchorUrl('https://approved-ui.example.net/deposit?id=1', anchor, approved)).toBe(true);
+    expect(isTrustedAnchorUrl('https://child.approved-ui.example.net/deposit', anchor, approved)).toBe(false);
+    expect(isTrustedAnchorUrl('http://approved-ui.example.net/deposit', anchor, approved)).toBe(false);
+    expect(isTrustedAnchorUrl('https://approved-ui.example.net.evil.org/deposit', anchor, approved)).toBe(false);
+  });
+
   it('reads where a transfer has got to', async () => {
     const fetcher = vi.fn(async () =>
       json({transaction: {id: 'tx-1', kind: 'deposit', status: 'pending_anchor', amount_in: '10.00'}}),
@@ -235,9 +262,86 @@ describe('opening the anchor’s own pages', () => {
 
   it('knows which states are waiting on the customer and which are over', () => {
     expect(needsCustomerAction('incomplete')).toBe(true);
+    expect(needsCustomerAction('pending_user_transfer_complete')).toBe(true);
+    expect(needsCustomerAction('pending_trust')).toBe(true);
     expect(needsCustomerAction('pending_anchor')).toBe(false);
     expect(isFinal('completed')).toBe(true);
     expect(isFinal('refunded')).toBe(true);
     expect(isFinal('pending_stellar')).toBe(false);
+    expect(transactionPhase('pending_user')).toBe('action_required');
+    expect(transactionPhase('on_hold')).toBe('pending');
+    expect(transactionPhase('completed')).toBe('completed');
+    expect(transactionPhase('expired')).toBe('failed');
+  });
+
+  it('follows status changes without turning a bounded timeout into a failure', async () => {
+    const statuses = ['pending_anchor', 'pending_stellar', 'completed'] as const;
+    const updates: string[] = [];
+    let call = 0;
+    const fetcher = vi.fn(async () =>
+      json({transaction: {id: 'tx-1', kind: 'deposit', status: statuses[call++]}}),
+    ) as unknown as typeof fetch;
+
+    const transaction = await pollTransaction({
+      anchor: anchorInfo(),
+      session,
+      transactionId: 'tx-1',
+      attempts: 5,
+      intervalMs: 0,
+      sleep: async () => undefined,
+      onUpdate: update => updates.push(update.status),
+      fetcher,
+    });
+
+    expect(transaction.status).toBe('completed');
+    expect(updates).toEqual(['pending_anchor', 'pending_stellar', 'completed']);
+    expect(fetcher).toHaveBeenCalledTimes(3);
+  });
+
+  it('returns the latest pending state when the polling window ends', async () => {
+    const fetcher = vi.fn(async () =>
+      json({transaction: {id: 'tx-1', kind: 'deposit', status: 'on_hold'}}),
+    ) as unknown as typeof fetch;
+
+    const transaction = await pollTransaction({
+      anchor: anchorInfo(),
+      session,
+      transactionId: 'tx-1',
+      attempts: 2,
+      intervalMs: 0,
+      sleep: async () => undefined,
+      fetcher,
+    });
+
+    expect(transaction.status).toBe('on_hold');
+    expect(fetcher).toHaveBeenCalledTimes(2);
+  });
+
+  it('returns immediately when the customer has another action', async () => {
+    const fetcher = vi.fn(async () =>
+      json({transaction: {id: 'tx-1', kind: 'deposit', status: 'incomplete'}}),
+    ) as unknown as typeof fetch;
+
+    const transaction = await pollTransaction({
+      anchor: anchorInfo(),
+      session,
+      transactionId: 'tx-1',
+      attempts: 30,
+      intervalMs: 0,
+      fetcher,
+    });
+
+    expect(transaction.status).toBe('incomplete');
+    expect(fetcher).toHaveBeenCalledTimes(1);
+  });
+
+  it('refuses an unknown transaction status instead of presenting it incorrectly', async () => {
+    const fetcher = vi.fn(async () =>
+      json({transaction: {id: 'tx-1', kind: 'deposit', status: 'looks_done'}}),
+    ) as unknown as typeof fetch;
+
+    await expect(
+      readTransaction({anchor: anchorInfo(), session, transactionId: 'tx-1', fetcher}),
+    ).rejects.toThrow(/cannot read/);
   });
 });

@@ -37,6 +37,7 @@ export type SessionToken = {
   /** The account the token speaks for. */
   account: string;
   homeDomain: string;
+  authProtocol: 'SEP-10' | 'SEP-45';
 };
 
 export type WebAuthOptions = {
@@ -124,5 +125,10 @@ export async function authenticate(
     throw new WebAuthError('TOKEN_REFUSED', `${anchor.homeDomain} could not be reached`);
   }
 
-  return {token: token.token!, account: signer.accountId, homeDomain: anchor.homeDomain};
+  return {
+    token: token.token!,
+    account: signer.accountId,
+    homeDomain: anchor.homeDomain,
+    authProtocol: 'SEP-10',
+  };
 }

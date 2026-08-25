@@ -133,17 +133,29 @@ export async function discoverAnchor(
     throw new AnchorDiscoveryError('INCOMPLETE_ANCHOR', `${domain} does not say which network it serves`);
   }
 
+  const webAuthEndpoint = secureEndpoint(values.WEB_AUTH_ENDPOINT, domain, 'WEB_AUTH_ENDPOINT');
+  const transferServerSep24 = secureEndpoint(
+    values.TRANSFER_SERVER_SEP0024,
+    domain,
+    'TRANSFER_SERVER_SEP0024',
+  );
+  const kycServer = secureEndpoint(values.KYC_SERVER, domain, 'KYC_SERVER');
+  const quoteServer = secureEndpoint(values.ANCHOR_QUOTE_SERVER, domain, 'ANCHOR_QUOTE_SERVER');
+  const webAuthForContractsEndpoint = secureEndpoint(
+    values.WEB_AUTH_FOR_CONTRACTS_ENDPOINT,
+    domain,
+    'WEB_AUTH_FOR_CONTRACTS_ENDPOINT',
+  );
+
   return {
     homeDomain: domain,
     networkPassphrase: values.NETWORK_PASSPHRASE,
     signingKey: signingKey.data,
-    ...(values.WEB_AUTH_ENDPOINT ? {webAuthEndpoint: values.WEB_AUTH_ENDPOINT} : {}),
-    ...(values.TRANSFER_SERVER_SEP0024 ? {transferServerSep24: values.TRANSFER_SERVER_SEP0024} : {}),
-    ...(values.KYC_SERVER ? {kycServer: values.KYC_SERVER} : {}),
-    ...(values.ANCHOR_QUOTE_SERVER ? {quoteServer: values.ANCHOR_QUOTE_SERVER} : {}),
-    ...(values.WEB_AUTH_FOR_CONTRACTS_ENDPOINT
-      ? {webAuthForContractsEndpoint: values.WEB_AUTH_FOR_CONTRACTS_ENDPOINT}
-      : {}),
+    ...(webAuthEndpoint ? {webAuthEndpoint} : {}),
+    ...(transferServerSep24 ? {transferServerSep24} : {}),
+    ...(kycServer ? {kycServer} : {}),
+    ...(quoteServer ? {quoteServer} : {}),
+    ...(webAuthForContractsEndpoint ? {webAuthForContractsEndpoint} : {}),
     ...(values.WEB_AUTH_CONTRACT_ID ? {webAuthContractId: values.WEB_AUTH_CONTRACT_ID} : {}),
     currencies: currencies
       .filter(currency => typeof currency.code === 'string')
@@ -153,4 +165,18 @@ export async function discoverAnchor(
         ...(currency.status ? {status: currency.status} : {}),
       })),
   };
+}
+
+function secureEndpoint(value: string | undefined, domain: string, field: string): string | undefined {
+  if (!value) return undefined;
+  try {
+    const url = new URL(value);
+    if (url.protocol === 'https:' && !url.username && !url.password) return url.toString().replace(/\/$/, '');
+  } catch {
+    // Converted to the stable discovery error below.
+  }
+  throw new AnchorDiscoveryError(
+    'INCOMPLETE_ANCHOR',
+    `${domain} publishes no usable HTTPS ${field}`,
+  );
 }

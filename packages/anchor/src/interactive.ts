@@ -28,6 +28,7 @@ export const anchorTransactionStatuses = [
   'pending_stellar',
   'pending_trust',
   'pending_user',
+  'on_hold',
   'completed',
   'refunded',
   'expired',
@@ -42,7 +43,7 @@ export type AnchorTransactionStatus = (typeof anchorTransactionStatuses)[number]
 export const anchorTransactionSchema = z.object({
   id: z.string().min(1),
   kind: z.string().min(1),
-  status: z.string().min(1),
+  status: z.enum(anchorTransactionStatuses),
   amount_in: z.string().optional(),
   amount_out: z.string().optional(),
   amount_fee: z.string().optional(),
@@ -52,6 +53,8 @@ export const anchorTransactionSchema = z.object({
   message: z.string().optional(),
   started_at: z.string().optional(),
   completed_at: z.string().optional(),
+  status_eta: z.number().int().nonnegative().optional(),
+  user_action_required_by: z.string().optional(),
   /** Present on a withdrawal: where the customer's asset must be sent. */
   withdraw_anchor_account: z.string().optional(),
   withdraw_memo: z.string().optional(),
@@ -60,7 +63,12 @@ export const anchorTransactionSchema = z.object({
 
 export type AnchorTransaction = z.infer<typeof anchorTransactionSchema>;
 
-export type InteractiveErrorCode = 'TRANSFER_UNSUPPORTED' | 'INTERACTIVE_REFUSED' | 'UNTRUSTED_URL' | 'UNKNOWN_TRANSACTION';
+export type InteractiveErrorCode =
+  | 'TRANSFER_UNSUPPORTED'
+  | 'INTERACTIVE_REFUSED'
+  | 'UNTRUSTED_URL'
+  | 'UNKNOWN_TRANSACTION'
+  | 'POLL_ABORTED';
 
 export class InteractiveError extends Error {
   override readonly name = 'InteractiveError';
@@ -77,7 +85,11 @@ export class InteractiveError extends Error {
  * a way to put a convincing page in front of someone mid-payment, so it is
  * refused rather than opened.
  */
-export function isTrustedAnchorUrl(url: string, anchor: AnchorInfo): boolean {
+export function isTrustedAnchorUrl(
+  url: string,
+  anchor: AnchorInfo,
+  trustedInteractiveOrigins: readonly string[] = [],
+): boolean {
   let parsed: URL;
   try {
     parsed = new URL(url);
@@ -88,7 +100,20 @@ export function isTrustedAnchorUrl(url: string, anchor: AnchorInfo): boolean {
   const host = parsed.hostname.toLowerCase();
   const domain = anchor.homeDomain.toLowerCase();
   // The anchor's own domain, or a subdomain of it.
-  return host === domain || host.endsWith(`.${domain}`);
+  if (host === domain || host.endsWith(`.${domain}`)) return true;
+
+  // Some anchors host their regulated UI on a separate origin. Never infer
+  // trust from a shared registrable domain (for example every *.stellar.org
+  // host); require the wallet's deployment configuration to name the exact
+  // HTTPS origin instead.
+  return trustedInteractiveOrigins.some(candidate => {
+    try {
+      const allowed = new URL(candidate);
+      return allowed.protocol === 'https:' && allowed.origin.toLowerCase() === parsed.origin.toLowerCase();
+    } catch {
+      return false;
+    }
+  });
 }
 
 export type InteractiveInput = {
@@ -100,6 +125,8 @@ export type InteractiveInput = {
   /** Where a deposit should land, or which account funds a withdrawal. */
   account?: string;
   amount?: string;
+  /** Exact HTTPS origins approved by deployment configuration for hosted UI. */
+  trustedInteractiveOrigins?: readonly string[];
   fetcher?: typeof fetch;
 };
 
@@ -139,10 +166,16 @@ export async function startInteractive(input: InteractiveInput): Promise<Interac
     throw new InteractiveError('INTERACTIVE_REFUSED', `${anchor.homeDomain} could not be reached`);
   }
 
-  if (!isTrustedAnchorUrl(payload.url!, anchor)) {
+  if (!isTrustedAnchorUrl(payload.url!, anchor, input.trustedInteractiveOrigins)) {
+    let refusedOrigin = 'an invalid URL';
+    try {
+      refusedOrigin = new URL(payload.url!).origin;
+    } catch {
+      // Keep the full attacker-controlled value out of the error and logs.
+    }
     throw new InteractiveError(
       'UNTRUSTED_URL',
-      'The anchor asked Rosa Pay to open a page on another domain, so it was not opened',
+      `The anchor asked Rosa Pay to open ${refusedOrigin}, so it was not opened`,
     );
   }
 
@@ -166,26 +199,97 @@ export async function readTransaction(query: TransactionQuery): Promise<AnchorTr
   const url = new URL(`${anchor.transferServerSep24}/transaction`);
   url.searchParams.set('id', transactionId);
 
-  const response = await fetcher(url.toString(), {
-    headers: {authorization: `Bearer ${session.token}`},
-  });
-  if (!response.ok) {
-    throw new InteractiveError('UNKNOWN_TRANSACTION', `${anchor.homeDomain} does not know that transaction`);
+  try {
+    const response = await fetcher(url.toString(), {
+      headers: {authorization: `Bearer ${session.token}`},
+    });
+    if (!response.ok) {
+      throw new InteractiveError('UNKNOWN_TRANSACTION', `${anchor.homeDomain} does not know that transaction`);
+    }
+    const body = (await response.json()) as {transaction?: unknown};
+    const parsed = anchorTransactionSchema.safeParse(body.transaction);
+    if (!parsed.success) {
+      throw new InteractiveError(
+        'UNKNOWN_TRANSACTION',
+        `${anchor.homeDomain} returned a transaction Rosa Pay cannot read`,
+      );
+    }
+    return parsed.data;
+  } catch (error) {
+    if (error instanceof InteractiveError) throw error;
+    throw new InteractiveError('UNKNOWN_TRANSACTION', `${anchor.homeDomain} could not report that transaction`);
   }
-  const body = (await response.json()) as {transaction?: unknown};
-  const parsed = anchorTransactionSchema.safeParse(body.transaction);
-  if (!parsed.success) {
-    throw new InteractiveError('UNKNOWN_TRANSACTION', `${anchor.homeDomain} returned a transaction Rosa Pay cannot read`);
-  }
-  return parsed.data;
 }
 
 /** Whether a status means the customer has to go back to the anchor's pages. */
-export function needsCustomerAction(status: string): boolean {
-  return status === 'incomplete' || status === 'pending_user' || status === 'pending_user_transfer_start';
+export function needsCustomerAction(status: AnchorTransactionStatus): boolean {
+  return [
+    'incomplete',
+    'pending_user',
+    'pending_user_transfer_start',
+    'pending_user_transfer_complete',
+    'pending_trust',
+  ].includes(status);
 }
 
 /** Whether a status means nothing further will happen. */
-export function isFinal(status: string): boolean {
+export function isFinal(status: AnchorTransactionStatus): boolean {
   return ['completed', 'refunded', 'expired', 'error', 'no_market', 'too_small', 'too_large'].includes(status);
+}
+
+export type AnchorTransactionPhase = 'action_required' | 'pending' | 'completed' | 'failed';
+
+/** Collapses the SEP-24 wire statuses into the four states the wallet presents. */
+export function transactionPhase(status: AnchorTransactionStatus): AnchorTransactionPhase {
+  if (status === 'completed') return 'completed';
+  if (needsCustomerAction(status)) return 'action_required';
+  if (isFinal(status)) return 'failed';
+  return 'pending';
+}
+
+export type PollTransactionOptions = TransactionQuery & {
+  /** Includes the first read. */
+  attempts?: number;
+  intervalMs?: number;
+  signal?: AbortSignal;
+  onUpdate?: (transaction: AnchorTransaction) => void;
+  /** Test seam; production uses a timer. */
+  sleep?: (milliseconds: number) => Promise<void>;
+};
+
+/**
+ * Follows an anchor transaction until it finishes, needs customer input, or the
+ * bounded polling window ends. A non-final result is returned on timeout so the
+ * app can persist the transaction id and resume later instead of turning a slow
+ * bank rail into a false failure.
+ */
+export async function pollTransaction({
+  attempts = 30,
+  intervalMs = 2_000,
+  signal,
+  onUpdate,
+  sleep = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds)),
+  ...query
+}: PollTransactionOptions): Promise<AnchorTransaction> {
+  if (!Number.isInteger(attempts) || attempts < 1) {
+    throw new RangeError('Polling attempts must be a positive integer');
+  }
+  if (!Number.isFinite(intervalMs) || intervalMs < 0) {
+    throw new RangeError('Polling interval must be zero or greater');
+  }
+
+  let latest: AnchorTransaction | undefined;
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    if (signal?.aborted) {
+      throw new InteractiveError('POLL_ABORTED', 'Following the anchor transaction was cancelled');
+    }
+    latest = await readTransaction(query);
+    onUpdate?.(latest);
+    if (isFinal(latest.status) || needsCustomerAction(latest.status) || attempt === attempts - 1) return latest;
+    await sleep(intervalMs);
+  }
+
+  // The positive-attempt guard makes this unreachable, but keeps the return
+  // type honest if the loop is ever refactored.
+  throw new InteractiveError('UNKNOWN_TRANSACTION', 'The anchor transaction could not be read');
 }
