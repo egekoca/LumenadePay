@@ -77,7 +77,7 @@ img { max-width: 100%; }
 .nav-links { align-items: center; color: var(--ink-muted); display: flex; font-size: 11px; font-weight: 650; gap: 30px; letter-spacing: 0.1em; text-transform: uppercase; }
 .nav-links > a { transition: color 200ms ease; }
 .nav-links > a:not(.pill):hover { color: var(--ink); }
-.pill { border: 1px solid var(--ink); border-radius: 0; color: var(--ink); padding: 9px 16px; transition: background 180ms ease, color 180ms ease; }
+.pill { border: 1px solid var(--ink); border-radius: 10px; color: var(--ink); padding: 9px 16px; transition: background 180ms ease, color 180ms ease; }
 .pill:hover { background: var(--ink); color: var(--paper); }
 .menu-button { background: none; border: 0; display: none; height: 42px; padding: 9px; width: 42px; }
 .menu-button span { background: var(--ink); display: block; height: 1px; margin: 7px 0; transition: transform 260ms var(--ease); width: 22px; }
@@ -114,14 +114,17 @@ img { max-width: 100%; }
 .hero-title em { display: block; width: fit-content; }
 /* One colour, and it earns its place by marking the payoff word only. */
 h1 em, h2 em { color: var(--ink); font-style: normal; position: relative; }
+/* A tight line-height pulls the em box above the descenders, so the mark is
+   placed from the box bottom rather than from where the glyphs look like they
+   sit. */
 .hero-title em::after {
   background: var(--lemon);
-  bottom: 0.11em;
+  bottom: -0.01em;
   content: "";
-  height: 0.15em;
-  left: -0.02em;
+  height: 0.13em;
+  left: -0.015em;
   position: absolute;
-  right: 0.06em;
+  right: 0.05em;
   z-index: -1;
 }
 .hero-title em { z-index: 0; }
@@ -133,7 +136,7 @@ h1 em, h2 em { color: var(--ink); font-style: normal; position: relative; }
   align-items: center;
   background: var(--ink);
   border: 1px solid var(--ink);
-  border-radius: 0;
+  border-radius: 12px;
   color: var(--paper);
   display: inline-flex;
   gap: 11px;
@@ -320,49 +323,101 @@ h1 em, h2 em { color: var(--ink); font-style: normal; position: relative; }
 .signal-track i { background: #080704; border-radius: 50%; height: 5px; width: 5px; }
 
 /* ---------- sections ---------- */
-.section { border-bottom: 1px solid var(--rule-strong); padding-block: 110px; }
+.section { border-bottom: 1px solid var(--rule); padding-block: 96px; }
 /* A numbered index entry, the way a printed section opens: the number and the
    label on one rule, the headline under it, hard left. */
-.section-heading { border-top: 2px solid var(--ink); margin-bottom: 56px; padding-top: 16px; }
+.section-heading { border-top: 1px solid var(--rule-strong); margin-bottom: 48px; padding-top: 18px; }
 .section-index { color: var(--ink); display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.2em; margin-bottom: 26px; }
 .section-heading h2, .proof-copy h2, .download h2 { font-size: clamp(42px, 5.2vw, 72px); font-weight: 700; letter-spacing: -0.05em; line-height: 0.94; max-width: 15ch; }
 .centered { text-align: left; }
 
 /* ---------- problem / solution ---------- */
-.compare { display: grid; gap: 14px; grid-template-columns: 1fr 66px 1fr; }
-.compare-card { border: 1px solid var(--ink); border-radius: 0; padding: 30px; }
-.compare-label { align-items: center; border-bottom: 1px solid var(--rule); color: var(--ink); display: flex; font-size: 10px; font-weight: 700; gap: 11px; letter-spacing: 0.2em; padding-bottom: 16px; }
-.badge { align-items: center; border-radius: 0; display: flex; font-size: 13px; height: 22px; justify-content: center; width: 22px; }
-.badge.bad { background: var(--red); color: var(--paper); }
-.badge.good { background: var(--green); color: var(--paper); }
-.compare-card ul { display: grid; list-style: none; margin: 8px 0 0; padding: 0; }
-/* Rows on a rule, like a table of figures, rather than nested pills. */
-.compare-card li {
+.compare { align-items: stretch; display: grid; gap: 18px; grid-template-columns: 1fr 60px 1fr; }
+/*
+ * Two cards that answer each other. Softer than the rest of the grid on
+ * purpose: this is the part a reader has to actually read, so it gets rounded
+ * corners, real padding and a size you do not have to lean into.
+ *
+ * The old version struck the left column through in grey on cream, which said
+ * "these go away" at the cost of being legible at all. The contrast between the
+ * two sides now comes from the cards, not from damaging the words.
+ */
+.compare-card {
+  background: var(--paper-raised);
+  border: 1px solid var(--rule);
+  border-radius: 26px;
+  box-shadow: 0 1px 2px rgba(20, 19, 15, 0.04), 0 18px 40px -30px rgba(20, 19, 15, 0.35);
+  padding: 34px 32px;
+}
+.compare-label {
   align-items: center;
   border-bottom: 1px solid var(--rule);
+  color: var(--ink);
   display: flex;
-  font-size: 16px;
-  gap: 14px;
-  padding: 18px 0;
+  font-size: 13px;
+  font-weight: 680;
+  gap: 12px;
+  letter-spacing: -0.01em;
+  padding-bottom: 20px;
 }
-.compare-card li:last-child { border-bottom: 0; padding-bottom: 0; }
-.compare-card .i { font-size: 21px; }
-.compare-then li { color: var(--ink-muted); text-decoration: line-through; text-decoration-color: var(--rule); }
-.compare-then .i { color: var(--ink-faint); }
-.compare-now { background: var(--lemon); border-color: var(--ink); }
-.compare-now li { border-bottom-color: rgba(20, 19, 15, 0.22); font-weight: 560; }
-.compare-now .i { color: var(--ink); }
+.badge {
+  align-items: center;
+  border-radius: 9px;
+  display: flex;
+  flex: 0 0 auto;
+  font-size: 13px;
+  height: 26px;
+  justify-content: center;
+  width: 26px;
+}
+.badge.bad { background: rgba(163, 43, 30, 0.12); color: var(--red); }
+.badge.good { background: rgba(20, 19, 15, 0.14); color: var(--ink); }
+
+.compare-card ul { display: grid; list-style: none; margin: 0; padding: 0; }
+.compare-card li {
+  align-items: flex-start;
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  gap: 16px;
+  padding: 22px 0;
+}
+.compare-card li:last-child { border-bottom: 0; padding-bottom: 4px; }
+
+/* A tinted rounded chip, the same shape the app uses for its own list rows. */
+.row-icon {
+  align-items: center;
+  background: rgba(20, 19, 15, 0.06);
+  border-radius: 12px;
+  color: var(--ink);
+  display: flex;
+  flex: 0 0 auto;
+  height: 42px;
+  justify-content: center;
+  width: 42px;
+}
+.row-icon .i { font-size: 20px; }
+.row-copy { display: grid; gap: 5px; }
+.row-copy b { font-size: 16.5px; font-weight: 640; letter-spacing: -0.02em; }
+.row-copy i { color: var(--ink-muted); font-size: 14px; font-style: normal; line-height: 1.5; }
+
+.compare-then .row-icon { background: rgba(163, 43, 30, 0.1); color: var(--red); }
+
+.compare-now { background: var(--lemon); border-color: rgba(20, 19, 15, 0.28); }
+.compare-now .compare-label,
+.compare-now li { border-bottom-color: rgba(20, 19, 15, 0.22); }
+.compare-now .row-icon { background: rgba(20, 19, 15, 0.14); color: var(--ink); }
+.compare-now .row-copy i { color: rgba(20, 19, 15, 0.72); }
 
 .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; letter-spacing: 0.01em; }
-.compare-arrow { align-items: center; color: var(--ink); display: flex; font-size: 26px; justify-content: center; }
+.compare-arrow { align-items: center; color: var(--ink-faint); display: flex; font-size: 24px; justify-content: center; }
 .compare-arrow .i { animation: none; }
 
 /* ---------- qr + nfc ---------- */
-.pay-grid { display: grid; gap: 2px; grid-template-columns: 1fr 1fr; }
+.pay-grid { display: grid; gap: 18px; grid-template-columns: 1fr 1fr; }
 .pay-card {
   background: var(--ink);
   border: 1px solid var(--ink);
-  border-radius: 0;
+  border-radius: 26px;
   color: var(--paper);
   overflow: hidden;
   padding: 32px;
@@ -464,7 +519,7 @@ h1 em, h2 em { color: var(--ink); font-style: normal; position: relative; }
 }
 .flow-who span {
   background: var(--ink);
-  border-radius: 0;
+  border-radius: 7px;
   color: var(--paper);
   padding: 3px 8px;
 }
@@ -481,9 +536,10 @@ h1 em, h2 em { color: var(--ink); font-style: normal; position: relative; }
 .flow-art > *:not(.flow-shot) {
   display: flex;
   flex-direction: column;
-  background: transparent;
-  border: 1px solid var(--ink);
-  border-radius: 0;
+  background: var(--paper-raised);
+  border: 1px solid var(--rule);
+  border-radius: 22px;
+  box-shadow: 0 1px 2px rgba(20, 19, 15, 0.04), 0 18px 40px -30px rgba(20, 19, 15, 0.35);
   padding: 18px;
   transition: transform 500ms var(--ease), border-color 400ms ease;
   width: 100%;
@@ -545,7 +601,7 @@ h1 em, h2 em { color: var(--ink); font-style: normal; position: relative; }
 .flow-step h3 { font-size: 20px; font-weight: 620; letter-spacing: -0.04em; margin-top: 22px; }
 .flow-note { color: var(--muted); font-size: 12.5px; line-height: 1.62; margin-top: 8px; }
 
-.proof-card { background: var(--lemon); border: 1px solid var(--ink); border-radius: 0; color: var(--ink); display: grid; gap: 56px; grid-template-columns: 1fr 0.82fr; overflow: hidden; padding: 60px; position: relative; }
+.proof-card { background: var(--lemon); border: 1px solid rgba(20, 19, 15, 0.28); border-radius: 30px; color: var(--ink); display: grid; gap: 56px; grid-template-columns: 1fr 0.82fr; overflow: hidden; padding: 60px; position: relative; }
 
 .proof-copy, .ledger-card { position: relative; z-index: 2; }
 .proof-copy .section-index { color: var(--ink); }
@@ -553,12 +609,12 @@ h1 em, h2 em { color: var(--ink); font-style: normal; position: relative; }
 .proof-copy > a { align-items: center; border-bottom: 1px solid rgba(0, 0, 0, 0.3); display: flex; font-size: 11px; font-weight: 700; justify-content: space-between; letter-spacing: 0.04em; margin-top: 42px; padding-bottom: 12px; text-transform: uppercase; transition: gap 300ms var(--ease); }
 .proof-copy > a .i { font-size: 17px; }
 .proof-copy > a:hover { border-bottom-color: var(--ink); }
-.ledger-card { background: var(--ink); border: 1px solid var(--ink); border-radius: 0; color: var(--paper); padding: 26px; transform: rotate(2deg); transition: transform 500ms var(--ease); }
+.ledger-card { background: var(--ink); border: 1px solid var(--ink); border-radius: 22px; color: var(--paper); padding: 26px; transform: rotate(2deg); transition: transform 500ms var(--ease); }
 
 .ledger-top { align-items: center; color: rgba(242, 239, 228, 0.62); display: flex; font-size: 8px; font-weight: 700; justify-content: space-between; letter-spacing: 0.14em; }
 .ledger-top span { align-items: center; display: flex; gap: 8px; }
 .ledger-top i { animation: none; background: #78dc96; box-shadow: none; }
-.ledger-top b { background: #78dc96; border-radius: 0; color: var(--ink); font-size: 8px; padding: 5px 8px; }
+.ledger-top b { background: #78dc96; border-radius: 6px; color: var(--ink); font-size: 8px; padding: 5px 8px; }
 .ledger-card > strong { display: block; font-size: 42px; font-weight: 620; letter-spacing: -0.06em; margin: 34px 0 26px; }
 .ledger-card > strong em { color: var(--lemon); font-size: 12px; font-style: normal; }
 .ledger-card dl { border-block: 1px solid rgba(242, 239, 228, 0.2); margin-bottom: 20px; }
@@ -573,7 +629,7 @@ h1 em, h2 em { color: var(--ink); font-style: normal; position: relative; }
   align-items: flex-start;
   background: var(--ink);
   border: 1px solid var(--ink);
-  border-radius: 0;
+  border-radius: 30px;
   color: var(--paper);
   display: flex;
   flex-direction: column;
@@ -710,3 +766,20 @@ h1 em, h2 em { color: var(--ink); font-style: normal; position: relative; }
 /* The closing block is black, so its store buttons invert to stay legible. */
 .download .store-button { background: var(--paper); border-color: var(--paper); color: var(--ink); }
 .download .store-button:hover { background: var(--ink); color: var(--paper); }
+
+/* ---------- headline reveal ---------- */
+[data-split] .word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(0.42em);
+  transition:
+    opacity 620ms var(--ease) var(--word-delay, 0ms),
+    transform 620ms var(--ease) var(--word-delay, 0ms);
+}
+[data-split="shown"] .word { opacity: 1; transform: none; }
+/* The mark under a hero word rides with it rather than hanging in mid-air. */
+.hero-title em .word { display: inline-block; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-split] .word { opacity: 1; transform: none; transition: none; }
+}
