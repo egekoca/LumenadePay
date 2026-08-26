@@ -193,11 +193,9 @@
             <li class="flow-step" data-rise>
               <p class="flow-who"><span>01</span> MERCHANT</p>
               <div class="flow-art">
-                <div class="flow-slip">
-                  <p class="flow-slip-top">REQUEST<b>Signed</b></p>
-                  <strong>24.90 <em>XLM</em></strong>
-                  <span class="flow-slip-code" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
-                </div>
+                <figure class="flow-shot">
+                  <img src="/assets/merchant-request.png" alt="The Lumenade Pay merchant screen showing a signed 24.9 XLM request as a QR code" width="276" height="620" loading="lazy" />
+                </figure>
               </div>
               <h3>Asks for the amount</h3>
               <p class="flow-note">Merchant mode signs the request with a key on that phone, so it names the amount and where it lands.</p>
@@ -206,12 +204,9 @@
             <li class="flow-step" data-rise style="--d: 90ms">
               <p class="flow-who"><span>02</span> CUSTOMER</p>
               <div class="flow-art">
-                <div class="flow-approve">
-                  <p>Rose Coffee</p>
-                  <strong>24.90 <em>XLM</em></strong>
-                  <span class="flow-verified"><svg class="i"><use href="#i-check" /></svg> Signature matches</span>
-                  <span class="flow-touch"><svg class="i"><use href="#i-fingerprint" /></svg></span>
-                </div>
+                <figure class="flow-shot">
+                  <img src="/assets/customer-confirm.png" alt="The Lumenade Pay confirmation screen showing Rose Coffee, 24.9 XLM and a verified merchant signature" width="276" height="620" loading="lazy" />
+                </figure>
               </div>
               <h3>Approves that exact one</h3>
               <p class="flow-note">Scan or tap to receive it. The app checks the signature before you look, and your face or fingerprint releases the key.</p>
@@ -224,6 +219,7 @@
                   <span class="flow-tick"><svg class="i"><use href="#i-check-circle" /></svg></span>
                   <p>Settled on Stellar</p>
                   <span class="flow-fee">Fee paid by the relayer</span>
+                  <a class="flow-evidence" href="https://stellar.expert/explorer/testnet/tx/c8414bdabd495b987a45588a09dc95ef3b4a821c39f08696895ea3720025a777" target="_blank" rel="noreferrer">See a settled one <svg class="i"><use href="#i-arrow" /></svg></a>
                 </div>
               </div>
               <h3>Settles it once</h3>

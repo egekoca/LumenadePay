@@ -469,13 +469,14 @@ h1 em, h2 em { color: var(--lemon); font-style: normal; }
 /* Every panel is the same height, so the three read as one row rather than
    three cards that happen to sit near each other. */
 .flow-art {
-  align-items: stretch;
+  align-items: center;
   display: flex;
   margin-top: 22px;
-  min-height: 172px;
+  justify-content: center;
+  min-height: 420px;
   position: relative;
 }
-.flow-art > * {
+.flow-art > *:not(.flow-shot) {
   display: flex;
   flex-direction: column;
   background: linear-gradient(168deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.014));
@@ -487,6 +488,22 @@ h1 em, h2 em { color: var(--lemon); font-style: normal; }
   width: 100%;
 }
 .flow-step:hover .flow-art > * { border-color: rgba(255, 176, 0, 0.36); transform: translateY(-5px); }
+
+/* Two of the three steps show the screen that does the work, at the size a
+   phone actually is in a hand. The third is the ledger, which has its own
+   section, so it links there rather than pretending to be a screen. */
+.flow-shot {
+  background: #050505;
+  border-radius: 22px;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14),
+    0 30px 60px -34px rgba(0, 0, 0, 0.95);
+  margin: 0;
+  overflow: hidden;
+  padding: 4px;
+  width: min(188px, 74%);
+}
+.flow-shot img { border-radius: 18px; display: block; height: auto; width: 100%; }
 
 .flow-slip-top { align-items: center; color: var(--faint); display: flex; font-size: 9px; font-weight: 700; justify-content: space-between; letter-spacing: 0.16em; }
 .flow-slip-top b { background: rgba(255, 176, 0, 0.12); border-radius: 999px; color: var(--lemon); font-size: 9px; letter-spacing: 0.1em; padding: 3px 8px; }
@@ -519,10 +536,12 @@ h1 em, h2 em { color: var(--lemon); font-style: normal; }
   width: 46px;
 }
 
-.flow-settled { align-items: flex-start; gap: 10px; justify-content: center; }
+.flow-settled { align-items: flex-start; display: flex; flex-direction: column; gap: 10px; justify-content: center; width: 100%; }
 .flow-tick { color: var(--good, #59c67f); font-size: 30px; }
 .flow-settled p { font-size: 17px; font-weight: 620; letter-spacing: -0.03em; }
 .flow-fee { color: var(--faint); font-size: 11px; }
+.flow-evidence { align-items: center; color: var(--lemon); display: inline-flex; font-size: 12px; font-weight: 620; gap: 6px; margin-top: 6px; }
+.flow-evidence:hover { text-decoration: underline; }
 
 .flow-step h3 { font-size: 20px; font-weight: 620; letter-spacing: -0.04em; margin-top: 22px; }
 .flow-note { color: var(--muted); font-size: 12.5px; line-height: 1.62; margin-top: 8px; }
