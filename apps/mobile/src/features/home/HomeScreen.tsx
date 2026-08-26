@@ -10,6 +10,7 @@ import {useMerchantPayments} from '../merchant/merchantRequestStatus';
 import {Screen} from '../../shared/Screen';
 import {useStellarHealth} from '../../shared/useStellarHealth';
 import {useWalletBalance} from '../../shared/useWalletBalance';
+import {useBalanceValue} from '../../shared/useBalanceValue';
 import {shareValue} from '../../shared/shareAddress';
 import {useAppStore} from '../../state/appStore';
 import {greetingFor} from './greeting';
@@ -52,13 +53,15 @@ function CustomerHome({navigation, merchantEnabled}: {navigation: Props['navigat
   const smartWallet = useAppStore(state => state.smartWallet);
   const receipts = useAppStore(state => state.receipts);
   const balance = useWalletBalance();
+  const value = useBalanceValue(balance.data);
   const address = smartWallet?.contractId;
 
   return (
     <>
       <AnimatedContent>
         <PaymentCard
-          {...(balance.data === undefined ? {} : {balance: balance.data})}
+          holdings={balance.data === undefined ? [] : [{code: 'XLM', amount: balance.data}]}
+          {...(value.data ? {value: value.data} : {})}
           {...(address === undefined ? {} : {address})}
           state={
             !smartWallet ? 'no-wallet' : balance.isPending ? 'loading' : balance.isError ? 'error' : 'ready'
