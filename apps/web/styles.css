@@ -334,83 +334,71 @@ h1 em, h2 em { color: var(--ink); font-style: normal; position: relative; }
 /* ---------- problem / solution ---------- */
 .compare { align-items: stretch; display: grid; gap: 18px; grid-template-columns: 1fr 60px 1fr; }
 /*
- * Two cards that answer each other. Softer than the rest of the grid on
- * purpose: this is the part a reader has to actually read, so it gets rounded
- * corners, real padding and a size you do not have to lean into.
+ * One row per friction, with its fix beside it. Two mirrored lists made a reader
+ * hold three problems in their head and pair them up themselves; here the pair
+ * is the unit, so "a 56-character address" and "scan the code" are one thought.
  *
- * The old version struck the left column through in grey on cream, which said
- * "these go away" at the cost of being legible at all. The contrast between the
- * two sides now comes from the cards, not from damaging the words.
+ * The old way is set on paper and the new way on lemon, so the swap is visible
+ * before a word is read.
  */
-.compare-card {
+.swap { display: grid; gap: 16px; list-style: none; margin: 0; padding: 0; }
+.swap-row {
+  align-items: stretch;
+  display: grid;
+  gap: 0;
+  grid-template-columns: 1fr 62px 1.05fr;
+}
+.swap-then,
+.swap-now { padding: 26px 28px; }
+.swap-then {
   background: var(--paper-raised);
   border: 1px solid var(--rule);
-  border-radius: 26px;
-  box-shadow: 0 1px 2px rgba(20, 19, 15, 0.04), 0 18px 40px -30px rgba(20, 19, 15, 0.35);
-  padding: 34px 32px;
+  border-radius: 22px;
 }
-.compare-label {
-  align-items: center;
-  border-bottom: 1px solid var(--rule);
-  color: var(--ink);
-  display: flex;
-  font-size: 13px;
-  font-weight: 680;
-  gap: 12px;
-  letter-spacing: -0.01em;
-  padding-bottom: 20px;
+.swap-tag {
+  color: var(--ink-faint);
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  margin-bottom: 12px;
+  text-transform: uppercase;
 }
-.badge {
-  align-items: center;
-  border-radius: 9px;
-  display: flex;
-  flex: 0 0 auto;
-  font-size: 13px;
-  height: 26px;
-  justify-content: center;
-  width: 26px;
-}
-.badge.bad { background: rgba(163, 43, 30, 0.12); color: var(--red); }
-.badge.good { background: rgba(20, 19, 15, 0.14); color: var(--ink); }
+.swap-head { font-size: 17px; font-weight: 640; letter-spacing: -0.02em; margin: 0; }
+.swap-note { color: var(--ink-muted); font-size: 14px; line-height: 1.5; margin: 6px 0 0; }
 
-.compare-card ul { display: grid; list-style: none; margin: 0; padding: 0; }
-.compare-card li {
+.swap-join {
+  align-items: center;
+  color: var(--ink-faint);
+  display: flex;
+  font-size: 20px;
+  justify-content: center;
+}
+
+.swap-now {
   align-items: flex-start;
-  border-bottom: 1px solid var(--rule);
+  background: var(--lemon);
+  border: 1px solid rgba(20, 19, 15, 0.26);
+  border-radius: 22px;
   display: flex;
   gap: 16px;
-  padding: 22px 0;
 }
-.compare-card li:last-child { border-bottom: 0; padding-bottom: 4px; }
-
-/* A tinted rounded chip, the same shape the app uses for its own list rows. */
-.row-icon {
+.swap-now .swap-head { color: var(--ink); }
+.swap-now .swap-note { color: rgba(20, 19, 15, 0.74); }
+.swap-icon {
   align-items: center;
-  background: rgba(20, 19, 15, 0.06);
-  border-radius: 12px;
+  background: rgba(20, 19, 15, 0.14);
+  border-radius: 13px;
   color: var(--ink);
   display: flex;
   flex: 0 0 auto;
-  height: 42px;
+  height: 44px;
   justify-content: center;
-  width: 42px;
+  width: 44px;
 }
-.row-icon .i { font-size: 20px; }
-.row-copy { display: grid; gap: 5px; }
-.row-copy b { font-size: 16.5px; font-weight: 640; letter-spacing: -0.02em; }
-.row-copy i { color: var(--ink-muted); font-size: 14px; font-style: normal; line-height: 1.5; }
-
-.compare-then .row-icon { background: rgba(163, 43, 30, 0.1); color: var(--red); }
-
-.compare-now { background: var(--lemon); border-color: rgba(20, 19, 15, 0.28); }
-.compare-now .compare-label,
-.compare-now li { border-bottom-color: rgba(20, 19, 15, 0.22); }
-.compare-now .row-icon { background: rgba(20, 19, 15, 0.14); color: var(--ink); }
-.compare-now .row-copy i { color: rgba(20, 19, 15, 0.72); }
+.swap-icon .i { font-size: 21px; }
 
 .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; letter-spacing: 0.01em; }
-.compare-arrow { align-items: center; color: var(--ink-faint); display: flex; font-size: 24px; justify-content: center; }
-.compare-arrow .i { animation: none; }
 
 /* ---------- qr + nfc ---------- */
 .pay-grid { display: grid; gap: 18px; grid-template-columns: 1fr 1fr; }
