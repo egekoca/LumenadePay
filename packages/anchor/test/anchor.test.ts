@@ -14,6 +14,9 @@ import {
   pollTransaction,
   assetCodeOf,
   readIndicativePrices,
+  readCurrencyPrices,
+  assetAmountForPrice,
+  PriceConversionError,
   readTransaction,
   startInteractive,
   transactionPhase,
@@ -369,6 +372,46 @@ describe('what a balance is worth', () => {
   it('returns nothing when the anchor has no quote server at all', async () => {
     // Rather than invent a rate, which is what a payment screen must never do.
     await expect(readIndicativePrices({anchor: anchorInfo(), sellAmount: '100'})).resolves.toEqual([]);
+  });
+
+  it('lists only the currencies the anchor can actually price', async () => {
+    const fetcher = vi.fn(async () =>
+      json({
+        buy_assets: [
+          {asset: 'iso4217:USD', price: '0.39'},
+          {asset: 'iso4217:TRY', price: '13.4'},
+          // An anchor that answers with a zero rate has told us nothing, and a
+          // merchant offered that currency would price a meal at infinity.
+          {asset: 'iso4217:BRL', price: '0'},
+        ],
+      }),
+    ) as unknown as typeof fetch;
+
+    const currencies = await readCurrencyPrices({anchor: withQuotes, fetcher});
+
+    expect(currencies).toEqual([
+      {currency: 'USD', asset: 'iso4217:USD', perUnit: '0.39'},
+      {currency: 'TRY', asset: 'iso4217:TRY', perUnit: '13.4'},
+    ]);
+    const [url] = (fetcher as unknown as ReturnType<typeof vi.fn>).mock.calls[0] as [string];
+    expect(url).toContain('sell_amount=1');
+  });
+
+  it('converts a price on a menu into the amount that settles it', () => {
+    // 500 lira at 13.4 lira per lumen is 37.3134328… lumens.
+    expect(assetAmountForPrice({amount: '500', perUnit: '13.4'})).toBe('37.3134329');
+  });
+
+  it('rounds up, so a merchant is never handed less than the price', () => {
+    // 1 unit at 3 per lumen is 0.333… — rounding down would short the merchant
+    // on every single payment.
+    expect(assetAmountForPrice({amount: '1', perUnit: '3'})).toBe('0.3333334');
+  });
+
+  it('refuses a price or a rate that cannot be paid', () => {
+    expect(() => assetAmountForPrice({amount: '0', perUnit: '13.4'})).toThrow(PriceConversionError);
+    expect(() => assetAmountForPrice({amount: 'lots', perUnit: '13.4'})).toThrow(PriceConversionError);
+    expect(() => assetAmountForPrice({amount: '500', perUnit: '0'})).toThrow(PriceConversionError);
   });
 
   it('names the currency an anchor identifier stands for', () => {
