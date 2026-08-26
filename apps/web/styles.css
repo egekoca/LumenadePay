@@ -207,7 +207,7 @@ h1 em, h2 em { color: var(--ink); font-style: normal; position: relative; }
  * Only the phone drifts. When the caption floated with it the two labels sat at
  * different heights, which read as a mistake rather than as motion.
  */
-.hold-float { transform-style: preserve-3d; }
+.hold-float { position: relative; transform-style: preserve-3d; }
 .hold--merchant .hold-float { animation: phone-float 7s ease-in-out infinite; }
 .hold--customer .hold-float { animation: phone-float 7s ease-in-out -3.4s infinite; }
 
@@ -278,6 +278,171 @@ h1 em, h2 em { color: var(--ink); font-style: normal; position: relative; }
   25% { opacity: 1; }
   100% { opacity: 0; transform: scale(2.4); }
 }
+
+/*
+ * The hand. Palm behind the phone, thumb across the front — the grip anyone
+ * uses, and the one detail that stops two rectangles reading as product shots.
+ * The customer holds from the left and the merchant from the right, so the
+ * hands frame the pair rather than both leaning the same way.
+ */
+.hand {
+  --skin: #e7b389;
+  --skin-shade: #c9925f;
+  bottom: 0;
+  height: 100%;
+  left: 0;
+  pointer-events: none;
+  position: absolute;
+  width: 100%;
+}
+.hand i { display: block; position: absolute; }
+
+/*
+ * Palm and fingers sit behind the glass, because a phone hides them. Only the
+ * thumb crosses the front, which is the single detail that makes a rectangle
+ * read as something being held.
+ */
+.palm {
+  background: var(--skin-shade);
+  border-radius: 46% 40% 36% 46%;
+  bottom: 2%;
+  height: 34%;
+  left: -28%;
+  transform: rotate(-10deg);
+  width: 70%;
+}
+.finger {
+  background: var(--skin-shade);
+  border-radius: 999px;
+  height: 5.4%;
+  left: -14%;
+  width: 24%;
+}
+.finger--1 { top: 46%; }
+.finger--2 { top: 53.6%; width: 23%; }
+.finger--3 { top: 61.2%; left: -15%; width: 21.5%; }
+.finger--4 { top: 68.8%; left: -16%; width: 19%; }
+
+.thumb {
+  background: var(--skin);
+  border-radius: 999px;
+  bottom: 8%;
+  height: 5.8%;
+  left: 2%;
+  transform: rotate(-17deg);
+  transform-origin: 6% 50%;
+  width: 40%;
+}
+
+.hand--right { transform: scaleX(-1); }
+/*
+ * The thumb has to come forward in the same 3d space the phone is built in,
+ * or the frame's own raised face swallows it.
+ */
+.hand--over { transform: translateZ(56px); }
+.hand--right.hand--over { transform: translateZ(56px) scaleX(-1); }
+
+/* The screens the customer's phone moves through, cross-faded in place. */
+.face {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  inset: 0;
+  justify-content: center;
+  opacity: 0;
+  padding: 8%;
+  position: absolute;
+  text-align: center;
+  transition: opacity 420ms var(--ease);
+}
+/*
+ * The camera belongs to the scan and nowhere else. Leaving the viewfinder up
+ * while the phone was being carried across said the customer was scanning
+ * something they were about to touch instead.
+ */
+.counter[data-phase="aim"] .face--scan { opacity: 1; }
+.counter[data-phase="away"] .face--tap,
+.counter[data-phase="tap"] .face--tap { opacity: 1; }
+.counter[data-phase="done"] .face--done { opacity: 1; }
+
+.face--scan { background: #100f0c; justify-content: flex-end; }
+.scan-frame {
+  border-radius: 14px;
+  height: 46%;
+  left: 14%;
+  position: absolute;
+  top: 18%;
+  width: 72%;
+}
+.scan-frame i {
+  border: 2.5px solid var(--lemon);
+  height: 20px;
+  position: absolute;
+  width: 20px;
+}
+.scan-frame i:nth-child(1) { border-bottom: 0; border-right: 0; border-top-left-radius: 8px; left: 0; top: 0; }
+.scan-frame i:nth-child(2) { border-bottom: 0; border-left: 0; border-top-right-radius: 8px; right: 0; top: 0; }
+.scan-frame i:nth-child(3) { border-left: 0; border-top: 0; border-bottom-right-radius: 8px; bottom: 0; right: 0; }
+.scan-frame i:nth-child(4) { border-right: 0; border-top: 0; border-bottom-left-radius: 8px; bottom: 0; left: 0; }
+.scan-sweep {
+  background: linear-gradient(90deg, transparent, var(--lemon), transparent);
+  box-shadow: 0 0 18px rgba(255, 176, 0, 0.6);
+  height: 2px;
+  left: 14%;
+  position: absolute;
+  width: 72%;
+  animation: scan-sweep 2s ease-in-out infinite;
+}
+@keyframes scan-sweep {
+  0%, 100% { top: 20%; opacity: 0.2; }
+  50% { top: 62%; opacity: 1; }
+}
+.scan-copy { color: rgba(255, 255, 255, 0.82); font-size: 10px; font-weight: 600; line-height: 1.4; margin: 0 0 12%; }
+
+.face--tap { background: #0d0c0a; gap: 10px; }
+.tap-mark {
+  align-items: center;
+  border: 2px solid rgba(255, 176, 0, 0.5);
+  border-radius: 50%;
+  color: var(--lemon);
+  display: flex;
+  font-size: 26px;
+  height: 58px;
+  justify-content: center;
+  width: 58px;
+}
+.tap-title { color: #fff; font-size: 17px; font-weight: 680; letter-spacing: -0.02em; margin: 8px 0 0; }
+.tap-note { color: rgba(255, 255, 255, 0.5); font-size: 10px; line-height: 1.4; margin: 0; }
+
+.face--done { background: #0b0b09; gap: 8px; }
+.done-tick {
+  align-items: center;
+  background: var(--lemon);
+  border-radius: 50%;
+  color: #14130f;
+  display: flex;
+  font-size: 24px;
+  height: 46px;
+  justify-content: center;
+  width: 46px;
+}
+.done-title { color: #fff; font-size: 20px; font-weight: 700; letter-spacing: -0.02em; margin: 6px 0 0; }
+.done-amount { color: var(--lemon); font-size: 26px; font-weight: 700; letter-spacing: -0.03em; margin: 0; }
+.done-amount span { font-size: 13px; letter-spacing: 0.08em; }
+.done-note { color: rgba(255, 255, 255, 0.5); font-size: 10px; letter-spacing: 0.1em; margin: 2px 0 0; text-transform: uppercase; }
+
+/*
+ * The tap. The customer's phone starts held back, reaches across to touch the
+ * merchant's, then shows the result — the gesture itself, rather than two
+ * phones that were always already touching.
+ */
+.counter[data-mode="nfc"][data-phase="away"] .hold--customer { transform: translateX(-58px); }
+.counter[data-mode="nfc"][data-phase="tap"] .hold--customer,
+.counter[data-mode="nfc"][data-phase="done"] .hold--customer { transform: translateX(16px); }
+.hold--customer, .hold--merchant { transition: transform 780ms var(--ease); }
+
+/* The wave only fires at the moment of contact. */
+.counter[data-mode="nfc"][data-phase="away"] .link--nfc { opacity: 0; }
 
 .counter-modes { height: 22px; position: relative; text-align: center; width: 100%; }
 .counter-mode {

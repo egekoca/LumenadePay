@@ -115,27 +115,54 @@ const phone = document.querySelector('.phone--customer[data-phone]') ?? document
  */
 const counter = document.querySelector('[data-counter]');
 if (counter) {
-  const modes = ['qr', 'nfc'];
-  let index = 0;
+  /*
+   * One payment, told twice. Each step holds long enough to be read as an
+   * action rather than a flicker: the camera finds the code, or the phone is
+   * carried across and touched to the other one, and only then does the money
+   * land. Showing the result without the gesture that caused it is what made
+   * the old single frame say nothing.
+   */
+  const script = [
+    {mode: 'qr', phase: 'aim', hold: 2100},
+    {mode: 'qr', phase: 'done', hold: 2300},
+    {mode: 'nfc', phase: 'away', hold: 1100},
+    {mode: 'nfc', phase: 'tap', hold: 1500},
+    {mode: 'nfc', phase: 'done', hold: 2300},
+  ];
+
+  let step = 0;
   let timer = 0;
 
+  const show = () => {
+    const frame = script[step];
+    counter.dataset.mode = frame.mode;
+    counter.dataset.phase = frame.phase;
+    return frame.hold;
+  };
+
   const advance = () => {
-    index = (index + 1) % modes.length;
-    counter.dataset.mode = modes[index];
+    step = (step + 1) % script.length;
+    timer = setTimeout(advance, show());
   };
 
   const start = () => {
     if (timer || reduceMotion) return;
-    timer = setInterval(advance, 3600);
+    timer = setTimeout(advance, show());
   };
   const stop = () => {
     if (!timer) return;
-    clearInterval(timer);
+    clearTimeout(timer);
     timer = 0;
   };
 
-  document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
-  start();
+  // Reduced motion gets the settled end of the story, held still.
+  if (reduceMotion) {
+    counter.dataset.mode = 'qr';
+    counter.dataset.phase = 'done';
+  } else {
+    document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
+    start();
+  }
 }
 
 if (stage && phone && !reduceMotion) {
