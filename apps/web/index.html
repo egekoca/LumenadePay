@@ -91,20 +91,64 @@
             <div class="orbit orbit-one" aria-hidden="true"><i></i></div>
             <div class="orbit orbit-two" aria-hidden="true"><i></i></div>
 
-            <div class="phone-float">
-              <div class="phone" data-phone>
-                <div class="phone-body" data-extrude="30" aria-hidden="true"></div>
-                <div class="phone-btn btn-action" data-extrude="18" aria-hidden="true"></div>
-                <div class="phone-btn btn-vol-up" data-extrude="18" aria-hidden="true"></div>
-                <div class="phone-btn btn-vol-down" data-extrude="18" aria-hidden="true"></div>
-                <div class="phone-btn btn-power" data-extrude="18" aria-hidden="true"></div>
-                <div class="phone-face">
-                  <div class="phone-screen">
-                    <img src="/assets/app-welcome.png" alt="The Lumenade Pay welcome screen running on a phone" width="644" height="1400" />
-                    <span class="screen-vignette" aria-hidden="true"></span>
-                    <span class="screen-glare" aria-hidden="true"></span>
+            <div class="counter" data-counter data-mode="qr">
+              <div class="counter-modes" role="status" aria-live="polite">
+                <p class="counter-mode counter-mode--qr">
+                  <svg class="i" aria-hidden="true"><use href="#i-qr" /></svg> Scan the code
+                </p>
+                <p class="counter-mode counter-mode--nfc">
+                  <svg class="i" aria-hidden="true"><use href="#i-nfc" /></svg> Or hold them together
+                </p>
+              </div>
+
+              <div class="counter-row">
+              <div class="hold hold--customer">
+                <div class="hold-float">
+                <div class="phone phone--customer" data-phone>
+                  <div class="phone-body" data-extrude="30" aria-hidden="true"></div>
+                  <div class="phone-btn btn-action" data-extrude="18" aria-hidden="true"></div>
+                  <div class="phone-btn btn-vol-up" data-extrude="18" aria-hidden="true"></div>
+                  <div class="phone-btn btn-vol-down" data-extrude="18" aria-hidden="true"></div>
+                  <div class="phone-btn btn-power" data-extrude="18" aria-hidden="true"></div>
+                  <div class="phone-face">
+                    <div class="phone-screen">
+                      <img src="/assets/customer-confirm.png" alt="The customer's phone showing the payment it is about to approve" width="276" height="620" />
+                      <span class="screen-vignette" aria-hidden="true"></span>
+                      <span class="screen-glare" aria-hidden="true"></span>
+                    </div>
                   </div>
                 </div>
+                </div>
+                <p class="hold-label"><span>Customer</span> pays</p>
+              </div>
+
+              <span class="link link--qr" aria-hidden="true">
+                <i></i><i></i><i></i>
+              </span>
+              <span class="link link--nfc" aria-hidden="true">
+                <i></i><i></i><i></i>
+              </span>
+
+              <div class="hold hold--merchant">
+                <div class="hold-float">
+                <div class="phone phone--merchant" data-phone>
+                  <div class="phone-body" data-extrude="30" aria-hidden="true"></div>
+                  <div class="phone-btn btn-action" data-extrude="18" aria-hidden="true"></div>
+                  <div class="phone-btn btn-vol-up" data-extrude="18" aria-hidden="true"></div>
+                  <div class="phone-btn btn-vol-down" data-extrude="18" aria-hidden="true"></div>
+                  <div class="phone-btn btn-power" data-extrude="18" aria-hidden="true"></div>
+                  <div class="phone-face">
+                    <div class="phone-screen">
+                      <img src="/assets/merchant-request.png" alt="The merchant's phone showing a signed payment request as a QR code" width="276" height="620" />
+                      <span class="screen-vignette" aria-hidden="true"></span>
+                      <span class="screen-glare" aria-hidden="true"></span>
+                    </div>
+                  </div>
+                </div>
+                </div>
+                <p class="hold-label"><span>Merchant</span> asks</p>
+              </div>
+
               </div>
               <div class="phone-shadow" aria-hidden="true"></div>
             </div>

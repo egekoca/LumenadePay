@@ -103,7 +103,40 @@ document.querySelectorAll('[data-extrude]').forEach(extrude);
 
 /* ---------- pointer + scroll driven rotation ---------- */
 const stage = document.querySelector('[data-stage]');
-const phone = document.querySelector('[data-phone]');
+const phone = document.querySelector('.phone--customer[data-phone]') ?? document.querySelector('[data-phone]');
+
+/*
+ * The two ways to hand a payment over, shown one at a time.
+ *
+ * Long enough to read the caption and watch the beam or the tap land, short
+ * enough that nobody scrolls past believing the scan is all there is. Paused
+ * while the tab is hidden, because a timer running in a background tab only
+ * ever comes back mid-swap.
+ */
+const counter = document.querySelector('[data-counter]');
+if (counter) {
+  const modes = ['qr', 'nfc'];
+  let index = 0;
+  let timer = 0;
+
+  const advance = () => {
+    index = (index + 1) % modes.length;
+    counter.dataset.mode = modes[index];
+  };
+
+  const start = () => {
+    if (timer || reduceMotion) return;
+    timer = setInterval(advance, 3600);
+  };
+  const stop = () => {
+    if (!timer) return;
+    clearInterval(timer);
+    timer = 0;
+  };
+
+  document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
+  start();
+}
 
 if (stage && phone && !reduceMotion) {
   const rest = {rx: 6, ry: -19, rz: 1};
