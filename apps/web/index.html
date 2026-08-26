@@ -33,6 +33,13 @@
       <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.4" /><path d="m8.4 12.2 2.4 2.4 4.8-4.9" /></symbol>
       <symbol id="i-x" viewBox="0 0 24 24"><path d="M7.2 7.2 16.8 16.8M16.8 7.2 7.2 16.8" /></symbol>
       <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4.4 12h14.4M13.2 6.4 18.8 12l-5.6 5.6" /></symbol>
+      <symbol id="i-hourglass" viewBox="0 0 24 24"><path d="M6.4 3h11.2M6.4 21h11.2M7.4 3v3.4c0 2 1.6 3.6 3 4.4l1.6 1.2 1.6-1.2c1.4-.8 3-2.4 3-4.4V3M7.4 21v-3.4c0-2 1.6-3.6 3-4.4l1.6-1.2 1.6 1.2c1.4.8 3 2.4 3 4.4V21" /></symbol>
+      <symbol id="i-vault" viewBox="0 0 24 24"><path d="M3.4 5.6h17.2v12.8H3.4z" /><circle cx="10.4" cy="12" r="3.4" /><path d="M17.2 9.4v5.2M10.4 8.6v1M10.4 14.4v1" /></symbol>
+      <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M3.6 7.4h14.8a2 2 0 0 1 2 2v7.2a2 2 0 0 1-2 2H5.6a2 2 0 0 1-2-2V7.4Zm0 0V6.2a1.6 1.6 0 0 1 1.6-1.6h9.6" /><path d="M16.4 12.4h1.2" /></symbol>
+      <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.6" y="10.4" width="14.8" height="10" rx="2.4" /><path d="M8.2 10.4V7.8a3.8 3.8 0 0 1 7.6 0v2.6" /></symbol>
+      <symbol id="i-unlock" viewBox="0 0 24 24"><rect x="4.6" y="10.4" width="14.8" height="10" rx="2.4" /><path d="M8.2 10.4V7.8a3.8 3.8 0 0 1 7.4-1" /></symbol>
+      <symbol id="i-percent" viewBox="0 0 24 24"><circle cx="7.6" cy="7.6" r="2.8" /><circle cx="16.4" cy="16.4" r="2.8" /><path d="M19 5 5 19" /></symbol>
+      <symbol id="i-type" viewBox="0 0 24 24"><path d="M4.6 6.4h14.8M4.6 12h14.8M4.6 17.6h8.4" /></symbol>
 
     </svg>
 
@@ -214,36 +221,91 @@
         </div>
 
         <div class="wait" data-rise>
-          <article class="wait-card wait-card--then">
-            <p class="wait-tag"><svg class="i"><use href="#i-clock" /></svg> Meal cards today</p>
-            <p class="wait-lead">A lunch is served on the 1st. The restaurant sees the money after the 30th.</p>
-            <div class="wait-meter">
-              <div class="wait-track"><span class="wait-fill"></span></div>
-              <ol class="wait-scale"><li>Day 1</li><li>Day 15</li><li>Day 30</li><li>Day 40</li></ol>
+          <div class="wait-lane wait-lane--then">
+            <div class="wait-who">
+              <span class="cards" aria-hidden="true">
+                <i class="card card--3"></i>
+                <i class="card card--2"></i>
+                <i class="card card--1"><b></b><u></u></i>
+              </span>
+              <p class="wait-name">Meal card</p>
             </div>
-            <p class="wait-note">Card schemes settle to the merchant on their own cycle, typically a month or more after the meal, less commission. Until it lands, the money is not spendable and cannot be moved into anything else.</p>
-          </article>
+            <ol class="stops">
+              <li>
+                <span class="stop-dot"><svg class="i"><use href="#i-store" /></svg></span>
+                <b>Day 1</b><span>Meal served</span>
+              </li>
+              <li>
+                <span class="stop-dot"><svg class="i"><use href="#i-hourglass" /></svg></span>
+                <b>Day 15</b><span>Still waiting</span>
+              </li>
+              <li>
+                <span class="stop-dot"><svg class="i"><use href="#i-vault" /></svg></span>
+                <b>Day 30–40</b><span>Paid, minus commission</span>
+              </li>
+            </ol>
+          </div>
 
-          <article class="wait-card wait-card--now">
-            <p class="wait-tag"><svg class="i"><use href="#i-bolt" /></svg> Lumenade Pay</p>
-            <p class="wait-lead">A lunch is served. The money is in the merchant's own account before the customer stands up.</p>
-            <div class="wait-meter">
-              <p class="wait-figure"><span data-count-to="5">5</span><span class="wait-unit">seconds</span></p>
-              <div class="wait-track wait-track--now"><span class="wait-fill"></span></div>
+          <div class="wait-lane wait-lane--now">
+            <div class="wait-who">
+              <span class="cards cards--one" aria-hidden="true">
+                <i class="card card--gold"><b></b><u></u></i>
+              </span>
+              <p class="wait-name">Lumenade Pay</p>
             </div>
-            <p class="wait-note">Settlement happens on Stellar, straight into the merchant's wallet. No float held by anyone, no payout run to wait for, and nobody in the middle deciding when it is released.</p>
-          </article>
+            <ol class="stops stops--short">
+              <li>
+                <span class="stop-dot"><svg class="i"><use href="#i-store" /></svg></span>
+                <b>Now</b><span>Meal served</span>
+              </li>
+              <li>
+                <span class="stop-dot"><svg class="i"><use href="#i-bolt" /></svg></span>
+                <b><span data-count-to="5">5</span> seconds</b><span>Paid, in full</span>
+              </li>
+            </ol>
+          </div>
         </div>
+
+        <ul class="beats" data-rise>
+          <li class="beat beat--then">
+            <svg class="i"><use href="#i-lock" /></svg>
+            <b>Locked</b>
+            <span>until the payout run</span>
+          </li>
+          <li class="beat beat--then">
+            <svg class="i"><use href="#i-percent" /></svg>
+            <b>Commission</b>
+            <span>off every plate</span>
+          </li>
+          <li class="beat beat--then">
+            <svg class="i"><use href="#i-vault" /></svg>
+            <b>Held</b>
+            <span>by someone else</span>
+          </li>
+          <li class="beat beat--now">
+            <svg class="i"><use href="#i-unlock" /></svg>
+            <b>Spendable</b>
+            <span>the moment it lands</span>
+          </li>
+          <li class="beat beat--now">
+            <svg class="i"><use href="#i-wallet" /></svg>
+            <b>Your wallet</b>
+            <span>nobody else holds it</span>
+          </li>
+          <li class="beat beat--now">
+            <svg class="i"><use href="#i-bolt" /></svg>
+            <b>No payout run</b>
+            <span>nothing to wait for</span>
+          </li>
+        </ul>
 
         <div class="priced" data-rise>
           <div class="priced-copy">
             <p class="priced-tag">Priced in your money</p>
             <h3>A merchant types 500&nbsp;₺. The customer sends lumens.</h3>
             <p class="priced-note">
-              Nobody at a till wants to think in an exchange rate. The merchant names the price in the
-              currency on their menu, and the app converts it at the rate an anchor is publishing right
-              then — a real SEP-38 quote from a Stellar service, not a number we made up. The price the
-              customer approves is the price on the bill.
+              The rate is an anchor's own live quote, not a number we made up. The price the customer
+              approves is the price on the bill.
             </p>
           </div>
           <div class="priced-convert" aria-hidden="true">
@@ -254,55 +316,23 @@
           </div>
         </div>
 
-        <ol class="swap">
-          <li class="swap-row" data-rise>
-            <div class="swap-then">
-              <span class="swap-tag">Today</span>
-              <p class="swap-head">Copy a 56-character address</p>
-              <p class="swap-note">One wrong character and the money is gone for good.</p>
-            </div>
-            <span class="swap-join" aria-hidden="true"><svg class="i"><use href="#i-arrow" /></svg></span>
-            <div class="swap-now">
-              <span class="swap-icon"><svg class="i"><use href="#i-scan" /></svg></span>
-              <div>
-                <p class="swap-head">Scan the code, or tap the phone</p>
-                <p class="swap-note">Nothing to read out, nothing to type in.</p>
-              </div>
-            </div>
+        <ul class="swaps" data-rise>
+          <li class="swaps-item">
+            <p class="swaps-old"><svg class="i"><use href="#i-type" /></svg> 56-character address</p>
+            <span class="swaps-join" aria-hidden="true"><svg class="i"><use href="#i-arrow" /></svg></span>
+            <p class="swaps-new"><svg class="i"><use href="#i-scan" /></svg> Scan or tap</p>
           </li>
-
-          <li class="swap-row" data-rise style="--d: 90ms">
-            <div class="swap-then">
-              <span class="swap-tag">Today</span>
-              <p class="swap-head">Guard a 12-word phrase</p>
-              <p class="swap-note">Lose it and nobody — not even us — can give the funds back.</p>
-            </div>
-            <span class="swap-join" aria-hidden="true"><svg class="i"><use href="#i-arrow" /></svg></span>
-            <div class="swap-now">
-              <span class="swap-icon"><svg class="i"><use href="#i-fingerprint" /></svg></span>
-              <div>
-                <p class="swap-head">Your face is the signature</p>
-                <p class="swap-note">The key stays in the phone, and only you release it.</p>
-              </div>
-            </div>
+          <li class="swaps-item">
+            <p class="swaps-old"><svg class="i"><use href="#i-key" /></svg> 12-word phrase</p>
+            <span class="swaps-join" aria-hidden="true"><svg class="i"><use href="#i-arrow" /></svg></span>
+            <p class="swaps-new"><svg class="i"><use href="#i-fingerprint" /></svg> Your face</p>
           </li>
-
-          <li class="swap-row" data-rise style="--d: 170ms">
-            <div class="swap-then">
-              <span class="swap-tag">Today</span>
-              <p class="swap-head">Hold coins just to pay the fee</p>
-              <p class="swap-note">Then wait at the counter, refreshing to see if it landed.</p>
-            </div>
-            <span class="swap-join" aria-hidden="true"><svg class="i"><use href="#i-arrow" /></svg></span>
-            <div class="swap-now">
-              <span class="swap-icon"><svg class="i"><use href="#i-bolt" /></svg></span>
-              <div>
-                <p class="swap-head">Settled in about five seconds</p>
-                <p class="swap-note">Someone else pays the network fee, so you hold none for it.</p>
-              </div>
-            </div>
+          <li class="swaps-item">
+            <p class="swaps-old"><svg class="i"><use href="#i-clock" /></svg> Coins for the fee</p>
+            <span class="swaps-join" aria-hidden="true"><svg class="i"><use href="#i-arrow" /></svg></span>
+            <p class="swaps-new"><svg class="i"><use href="#i-bolt" /></svg> Paid for you</p>
           </li>
-        </ol>
+        </ul>
       </section>
 
       <section class="section shell" id="pay">
