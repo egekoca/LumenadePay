@@ -279,69 +279,6 @@ h1 em, h2 em { color: var(--ink); font-style: normal; position: relative; }
   100% { opacity: 0; transform: scale(2.4); }
 }
 
-/*
- * The hand. Palm behind the phone, thumb across the front — the grip anyone
- * uses, and the one detail that stops two rectangles reading as product shots.
- * The customer holds from the left and the merchant from the right, so the
- * hands frame the pair rather than both leaning the same way.
- */
-.hand {
-  --skin: #e7b389;
-  --skin-shade: #c9925f;
-  bottom: 0;
-  height: 100%;
-  left: 0;
-  pointer-events: none;
-  position: absolute;
-  width: 100%;
-}
-.hand i { display: block; position: absolute; }
-
-/*
- * Palm and fingers sit behind the glass, because a phone hides them. Only the
- * thumb crosses the front, which is the single detail that makes a rectangle
- * read as something being held.
- */
-.palm {
-  background: var(--skin-shade);
-  border-radius: 46% 40% 36% 46%;
-  bottom: 2%;
-  height: 34%;
-  left: -28%;
-  transform: rotate(-10deg);
-  width: 70%;
-}
-.finger {
-  background: var(--skin-shade);
-  border-radius: 999px;
-  height: 5.4%;
-  left: -14%;
-  width: 24%;
-}
-.finger--1 { top: 46%; }
-.finger--2 { top: 53.6%; width: 23%; }
-.finger--3 { top: 61.2%; left: -15%; width: 21.5%; }
-.finger--4 { top: 68.8%; left: -16%; width: 19%; }
-
-.thumb {
-  background: var(--skin);
-  border-radius: 999px;
-  bottom: 8%;
-  height: 5.8%;
-  left: 2%;
-  transform: rotate(-17deg);
-  transform-origin: 6% 50%;
-  width: 40%;
-}
-
-.hand--right { transform: scaleX(-1); }
-/*
- * The thumb has to come forward in the same 3d space the phone is built in,
- * or the frame's own raised face swallows it.
- */
-.hand--over { transform: translateZ(56px); }
-.hand--right.hand--over { transform: translateZ(56px) scaleX(-1); }
-
 /* The screens the customer's phone moves through, cross-faded in place. */
 .face {
   align-items: center;
