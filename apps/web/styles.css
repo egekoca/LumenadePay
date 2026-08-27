@@ -900,6 +900,38 @@ h1 em, h2 em { color: var(--ink); font-style: normal; position: relative; }
 }
 
 /*
+ * The anchors. Naming the SEP on each tile is not decoration: it is the claim
+ * that this is the ordinary way in and out of Stellar rather than a private
+ * arrangement of ours, and it is checkable.
+ */
+.anchors { display: grid; gap: 12px; grid-template-columns: 1fr; list-style: none; margin: 0 0 26px; padding: 0; }
+@media (min-width: 640px) { .anchors { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1000px) { .anchors { grid-template-columns: repeat(4, 1fr); } }
+
+.anchor-tile {
+  background: var(--paper-raised);
+  border: 1px solid var(--rule);
+  border-radius: 18px;
+  display: grid;
+  gap: 4px;
+  justify-items: start;
+  padding: 24px 22px 20px;
+}
+.anchor-tile .i { color: var(--lemon-ink); font-size: 22px; margin-bottom: 12px; }
+.anchor-tile b { font-size: 15px; font-weight: 680; letter-spacing: -0.025em; }
+.anchor-tile span { color: var(--ink-muted); font-size: 13px; line-height: 1.45; }
+.anchor-tile code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+.anchor-tile em {
+  color: var(--ink-faint);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  margin-top: 10px;
+}
+.anchors-note { color: var(--ink-muted); font-size: 15px; line-height: 1.6; margin: 0 auto; max-width: 62ch; text-align: center; }
+
+/*
  * The flow is the page's argument, so it names who acts at each step rather
  * than only what happens. Each panel carries the thing that step produces — a
  * signed request, an approval, a settlement — because a reader believes a

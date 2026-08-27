@@ -136,15 +136,30 @@ if (counter) {
   };
 
   const buttons = [...counter.querySelectorAll('[data-pick]')];
-  let pick = 'auto';
+  /*
+   * It runs itself and the buttons follow along, so they read as a position
+   * indicator first and a control second. Pressing one holds the sequence on
+   * that half; pressing it again lets go. There is no third "auto" chip,
+   * because auto is simply nobody having pressed anything.
+   */
+  let pinned = null;
   let mode = 'qr';
   let step = 0;
   let timer = 0;
+
+  const mark = () => {
+    buttons.forEach(button => {
+      const on = button.dataset.pick === mode;
+      button.classList.toggle('is-on', on);
+      button.setAttribute('aria-pressed', String(on));
+    });
+  };
 
   const show = () => {
     const frame = script[mode][step];
     counter.dataset.mode = mode;
     counter.dataset.phase = frame.phase;
+    mark();
     return frame.hold;
   };
 
@@ -152,8 +167,7 @@ if (counter) {
     step += 1;
     if (step >= script[mode].length) {
       step = 0;
-      // On auto the two alternate; pinned to one, that one repeats.
-      if (pick === 'auto') mode = mode === 'qr' ? 'nfc' : 'qr';
+      if (!pinned) mode = mode === 'qr' ? 'nfc' : 'qr';
     }
     timer = setTimeout(advance, show());
   };
@@ -168,17 +182,20 @@ if (counter) {
     timer = setTimeout(advance, show());
   };
 
-  const choose = value => {
-    pick = value;
-    buttons.forEach(button => button.classList.toggle('is-on', button.dataset.pick === value));
-    if (value !== 'auto') mode = value;
+  const press = value => {
+    if (pinned === value) {
+      pinned = null;
+      return;
+    }
+    pinned = value;
+    mode = value;
     step = 0;
     stop();
     show();
     start();
   };
 
-  buttons.forEach(button => button.addEventListener('click', () => choose(button.dataset.pick)));
+  buttons.forEach(button => button.addEventListener('click', () => press(button.dataset.pick)));
 
   // A timer left running in a hidden tab only ever comes back mid-frame.
   document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
@@ -187,6 +204,7 @@ if (counter) {
     // The settled end of the story, held still.
     counter.dataset.mode = 'qr';
     counter.dataset.phase = 'done';
+    mark();
   } else {
     start();
   }
