@@ -174,6 +174,45 @@ h1 em, h2 em { color: var(--ink); font-style: normal; position: relative; }
 .orbit-two { animation: orbit-spin-reverse 24s linear infinite; border-color: rgba(255, 255, 255, 0.07); height: 400px; width: 400px; }
 .orbit-two i { background: #fff; bottom: 54px; height: 5px; left: 44px; width: 5px; }
 
+
+
+/*
+ * A photograph, because a drawn hand beside a rendered phone always reads as
+ * pasted on. This one is public domain, keyed off its white studio background,
+ * and the app is composited into the blank screen it was shot with — which is
+ * what the shot is for.
+ *
+ * The screen box is measured from the image, not guessed, so it stays welded to
+ * the bezel at every size.
+ */
+.held { display: block; margin: 0; position: relative; width: clamp(290px, 30vw, 424px); }
+/*
+ * The wrist runs off the bottom of the photograph. Left hard it reads as a cut;
+ * faded, it reads as the frame ending.
+ */
+.held-hand {
+  display: block;
+  height: auto;
+  mask-image: linear-gradient(180deg, #000 78%, transparent 99%);
+  width: 100%;
+}
+.held--mirror .held-hand { transform: scaleX(-1); }
+
+.held-screen {
+  background: #0b0b09;
+  border-radius: 3px 3px 9px 9px;
+  display: block;
+  height: 76.2%;
+  left: 33%;
+  overflow: hidden;
+  position: absolute;
+  top: 10.2%;
+  width: 35.6%;
+}
+/* Mirroring the photograph moves the screen with it; the app inside must not flip. */
+.held--mirror .held-screen { left: 31.4%; }
+.held-shot { display: block; height: 100%; object-fit: cover; object-position: top center; width: 100%; }
+
 /*
  * The counter, which is the whole product in one picture: two phones facing
  * each other, one asking and one paying. A single phone showed what the app
@@ -195,9 +234,9 @@ h1 em, h2 em { color: var(--ink); font-style: normal; position: relative; }
   z-index: 3;
 }
 .counter-row {
-  align-items: center;
+  align-items: flex-end;
   display: flex;
-  gap: clamp(10px, 3.4vw, 52px);
+  gap: clamp(0px, 0.5vw, 12px);
   justify-content: center;
   position: relative;
   transform-style: preserve-3d;
@@ -207,16 +246,9 @@ h1 em, h2 em { color: var(--ink); font-style: normal; position: relative; }
  * Only the phone drifts. When the caption floated with it the two labels sat at
  * different heights, which read as a mistake rather than as motion.
  */
-.hold-float { position: relative; transform-style: preserve-3d; }
-.hold--merchant .hold-float { animation: phone-float 7s ease-in-out infinite; }
-.hold--customer .hold-float { animation: phone-float 7s ease-in-out -3.4s infinite; }
-
-.phone--merchant, .phone--customer {
-  height: clamp(268px, 30vw, 392px);
-  transition: transform 900ms var(--ease);
-  width: clamp(128px, 14.3vw, 187px);
-}
-.phone--merchant, .phone--customer { --bezel: 6px; --screen-radius: 28px; }
+/* The two drift out of step, so neither looks pinned to the other. */
+.hold--merchant .held { animation: phone-float 7s ease-in-out infinite; }
+.hold--customer .held { animation: phone-float 7s ease-in-out -3.4s infinite; }
 
 /* Held closer together for a tap than for a scan, because that is the gesture. */
 .counter[data-mode="nfc"] .phone--customer { transform: rotateX(6deg) rotateY(25deg) rotateZ(-3deg) translateX(20px); }
@@ -334,7 +366,7 @@ h1 em, h2 em { color: var(--ink); font-style: normal; position: relative; }
   0%, 100% { top: 20%; opacity: 0.2; }
   50% { top: 62%; opacity: 1; }
 }
-.scan-copy { color: rgba(255, 255, 255, 0.82); font-size: 10px; font-weight: 600; line-height: 1.4; margin: 0 0 12%; }
+.scan-copy { color: rgba(255, 255, 255, 0.82); font-size: 8.5px; font-weight: 600; line-height: 1.35; margin: 0 0 12%; }
 
 .face--tap { background: #0d0c0a; gap: 10px; }
 .tap-mark {
@@ -343,13 +375,13 @@ h1 em, h2 em { color: var(--ink); font-style: normal; position: relative; }
   border-radius: 50%;
   color: var(--lemon);
   display: flex;
-  font-size: 26px;
-  height: 58px;
+  font-size: 21px;
+  height: 48px;
   justify-content: center;
-  width: 58px;
+  width: 48px;
 }
-.tap-title { color: #fff; font-size: 17px; font-weight: 680; letter-spacing: -0.02em; margin: 8px 0 0; }
-.tap-note { color: rgba(255, 255, 255, 0.5); font-size: 10px; line-height: 1.4; margin: 0; }
+.tap-title { color: #fff; font-size: 14px; font-weight: 680; letter-spacing: -0.02em; margin: 6px 0 0; }
+.tap-note { color: rgba(255, 255, 255, 0.5); font-size: 8.5px; line-height: 1.35; margin: 0; }
 
 .face--done { background: #0b0b09; gap: 8px; }
 .done-tick {
@@ -358,15 +390,15 @@ h1 em, h2 em { color: var(--ink); font-style: normal; position: relative; }
   border-radius: 50%;
   color: #14130f;
   display: flex;
-  font-size: 24px;
-  height: 46px;
+  font-size: 19px;
+  height: 38px;
   justify-content: center;
-  width: 46px;
+  width: 38px;
 }
-.done-title { color: #fff; font-size: 20px; font-weight: 700; letter-spacing: -0.02em; margin: 6px 0 0; }
-.done-amount { color: var(--lemon); font-size: 26px; font-weight: 700; letter-spacing: -0.03em; margin: 0; }
-.done-amount span { font-size: 13px; letter-spacing: 0.08em; }
-.done-note { color: rgba(255, 255, 255, 0.5); font-size: 10px; letter-spacing: 0.1em; margin: 2px 0 0; text-transform: uppercase; }
+.done-title { color: #fff; font-size: 16px; font-weight: 700; letter-spacing: -0.02em; margin: 4px 0 0; }
+.done-amount { color: var(--lemon); font-size: 21px; font-weight: 700; letter-spacing: -0.03em; margin: 0; white-space: nowrap; }
+.done-amount span { font-size: 11px; letter-spacing: 0.08em; }
+.done-note { color: rgba(255, 255, 255, 0.5); font-size: 8.5px; letter-spacing: 0.08em; margin: 2px 0 0; text-transform: uppercase; white-space: nowrap; }
 
 /*
  * The tap. The customer's phone starts held back, reaches across to touch the
@@ -403,17 +435,14 @@ h1 em, h2 em { color: var(--ink); font-style: normal; position: relative; }
 .counter[data-mode="nfc"] .counter-mode--nfc { opacity: 1; transform: none; }
 
 @media (prefers-reduced-motion: reduce) {
-  .hold--merchant .hold-float, .hold--customer .hold-float { animation: none; }
+  .hold--merchant .held, .hold--customer .held { animation: none; }
   .link i { animation: none; }
-  .phone--merchant, .phone--customer { transition: none; }
 }
 
 @media (max-width: 860px) {
   .counter { gap: 8px; }
   .hold-label { margin-top: 14px; }
 }
-
-.phone-float { animation: phone-float 7s ease-in-out infinite; position: relative; transform-style: preserve-3d; z-index: 3; }
 
 /*
  * An iPhone rather than a rounded rectangle. Three details do most of the work:
@@ -455,9 +484,6 @@ h1 em, h2 em { color: var(--ink); font-style: normal; position: relative; }
 }
 /* Mirrored, so the two phones face each other rather than both facing away. */
 .phone--customer { --rx: 6deg; --ry: 19deg; --rz: -1deg; }
-.phone--merchant { --rx: 4deg; --ry: -17deg; --rz: 2deg; }
-
-.phone-body { inset: 0; position: absolute; transform-style: preserve-3d; }
 
 /* Titanium is lighter than the body sides catch, and the ends are chamfered. */
 .phone-btn {
@@ -467,73 +493,12 @@ h1 em, h2 em { color: var(--ink); font-style: normal; position: relative; }
   transform-style: preserve-3d;
   width: 3px;
 }
-.btn-action { height: 30px; left: -3px; top: 96px; }
-.btn-vol-up { height: 46px; left: -3px; top: 148px; }
-.btn-vol-down { height: 46px; left: -3px; top: 202px; }
-.btn-power { height: 64px; right: -3px; top: 158px; }
-
-.slab {
-  background: var(--slab);
-  border-radius: var(--radius);
-  filter: brightness(var(--b, 1));
-  inset: 0;
-  position: absolute;
-  transform: translateZ(var(--z));
-}
-.phone-face {
-  background: #08080a;
-  border-radius: var(--radius);
-  box-shadow:
-    /* the polished lip of the frame, then the black bezel it holds */
-    inset 0 0 0 1px rgba(255, 255, 255, 0.5),
-    inset 0 0 0 2px rgba(255, 255, 255, 0.12),
-    inset 0 1px 2px 1px rgba(0, 0, 0, 0.9),
-    0 60px 90px -44px rgba(20, 19, 15, 0.55);
-  inset: 0;
-  padding: var(--bezel);
-  position: absolute;
-  transform: translateZ(15px);
-  transform-style: preserve-3d;
-}
-.phone-screen {
-  background: #000;
-  border-radius: var(--screen-radius);
-  height: 100%;
-  overflow: hidden;
-  position: relative;
-  width: 100%;
-}
-.phone-screen img { display: block; height: 100%; object-fit: cover; object-position: top center; width: 100%; }
 /* Glass sits slightly proud of the bezel and darkens where it curves away. */
 .screen-vignette {
   box-shadow: inset 0 0 26px 6px rgba(0, 0, 0, 0.55);
   inset: 0;
   pointer-events: none;
   position: absolute;
-}
-.screen-glare {
-  background: linear-gradient(
-    calc(115deg + var(--glare, 0) * 1deg),
-    /* Enough to read as glass, not so much that it hides the screen the
-       phone is there to show. */
-    rgba(255, 255, 255, 0.13) 0%,
-    rgba(255, 255, 255, 0.035) 22%,
-    transparent 40%
-  );
-  inset: 0;
-  mix-blend-mode: screen;
-  pointer-events: none;
-  position: absolute;
-}
-.phone-shadow {
-  background: radial-gradient(ellipse at center, rgba(20, 19, 15, 0.34), transparent 70%);
-  bottom: -72px;
-  filter: blur(26px);
-  height: 96px;
-  left: 50%;
-  position: absolute;
-  transform: translateX(-50%) rotateX(78deg);
-  width: 320px;
 }
 
 .chip {
@@ -760,6 +725,89 @@ h1 em, h2 em { color: var(--ink); font-style: normal; position: relative; }
 .swaps-join { color: var(--ink-faint); font-size: 17px; }
 
 /*
+ * The two ways to hand a payment over, one card each. Restored: the base rules
+ * for this section had been lost in an earlier edit and only the narrow-screen
+ * overrides survived, so on a desktop the QR grew to the width of its card.
+ *
+ * Rewritten for paper rather than reinstated from the dark theme they were
+ * written for — a panel of translucent white on a cream page is a grey smear.
+ */
+.pay-grid { display: grid; gap: 16px; grid-template-columns: 1fr 1fr; }
+.pay-card {
+  background: var(--paper-raised);
+  border: 1px solid var(--rule);
+  border-radius: 22px;
+  overflow: hidden;
+  padding: 32px;
+  position: relative;
+}
+.pay-label { align-items: center; color: var(--lemon-ink); display: flex; font-size: 10px; font-weight: 750; gap: 9px; letter-spacing: 0.22em; margin: 0; }
+.pay-label .i { font-size: 16px; }
+.pay-card h3 { font-size: clamp(23px, 2.5vw, 31px); font-weight: 650; letter-spacing: -0.045em; line-height: 1.04; margin-top: 12px; }
+.pay-foot { position: relative; z-index: 2; }
+
+.qr-visual, .nfc-visual { align-items: center; display: flex; height: 300px; justify-content: center; margin-bottom: 32px; position: relative; }
+.qr-code { color: var(--ink); fill: currentColor; flex: 0 0 auto; height: 200px; width: 200px; }
+.qr-frame { border-color: var(--lemon); border-style: solid; height: 40px; position: absolute; width: 40px; }
+.qr-frame-1 { border-radius: 12px 0 0 0; border-width: 2px 0 0 2px; left: calc(50% - 124px); top: calc(50% - 124px); }
+.qr-frame-2 { border-radius: 0 12px 0 0; border-width: 2px 2px 0 0; right: calc(50% - 124px); top: calc(50% - 124px); }
+.qr-frame-3 { border-radius: 0 0 0 12px; border-width: 0 0 2px 2px; bottom: calc(50% - 124px); left: calc(50% - 124px); }
+.qr-frame-4 { border-radius: 0 0 12px 0; border-width: 0 2px 2px 0; bottom: calc(50% - 124px); right: calc(50% - 124px); }
+.qr-beam {
+  animation: qr-beam 3.4s ease-in-out infinite;
+  background: linear-gradient(90deg, transparent, var(--lemon) 24%, var(--lemon) 76%, transparent);
+  height: 2px;
+  left: calc(50% - 128px);
+  position: absolute;
+  width: 256px;
+  z-index: 3;
+}
+/* The mark sits in the quiet zone a real code leaves for exactly this. */
+.qr-logo {
+  border: 3px solid var(--paper-raised);
+  border-radius: 14px;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
+.nfc-visual { gap: 88px; }
+.tap-phone {
+  align-items: center;
+  background: var(--ink);
+  border-radius: 20px;
+  display: flex;
+  height: 196px;
+  justify-content: center;
+  position: relative;
+  width: 100px;
+}
+.tap-amount { color: var(--paper); display: grid; font-size: 17px; font-weight: 700; justify-items: center; letter-spacing: -0.03em; }
+.tap-amount em { color: var(--lemon); font-size: 10px; font-style: normal; font-weight: 700; letter-spacing: 0.16em; margin-top: 3px; }
+.tap-face { align-items: center; color: var(--lemon); display: flex; font-size: 30px; justify-content: center; }
+
+/* The tap itself, leaving the phone that touches. */
+.tap-waves { display: grid; place-items: center; position: absolute; }
+.tap-waves i {
+  border: 2px solid var(--lemon);
+  border-left-color: transparent;
+  border-radius: 50%;
+  border-right-color: transparent;
+  height: 34px;
+  position: absolute;
+  width: 34px;
+}
+.tap-waves i:nth-child(1) { animation: ping 1.8s ease-out infinite; }
+.tap-waves i:nth-child(2) { animation: ping 1.8s ease-out -0.6s infinite; }
+.tap-waves i:nth-child(3) { animation: ping 1.8s ease-out -1.2s infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .qr-beam, .tap-waves i { animation: none; }
+}
+
+/*
  * The flow is the page's argument, so it names who acts at each step rather
  * than only what happens. Each panel carries the thing that step produces — a
  * signed request, an approval, a settlement — because a reader believes a
@@ -967,15 +1015,11 @@ h1 em, h2 em { color: var(--ink); font-style: normal; position: relative; }
   .lede { font-size: 15px; margin-inline: auto; }
   .hero-title { font-size: clamp(54px, 16vw, 82px); }
   .stage { height: 520px; width: 100%; }
-  .phone { --radius: 40px; height: 466px; width: 218px; }
-  .phone-screen { border-radius: 32px; }
   .phone-rail-one { height: 47px; top: 103px; }
   .phone-rail-two { height: 72px; top: 166px; }
   .island { height: 18px; top: 16px; width: 68px; }
   .orbit-one { height: 440px; width: 440px; }
   .orbit-two { height: 344px; width: 344px; }
-  .halo { height: 300px; width: 300px; }
-  .phone-shadow { bottom: -56px; width: 250px; }
   .chip-request { left: 0; top: 96px; }
   .chip-settled { bottom: 96px; right: 0; }
   .section { padding-block: 96px; }
@@ -998,9 +1042,6 @@ h1 em, h2 em { color: var(--ink); font-style: normal; position: relative; }
   .store-button { justify-content: center; width: 100%; }
   .hero-copy .store-row { margin-inline: auto; }
   .stage { height: 470px; }
-  .phone { --radius: 36px; height: 420px; width: 196px; }
-  .phone-screen { border-radius: 29px; }
-  .phone-face { padding: 8px; }
   .phone-rail-one { height: 42px; top: 93px; }
   .phone-rail-two { height: 65px; top: 150px; }
   .island { height: 16px; top: 14px; width: 62px; }

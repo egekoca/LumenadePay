@@ -95,7 +95,6 @@
           </div>
 
           <div class="stage" data-stage>
-            <div class="halo" aria-hidden="true"></div>
             <div class="orbit orbit-one" aria-hidden="true"><i></i></div>
             <div class="orbit orbit-two" aria-hidden="true"><i></i></div>
 
@@ -110,70 +109,44 @@
               </div>
 
               <div class="counter-row">
-              <div class="hold hold--customer">
-                <div class="hold-float">
-                <div class="phone phone--customer" data-phone>
-                  <div class="phone-body" data-extrude="30" aria-hidden="true"></div>
-                  <div class="phone-btn btn-action" data-extrude="18" aria-hidden="true"></div>
-                  <div class="phone-btn btn-vol-up" data-extrude="18" aria-hidden="true"></div>
-                  <div class="phone-btn btn-vol-down" data-extrude="18" aria-hidden="true"></div>
-                  <div class="phone-btn btn-power" data-extrude="18" aria-hidden="true"></div>
-                  <div class="phone-face">
-                    <div class="phone-screen">
-                      <div class="face face--scan">
-                        <span class="scan-frame" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-                        <span class="scan-sweep" aria-hidden="true"></span>
-                        <p class="scan-copy">Align the merchant QR inside the frame</p>
-                      </div>
-                      <div class="face face--tap">
-                        <span class="tap-mark" aria-hidden="true"><svg class="i"><use href="#i-nfc" /></svg></span>
-                        <p class="tap-title">Ready to pay</p>
-                        <p class="tap-note">Hold near the merchant's phone</p>
-                      </div>
-                      <div class="face face--done">
-                        <span class="done-tick" aria-hidden="true"><svg class="i"><use href="#i-check" /></svg></span>
-                        <p class="done-title">Paid</p>
-                        <p class="done-amount">24.9 <span>XLM</span></p>
-                        <p class="done-note">Settled on Stellar</p>
-                      </div>
-                      <span class="screen-vignette" aria-hidden="true"></span>
-                      <span class="screen-glare" aria-hidden="true"></span>
-                    </div>
-                  </div>
+                <div class="hold hold--customer">
+                  <figure class="held">
+                    <img class="held-hand" src="/assets/hand-holding-phone.png" alt="A hand holding a phone running Lumenade Pay" width="760" height="760" />
+                    <span class="held-screen">
+                    <span class="face face--scan">
+                      <span class="scan-frame" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                      <span class="scan-sweep" aria-hidden="true"></span>
+                      <p class="scan-copy">Align the merchant QR inside the frame</p>
+                    </span>
+                    <span class="face face--tap">
+                      <span class="tap-mark" aria-hidden="true"><svg class="i"><use href="#i-nfc" /></svg></span>
+                      <p class="tap-title">Ready to pay</p>
+                      <p class="tap-note">Hold near the merchant's phone</p>
+                    </span>
+                    <span class="face face--done">
+                      <span class="done-tick" aria-hidden="true"><svg class="i"><use href="#i-check" /></svg></span>
+                      <p class="done-title">Paid</p>
+                      <p class="done-amount">24.9 <span>XLM</span></p>
+                      <p class="done-note">Settled on Stellar</p>
+                    </span>
+                    </span>
+                  </figure>
+                  <p class="hold-label"><span>Customer</span> pays</p>
                 </div>
-                </div>
-                <p class="hold-label"><span>Customer</span> pays</p>
-              </div>
 
-              <span class="link link--qr" aria-hidden="true">
-                <i></i><i></i><i></i>
-              </span>
-              <span class="link link--nfc" aria-hidden="true">
-                <i></i><i></i><i></i>
-              </span>
+                <span class="link link--qr" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span class="link link--nfc" aria-hidden="true"><i></i><i></i><i></i></span>
 
-              <div class="hold hold--merchant">
-                <div class="hold-float">
-                <div class="phone phone--merchant" data-phone>
-                  <div class="phone-body" data-extrude="30" aria-hidden="true"></div>
-                  <div class="phone-btn btn-action" data-extrude="18" aria-hidden="true"></div>
-                  <div class="phone-btn btn-vol-up" data-extrude="18" aria-hidden="true"></div>
-                  <div class="phone-btn btn-vol-down" data-extrude="18" aria-hidden="true"></div>
-                  <div class="phone-btn btn-power" data-extrude="18" aria-hidden="true"></div>
-                  <div class="phone-face">
-                    <div class="phone-screen">
-                      <img src="/assets/merchant-request.png" alt="The merchant's phone showing a signed payment request as a QR code" width="276" height="620" />
-                      <span class="screen-vignette" aria-hidden="true"></span>
-                      <span class="screen-glare" aria-hidden="true"></span>
-                    </div>
-                  </div>
+                <div class="hold hold--merchant">
+                  <figure class="held held--mirror">
+                    <img class="held-hand" src="/assets/hand-holding-phone.png" alt="A hand holding the merchant's phone showing a payment request" width="760" height="760" />
+                    <span class="held-screen">
+                      <img class="held-shot" src="/assets/merchant-request.png" alt="" width="276" height="620" />
+                    </span>
+                  </figure>
+                  <p class="hold-label"><span>Merchant</span> asks</p>
                 </div>
-                </div>
-                <p class="hold-label"><span>Merchant</span> asks</p>
               </div>
-
-              </div>
-              <div class="phone-shadow" aria-hidden="true"></div>
             </div>
 
           </div>
@@ -214,7 +187,7 @@
 
           <div class="wait-lane wait-lane--now">
             <div class="wait-who">
-              <span class="cards cards--one" aria-hidden="true">
+              <span class="cards" aria-hidden="true">
                 <i class="card card--gold"><b></b><u></u></i>
               </span>
               <p class="wait-name">Lumenade Pay</p>
