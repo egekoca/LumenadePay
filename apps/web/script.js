@@ -116,51 +116,78 @@ const phone = document.querySelector('.phone--customer[data-phone]') ?? document
 const counter = document.querySelector('[data-counter]');
 if (counter) {
   /*
-   * One payment, told twice. Each step holds long enough to be read as an
-   * action rather than a flicker: the camera finds the code, or the phone is
-   * carried across and touched to the other one, and only then does the money
-   * land. Showing the result without the gesture that caused it is what made
-   * the old single frame say nothing.
+   * One payment, told twice. Each frame holds long enough to be read as an
+   * action rather than a flicker: the merchant types a price, the customer's
+   * camera finds the code or the phone is carried across and touched to the
+   * other one, and only then does the money land. Showing the result without
+   * the gesture that caused it is what made the old still frame say nothing.
    */
-  const script = [
-    {mode: 'qr', phase: 'aim', hold: 2100},
-    {mode: 'qr', phase: 'done', hold: 2300},
-    {mode: 'nfc', phase: 'away', hold: 1100},
-    {mode: 'nfc', phase: 'tap', hold: 1500},
-    {mode: 'nfc', phase: 'done', hold: 2300},
-  ];
+  const script = {
+    qr: [
+      {phase: 'entry', hold: 2200},
+      {phase: 'aim', hold: 2100},
+      {phase: 'done', hold: 2400},
+    ],
+    nfc: [
+      {phase: 'entry', hold: 2200},
+      {phase: 'tap', hold: 1800},
+      {phase: 'done', hold: 2400},
+    ],
+  };
 
+  const buttons = [...counter.querySelectorAll('[data-pick]')];
+  let pick = 'auto';
+  let mode = 'qr';
   let step = 0;
   let timer = 0;
 
   const show = () => {
-    const frame = script[step];
-    counter.dataset.mode = frame.mode;
+    const frame = script[mode][step];
+    counter.dataset.mode = mode;
     counter.dataset.phase = frame.phase;
     return frame.hold;
   };
 
   const advance = () => {
-    step = (step + 1) % script.length;
+    step += 1;
+    if (step >= script[mode].length) {
+      step = 0;
+      // On auto the two alternate; pinned to one, that one repeats.
+      if (pick === 'auto') mode = mode === 'qr' ? 'nfc' : 'qr';
+    }
     timer = setTimeout(advance, show());
   };
 
-  const start = () => {
-    if (timer || reduceMotion) return;
-    timer = setTimeout(advance, show());
-  };
   const stop = () => {
     if (!timer) return;
     clearTimeout(timer);
     timer = 0;
   };
+  const start = () => {
+    if (timer || reduceMotion) return;
+    timer = setTimeout(advance, show());
+  };
 
-  // Reduced motion gets the settled end of the story, held still.
+  const choose = value => {
+    pick = value;
+    buttons.forEach(button => button.classList.toggle('is-on', button.dataset.pick === value));
+    if (value !== 'auto') mode = value;
+    step = 0;
+    stop();
+    show();
+    start();
+  };
+
+  buttons.forEach(button => button.addEventListener('click', () => choose(button.dataset.pick)));
+
+  // A timer left running in a hidden tab only ever comes back mid-frame.
+  document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
+
   if (reduceMotion) {
+    // The settled end of the story, held still.
     counter.dataset.mode = 'qr';
     counter.dataset.phase = 'done';
   } else {
-    document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
     start();
   }
 }

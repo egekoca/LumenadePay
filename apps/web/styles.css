@@ -329,10 +329,115 @@ h1 em, h2 em { color: var(--ink); font-style: normal; position: relative; }
  * while the phone was being carried across said the customer was scanning
  * something they were about to touch instead.
  */
-.counter[data-phase="aim"] .face--scan { opacity: 1; }
-.counter[data-phase="away"] .face--tap,
-.counter[data-phase="tap"] .face--tap { opacity: 1; }
+/*
+ * Which screen each phone is showing. The camera belongs to the scan and
+ * nowhere else — left up while the phone is carried across, it says the
+ * customer is scanning the thing they are about to touch.
+ */
+.counter[data-mode="qr"][data-phase="entry"] .face--scan,
+.counter[data-mode="qr"][data-phase="aim"] .face--scan { opacity: 1; }
+.counter[data-mode="nfc"][data-phase="entry"] .face--tap,
+.counter[data-mode="nfc"][data-phase="tap"] .face--tap { opacity: 1; }
 .counter[data-phase="done"] .face--done { opacity: 1; }
+
+/* The merchant types the price before there is a code to show. */
+.counter[data-phase="entry"] .face--entry { opacity: 1; }
+.counter:not([data-phase="entry"]) .face--code { opacity: 1; }
+
+/*
+ * Aiming. A camera is not held square to what it is reading, and the tilt is
+ * the only thing that says this phone is pointed at the other one.
+ */
+.counter[data-mode="qr"][data-phase="aim"] .hold--customer .hold-move { transform: rotate(-7deg) translate(5%, -4px); }
+
+/*
+ * The tap. Held back, then carried across until the two phones meet — the
+ * edges actually touch, because that is what makes it read as NFC rather than
+ * as two phones standing near each other.
+ */
+.counter[data-mode="nfc"][data-phase="entry"] .hold--customer .hold-move { transform: translateX(-11%); }
+/*
+ * Far enough that the two edges actually meet. The photograph carries a wide
+ * transparent margin, so a distance in pixels leaves a gap at one width and an
+ * overlap at another; measured against the phone it holds at every size.
+ */
+.counter[data-mode="nfc"][data-phase="tap"] .hold--customer .hold-move,
+.counter[data-mode="nfc"][data-phase="done"] .hold--customer .hold-move { transform: translateX(52%) rotate(3deg); }
+/* Only the phone moves; the caption under it stays level and stays put. */
+.hold-move { transition: transform 820ms var(--ease); }
+
+/* The wave only fires once the phones are together. */
+.counter[data-mode="nfc"]:not([data-phase="tap"]):not([data-phase="done"]) .link--nfc { opacity: 0; }
+.link--nfc { transform: translateX(7%); }
+.counter[data-phase="entry"] .link { opacity: 0; }
+
+/* The screen the merchant types the price on. */
+.face--entry { background: #0d0c0a; gap: 9px; justify-content: flex-start; padding: 13% 9%; text-align: left; align-items: stretch; }
+.entry-top { display: grid; gap: 2px; margin-bottom: 4px; }
+.entry-top b { color: var(--lemon); font-size: 8px; font-weight: 750; letter-spacing: 0.18em; text-transform: uppercase; }
+.entry-top span { color: #fff; font-size: 13px; font-weight: 680; letter-spacing: -0.02em; }
+.entry-pills { display: flex; gap: 5px; }
+.entry-pills i {
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.55);
+  display: flex;
+  font-size: 7.5px;
+  font-style: normal;
+  font-weight: 700;
+  gap: 3px;
+  letter-spacing: 0.06em;
+  padding: 3px 7px;
+}
+.entry-pills i.is-on { background: var(--lemon); border-color: var(--lemon); color: #14130f; }
+.flag { display: inline-block; height: 7px; width: 10.5px; vertical-align: -1px; }
+.done-note .flag { height: 8px; width: 12px; margin-right: 3px; }
+
+.entry-field { border-bottom: 1px solid rgba(255, 255, 255, 0.16); display: grid; gap: 3px; padding-bottom: 6px; }
+.entry-label { color: rgba(255, 255, 255, 0.45); font-size: 7px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; }
+.entry-amount { align-items: center; color: #fff; display: flex; font-size: 22px; font-weight: 700; letter-spacing: -0.03em; }
+/* A caret, because a number typing itself is the point of this frame. */
+.caret { animation: caret 1s steps(1) infinite; background: var(--lemon); display: inline-block; height: 20px; margin-left: 3px; width: 2px; }
+@keyframes caret { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+.entry-rate { color: rgba(255, 255, 255, 0.5); font-size: 7.5px; letter-spacing: 0.02em; margin-top: 2px; }
+
+/*
+ * The code the merchant then shows. Drawn rather than screenshotted: the
+ * capture we had was of a different payment, and a phone quoting one amount
+ * beside a phone quoting another is the one thing this sequence must not do.
+ */
+.face--code { background: #0b0b09; gap: 8px; justify-content: flex-start; padding: 12% 9%; align-items: stretch; text-align: left; }
+.code-top { display: grid; gap: 2px; }
+.code-top b { color: var(--lemon); font-size: 8px; font-weight: 750; letter-spacing: 0.18em; text-transform: uppercase; }
+.code-top span { color: #fff; font-size: 13px; font-weight: 680; letter-spacing: -0.02em; }
+.code-sum { display: grid; gap: 1px; }
+.code-fiat { align-items: center; color: #fff; display: flex; font-size: 17px; font-weight: 700; gap: 5px; letter-spacing: -0.03em; }
+.code-asset { color: var(--lemon); font-size: 9px; font-weight: 700; letter-spacing: 0.01em; }
+.code-asset i { font-size: 7.5px; font-style: normal; letter-spacing: 0.12em; }
+.code-art { background: #fff; border-radius: 4px; color: #0b0b09; fill: currentColor; padding: 5px; width: 100%; }
+.code-foot { color: rgba(255, 255, 255, 0.42); font-size: 7px; letter-spacing: 0.06em; }
+
+/*
+ * The control. It runs itself, and anyone who wants to stop on one of the two
+ * can — a page that only ever plays at you is a page you cannot check.
+ */
+.switcher { display: flex; gap: 4px; justify-content: center; }
+.switcher-btn {
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  color: var(--ink-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  padding: 6px 14px;
+  transition: background 220ms var(--ease), border-color 220ms var(--ease), color 220ms var(--ease);
+}
+.switcher-btn:hover { border-color: var(--rule-strong); color: var(--ink); }
+.switcher-btn.is-on { background: var(--ink); border-color: var(--ink); color: var(--paper); }
 
 .face--scan { background: #100f0c; justify-content: flex-end; }
 .scan-frame {
@@ -399,19 +504,6 @@ h1 em, h2 em { color: var(--ink); font-style: normal; position: relative; }
 .done-amount { color: var(--lemon); font-size: 21px; font-weight: 700; letter-spacing: -0.03em; margin: 0; white-space: nowrap; }
 .done-amount span { font-size: 11px; letter-spacing: 0.08em; }
 .done-note { color: rgba(255, 255, 255, 0.5); font-size: 8.5px; letter-spacing: 0.08em; margin: 2px 0 0; text-transform: uppercase; white-space: nowrap; }
-
-/*
- * The tap. The customer's phone starts held back, reaches across to touch the
- * merchant's, then shows the result — the gesture itself, rather than two
- * phones that were always already touching.
- */
-.counter[data-mode="nfc"][data-phase="away"] .hold--customer { transform: translateX(-58px); }
-.counter[data-mode="nfc"][data-phase="tap"] .hold--customer,
-.counter[data-mode="nfc"][data-phase="done"] .hold--customer { transform: translateX(16px); }
-.hold--customer, .hold--merchant { transition: transform 780ms var(--ease); }
-
-/* The wave only fires at the moment of contact. */
-.counter[data-mode="nfc"][data-phase="away"] .link--nfc { opacity: 0; }
 
 .counter-modes { height: 22px; position: relative; text-align: center; width: 100%; }
 .counter-mode {
