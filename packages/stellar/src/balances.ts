@@ -59,3 +59,28 @@ export function formatStroops(stroops: bigint): string {
   const fraction = (absolute % 10_000_000n).toString().padStart(7, '0').replace(/0+$/, '');
   return `${negative ? '-' : ''}${whole}${fraction ? `.${fraction}` : ''}`;
 }
+
+/**
+ * Whether a holder could receive this asset at all.
+ *
+ * A classic account needs a trustline before it can hold a credit asset, and
+ * without one the token refuses even to report a balance. A contract account
+ * needs nothing: a Stellar Asset Contract keeps its balance in contract
+ * storage. So the question "can this address be paid in USDC?" is answered by
+ * asking the token, which is the same thing the settlement will do.
+ *
+ * A network failure reads as "cannot", which is the safe way round: refusing to
+ * offer an asset costs a merchant a choice, and offering one that cannot arrive
+ * costs them a sale with the customer already committed.
+ */
+export async function canReceiveAsset(
+  config: StellarConfig,
+  holder: BalanceHolder,
+  assetContractId: string,
+  server: rpc.Server = new rpc.Server(config.rpcUrl),
+): Promise<boolean> {
+  return readAssetBalance(config, holder, assetContractId, server).then(
+    () => true,
+    () => false,
+  );
+}

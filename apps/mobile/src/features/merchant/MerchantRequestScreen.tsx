@@ -16,6 +16,7 @@ import {useNfcBroadcast} from '../payments/useNfc';
 import {createSignedPaymentRequest, MerchantProfileError} from './merchantProfile';
 import {priceRequest, referenceForRequest} from './pricedRequest';
 import {defaultPayableAsset, payableAssets, type PayableAsset} from '../payments/assets';
+import {useRecipientCanReceive} from './useRecipientCanReceive';
 import {registerMerchantForTestnet} from './merchantRegistration';
 import {publishPaymentRequest, useRelayerIdentity, usePaymentRequestStatus} from './merchantRequestStatus';
 import {useMerchantCountersigning} from './merchantCountersigning';
@@ -56,6 +57,7 @@ export function MerchantRequestScreen({navigation}: Props) {
   // told about, so this list is the registered one rather than a free choice.
   const [payable, setPayable] = useState<PayableAsset>(defaultPayableAsset);
   const currencies = useCurrencyPrices(payable.sep38);
+  const canReceive = useRecipientCanReceive(merchantProfile?.recipient, payable);
   const [error, setError] = useState<string | undefined>();
   const [registering, setRegistering] = useState(false);
 
@@ -93,6 +95,12 @@ export function MerchantRequestScreen({navigation}: Props) {
 
   const createRequest = () => {
     setError(undefined);
+    if (canReceive.data === false) {
+      // Signing a request the recipient cannot be paid on would hand the
+      // customer something guaranteed to fail after they had approved it.
+      setError(`This business cannot receive ${payable.code} yet`);
+      return;
+    }
     if (currency && !priced) {
       setError(`Enter a price in ${currency.currency} to convert`);
       return;
@@ -174,7 +182,11 @@ export function MerchantRequestScreen({navigation}: Props) {
                 />
               ))}
             </View>
-            <Text style={styles.assetNote}>{payable.note}</Text>
+            <Text style={styles.assetNote}>
+              {canReceive.data === false
+                ? `${merchantProfile.recipient.slice(0, 4)}…${merchantProfile.recipient.slice(-4)} has no ${payable.code} trustline, so a payment in it would not arrive. Add one, or receive into this phone instead.`
+                : payable.note}
+            </Text>
 
             {currencies.data && currencies.data.length > 0 ? (
               <Text style={styles.fieldLabel}>PRICED IN</Text>
@@ -232,7 +244,12 @@ export function MerchantRequestScreen({navigation}: Props) {
             </Text>
           </View>
           {error ? <Text style={styles.error}>{error}</Text> : null}
-          <Button onPress={createRequest} testID="create-request">Create payment request</Button>
+          <Button
+            disabled={canReceive.data === false}
+            onPress={createRequest}
+            testID="create-request">
+            Create payment request
+          </Button>
         </>
       )}
     </Screen>
