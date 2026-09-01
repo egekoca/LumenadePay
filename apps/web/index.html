@@ -59,6 +59,10 @@
         <circle cx="13.6" cy="10" r="4" fill="#E30A17" stroke="none" />
         <path fill="#fff" stroke="none" d="m19.9 10 1.5-2v2.5l2.4.8-2.4.8V14.6l-1.5-2-2.4.8 1.5-2-1.5-2 2.4.8Z" transform="translate(0,-2.4)" />
       </symbol>
+      <symbol id="i-xlm" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M7.3 7.3 16.7 16.7M16.7 7.3 7.3 16.7" />
+      </symbol>
 
     </svg>
 
@@ -85,13 +89,13 @@
       <section class="hero" id="top">
         <div class="shell hero-grid">
           <div class="hero-copy">
-            <p class="eyebrow" data-rise style="--d: 40ms"><i></i> Built on Stellar</p>
+            <p class="eyebrow" data-rise style="--d: 40ms"><i></i> In-person payments</p>
             <h1 class="hero-title" data-split>
               <span data-rise style="--d: 120ms">Scan.</span>
               <span data-rise style="--d: 200ms">Approve.</span>
               <em data-rise style="--d: 280ms">Settled.</em>
             </h1>
-            <p class="lede" data-rise style="--d: 380ms">In-person Stellar payments. No addresses, no checkout.</p>
+            <p class="lede" data-rise style="--d: 380ms">Fast in-person payments. No addresses, no checkout.</p>
 
             <div class="store-row" data-rise style="--d: 460ms" aria-label="Mobile app availability">
               <a class="store-button" href="https://apps.apple.com/us/search?term=Lumenade%20Pay" target="_blank" rel="noreferrer" aria-label="Lumenade Pay on the App Store, coming soon">
@@ -110,7 +114,7 @@
             </div>
 
             <p class="live-proof" data-rise style="--d: 540ms" data-network-proof data-checking="true">
-              <i aria-hidden="true"></i><span data-network-status>Checking Stellar Testnet</span>
+              <i aria-hidden="true"></i><span data-network-status>Verifying payment network</span>
             </p>
           </div>
 
@@ -152,8 +156,15 @@
                     <span class="face face--done">
                       <span class="done-tick" aria-hidden="true"><svg class="i"><use href="#i-check" /></svg></span>
                       <p class="done-title">Paid</p>
-                      <p class="done-amount">37.3134329 <span>XLM</span></p>
-                      <p class="done-note"><svg class="flag"><use href="#i-flag-tr" /></svg> 500.00 ₺ on the bill</p>
+                      <p class="done-amount">37.31 <span>XLM</span></p>
+                      <span class="asset-unit" aria-hidden="true">
+                        <svg class="asset-logo" viewBox="0 0 24 24"><use href="#i-xlm" /></svg>
+                        <span class="asset-copy">
+                          <strong>XLM</strong>
+                          <small>Stellar lumeni</small>
+                        </span>
+                      </span>
+                      <p class="done-note"><svg class="flag"><use href="#i-flag-tr" /></svg> Faturada 500,00 ₺</p>
                     </span>
                     </span>
                   </figure>
@@ -183,7 +194,7 @@
                           <span class="entry-label">Amount (TRY)</span>
                           <span class="entry-amount"><b>500</b><i class="caret"></i></span>
                         </span>
-                        <span class="entry-rate">Customer sends 37.3134329 XLM</span>
+                        <span class="entry-rate">Customer sends 37.31 XLM</span>
                       </span>
                       <span class="face face--code">
                         <span class="code-top">
@@ -192,7 +203,16 @@
                         </span>
                         <span class="code-sum">
                           <span class="code-fiat"><svg class="flag"><use href="#i-flag-tr" /></svg> 500,00 ₺</span>
-                          <span class="code-asset">37.3134329 <i>XLM</i></span>
+                          <span class="code-asset">
+                            <span class="code-amount">37.31 <i>XLM</i></span>
+                            <span class="asset-unit" aria-hidden="true">
+                              <svg class="asset-logo" viewBox="0 0 24 24"><use href="#i-xlm" /></svg>
+                              <span class="asset-copy">
+                                <strong>XLM</strong>
+                                <small>Stellar lumeni</small>
+                              </span>
+                            </span>
+                          </span>
                         </span>
                         <svg class="code-art" viewBox="0 0 200 200" aria-hidden="true"><use href="#i-qr-art" /></svg>
                         <span class="code-foot">Show this code to your customer</span>
@@ -306,7 +326,7 @@
           <div class="priced-convert" aria-hidden="true">
             <p class="priced-from"><span>500.00</span><em>TRY</em></p>
             <span class="priced-arrow"><svg class="i"><use href="#i-arrow" /></svg></span>
-            <p class="priced-to"><span>37.3134329</span><em>XLM</em></p>
+            <p class="priced-to"><span>37.31</span><em>XLM</em></p>
             <p class="priced-rate">at the anchor’s published rate</p>
           </div>
         </div>
@@ -457,7 +477,7 @@
         </p>
       </section>
 
-      <section class="section shell" id="proof">
+      <section class="section shell" id="proof" aria-label="Stellar Testnet payment proof">
         <div class="proof-card" data-rise>
           <div class="proof-copy">
             <span class="section-index">Live proof</span>

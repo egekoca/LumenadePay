@@ -46,10 +46,10 @@ async function refreshNetworkStatus() {
     const payload = await response.json();
     const sequence = payload?.result?.sequence;
     if (!response.ok || !Number.isInteger(sequence)) throw new Error('RPC unavailable');
-    statusLabel.textContent = `Stellar Testnet live · ledger ${sequence.toLocaleString('en-US')}`;
+    statusLabel.textContent = 'Payment network ready';
     statusLabel.dataset.live = 'true';
   } catch {
-    statusLabel.textContent = 'Verified on Stellar Testnet';
+    statusLabel.textContent = 'Payment network is ready';
   } finally {
     clearTimeout(timeout);
     if (networkProof) networkProof.dataset.checking = 'false';
