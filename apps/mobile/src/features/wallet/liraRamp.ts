@@ -1,4 +1,4 @@
-import {TransactionBuilder} from '@stellar/stellar-sdk';
+import {Asset, BASE_FEE, Memo, Operation, TransactionBuilder, rpc} from '@stellar/stellar-sdk';
 import {authenticate, discoverAnchor, type AnchorInfo, type SessionToken} from '@rosapay/anchor';
 import {createStellarConfig} from '@rosapay/stellar';
 import {logger} from '../../shared/logger';
@@ -230,8 +230,8 @@ function readInstructions(opened: Record<string, unknown>): BankInstructions {
   };
 }
 
-/** Where the deposit has got to. Terminal states stop the caller polling. */
-export async function readLiraDeposit(started: {
+/** Where a transfer has got to, either direction. Terminal states stop polling. */
+export async function readLiraTransfer(started: {
   transferServer: string;
   transactionId: string;
   session: SessionToken;
@@ -270,4 +270,168 @@ export async function simulateBankTransfer(started: {
     method: 'POST',
     headers: {Authorization: `Bearer ${started.session.token}`},
   });
+}
+
+export type LiraWithdrawalQuote = {
+  /** Lira per USDC, after the anchor's spread. */
+  perUsdc: string;
+  /** What reaches the bank account. */
+  buyAmount: string;
+  feeTotal?: string;
+};
+
+/** What an amount of USDC is worth in lira, before the customer commits. */
+export async function quoteLiraWithdrawal(amountUsdc: string): Promise<LiraWithdrawalQuote> {
+  const anchor = await discover();
+  const usdc = anchor.currencies.find(currency => currency.code === 'USDC');
+  if (!anchor.quoteServer || !usdc?.issuer) {
+    throw new LiraRampError('ANCHOR_UNAVAILABLE', 'The lira anchor is not quoting right now.');
+  }
+
+  const url = new URL(`${anchor.quoteServer}/price`);
+  url.searchParams.set('sell_asset', `stellar:USDC:${usdc.issuer}`);
+  url.searchParams.set('buy_asset', 'iso4217:TRY');
+  url.searchParams.set('sell_amount', amountUsdc);
+  url.searchParams.set('context', 'sep6');
+
+  const quoted = await readJson(url.toString());
+  const fee = quoted.fee as {total?: string} | undefined;
+  return {
+    // Selling USDC to buy lira, SEP-38 quotes USDC per lira. A person reads the
+    // other way round, so it is flipped here as it is everywhere else.
+    perUsdc: String(1 / Number(quoted.total_price ?? quoted.price ?? 1)),
+    buyAmount: String(quoted.buy_amount ?? '0'),
+    ...(fee?.total ? {feeTotal: fee.total} : {}),
+  };
+}
+
+export type StartedLiraWithdrawal = {
+  transactionId: string;
+  session: SessionToken;
+  transferServer: string;
+  /** Where the USDC must go, and the memo that says whose withdrawal it settles. */
+  treasury: string;
+  memo?: string;
+  amountUsdc: string;
+  bankAccount?: string;
+};
+
+/**
+ * Opens a withdrawal and sends the USDC that funds it.
+ *
+ * Both halves are here on purpose. The anchor names an account and a memo, and
+ * a payment that reaches that account without the memo is money sent to a
+ * stranger — it settles nobody's withdrawal and there is no thread back to the
+ * person who sent it. Leaving the two steps for a screen to sequence would make
+ * that gap something a rushed edit could open.
+ */
+export async function startLiraWithdrawal(input: {
+  address: string;
+  amountUsdc: string;
+  reason?: string;
+}): Promise<StartedLiraWithdrawal> {
+  const anchor = await discover();
+  const usdc = anchor.currencies.find(currency => currency.code === 'USDC');
+  const transferServer = anchor.transferServerSep6;
+  if (!transferServer || !usdc?.issuer || !anchor.webAuthEndpoint) {
+    throw new LiraRampError('ANCHOR_UNAVAILABLE', 'The lira anchor is not paying out right now.');
+  }
+
+  const keypair = keypairFromSecret(
+    await loadSigningKey(input.reason ?? `Cash out ${input.amountUsdc} USDC`),
+  );
+  if (keypair.publicKey() !== input.address) {
+    throw new LiraRampError(
+      'UNSUPPORTED_ACCOUNT',
+      'The key on this phone does not match the wallet it shows.',
+    );
+  }
+
+  const session = await authenticate(anchor, {
+    accountId: keypair.publicKey(),
+    signTransaction: async (xdr, {networkPassphrase}) => {
+      const challenge = TransactionBuilder.fromXDR(xdr, networkPassphrase);
+      challenge.sign(keypair);
+      return challenge.toXDR();
+    },
+  });
+
+  const url = new URL(`${transferServer}/withdraw-exchange`);
+  url.searchParams.set('asset_code', 'USDC');
+  url.searchParams.set('source_asset', `stellar:USDC:${usdc.issuer}`);
+  url.searchParams.set('destination_asset', 'iso4217:TRY');
+  url.searchParams.set('amount', input.amountUsdc);
+
+  const opened = await readJson(url.toString(), {
+    headers: {Authorization: `Bearer ${session.token}`},
+  });
+  const treasury = String(opened.account_id ?? '');
+  const transactionId = String(opened.id ?? '');
+  if (!treasury || !transactionId) {
+    throw new LiraRampError('REFUSED', 'The anchor opened no withdrawal for this wallet.');
+  }
+  const memo = opened.memo === undefined || opened.memo === null ? undefined : String(opened.memo);
+
+  const config = createStellarConfig('testnet');
+  const server = new rpc.Server(config.rpcUrl);
+  const account = await server.getAccount(keypair.publicKey());
+  const builder = new TransactionBuilder(account, {
+    fee: BASE_FEE,
+    networkPassphrase: config.networkPassphrase,
+  })
+    .addOperation(
+      Operation.payment({
+        destination: treasury,
+        asset: new Asset('USDC', usdc.issuer),
+        amount: input.amountUsdc,
+      }),
+    )
+    .setTimeout(60);
+  if (memo) builder.addMemo(Memo.id(memo));
+  const payment = builder.build();
+  payment.sign(keypair);
+
+  let sent;
+  try {
+    sent = await server.sendTransaction(payment);
+  } catch {
+    throw new LiraRampError('REFUSED', 'The payment to the anchor could not be sent.');
+  }
+  if (sent.status === 'ERROR') {
+    throw new LiraRampError('REFUSED', 'The network rejected the payment to the anchor.');
+  }
+
+  // Waited on rather than assumed: telling someone their lira is on the way
+  // while the payment is still unconfirmed is the false success this project
+  // refuses everywhere else.
+  let settled = false;
+  for (let attempt = 0; attempt < 20 && !settled; attempt += 1) {
+    await new Promise(resolve => setTimeout(resolve, 1_000));
+    const result = await server.getTransaction(sent.hash).catch(() => undefined);
+    if (result?.status === 'SUCCESS') settled = true;
+    if (result?.status === 'FAILED') break;
+  }
+  if (!settled) {
+    throw new LiraRampError('REFUSED', 'The payment to the anchor was not confirmed on Stellar.');
+  }
+
+  logger.info('lira_withdrawal_paid', {transactionId, amountUsdc: input.amountUsdc});
+  return {
+    transactionId,
+    session,
+    transferServer,
+    treasury,
+    amountUsdc: input.amountUsdc,
+    ...(memo ? {memo} : {}),
+    ...(typeof opened.extra_info === 'object' && opened.extra_info
+      ? readBankAccount(opened.extra_info as Record<string, unknown>)
+      : {}),
+  };
+}
+
+/** The IBAN the anchor says it will pay, when it says one. */
+function readBankAccount(extra: Record<string, unknown>): {bankAccount?: string} {
+  const message = typeof extra.message === 'string' ? extra.message : '';
+  const iban = /TR\d{24}/.exec(message)?.[0];
+  return iban ? {bankAccount: iban} : {};
 }
