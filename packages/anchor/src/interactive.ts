@@ -299,7 +299,11 @@ export const nativeAsset = 'stellar:native';
 export type IndicativePrice = {
   /** SEP-38 asset identifier, e.g. `iso4217:USD` or `stellar:USDC:G…`. */
   asset: string;
-  /** How much of `asset` one unit of the sold asset is worth. */
+  /**
+   * Exactly as SEP-38 defines it: units of the **sold** asset for one unit of
+   * this bought asset. Selling USDC to buy lira quotes ~0.0207, because one
+   * lira costs about two cents — not 48, which is the same rate read backwards.
+   */
   price: string;
   decimals?: number;
 };
@@ -366,7 +370,16 @@ export type CurrencyPrice = {
   currency: string;
   /** SEP-38 identifier the anchor used, kept so a quote can be requested later. */
   asset: string;
-  /** How many units of `currency` one unit of the sold asset is worth. */
+  /**
+   * How many units of `currency` one unit of the sold asset is worth — the
+   * inverse of what SEP-38 sends, and the direction a person reads: "8.97 lira
+   * per lumen", not "0.11 lumens per lira".
+   *
+   * The flip happens here, once, at the edge. It used to not happen at all,
+   * which went unnoticed because this app was also serving its own prices in
+   * the inverted direction — both sides wrong in the same way agree. Against a
+   * real anchor a 500 lira coffee came out as 24,095 USDC.
+   */
   perUnit: string;
 };
 
@@ -391,7 +404,23 @@ export async function readCurrencyPrices(input: {
 
   return prices
     .filter(price => Number(price.price) > 0)
-    .map(price => ({currency: assetCodeOf(price.asset), asset: price.asset, perUnit: price.price}));
+    .map(price => ({
+      currency: assetCodeOf(price.asset),
+      asset: price.asset,
+      perUnit: invert(price.price),
+    }));
+}
+
+/**
+ * Turns SEP-38's sell-per-buy into the buy-per-sell a menu price is read in.
+ *
+ * Done in decimal rather than as `1 / x` on a float, and at more places than a
+ * price is ever displayed to, because this number multiplies a sale.
+ */
+function invert(price: string): string {
+  const value = Number(price);
+  if (!Number.isFinite(value) || value <= 0) return '0';
+  return (1 / value).toFixed(10).replace(/0+$/, '').replace(/\.$/, '');
 }
 
 export class PriceConversionError extends Error {}

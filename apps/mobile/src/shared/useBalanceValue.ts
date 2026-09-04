@@ -30,7 +30,6 @@ export function useBalanceValue(holdings: Holding[] | undefined) {
     refetchInterval: 5 * 60_000,
     retry: 1,
     queryFn: async (): Promise<BalanceValue | null> => {
-      const source = await resolveQuoteSource();
       const priced = (holdings ?? []).filter(holding => Number(holding.amount) > 0);
 
       let total = 0;
@@ -38,6 +37,9 @@ export function useBalanceValue(holdings: Holding[] | undefined) {
 
       for (const holding of priced) {
         const sellAsset = payableAssetByCode(holding.code)?.sep38;
+        // Each holding is priced by whichever server quotes that asset, so a
+        // wallet of lumens and USDC still totals in one currency.
+        const source = await resolveQuoteSource(sellAsset);
         const prices = await readIndicativePrices({
           source,
           sellAmount: holding.amount,

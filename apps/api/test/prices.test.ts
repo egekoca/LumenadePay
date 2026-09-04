@@ -24,7 +24,7 @@ function provider(rates: AssetRate[] | (() => Promise<AssetRate[]>)): RateProvid
 
 function service(overrides: Partial<ConstructorParameters<typeof PriceService>[0]> = {}) {
   return new PriceService({
-    provider: provider([{asset: 'iso4217:TRY', price: '8.9700', decimals: 2}]),
+    provider: provider([{asset: 'iso4217:TRY', price: '0.1115', decimals: 2}]),
     sellAssets: [xlm, usdc],
     buyAssets: ['iso4217:TRY', 'iso4217:USD'],
     ...overrides,
@@ -40,7 +40,7 @@ describe('the deployment’s own SEP-38 prices', () => {
 
   it('prices a lumen in lira, which is the whole reason this exists', async () => {
     const prices = await service().prices({sellAsset: xlm, sellAmount: '1'});
-    expect(prices).toEqual({buy_assets: [{asset: 'iso4217:TRY', price: '8.9700', decimals: 2}]});
+    expect(prices).toEqual({buy_assets: [{asset: 'iso4217:TRY', price: '0.1115', decimals: 2}]});
   });
 
   /**
@@ -132,16 +132,22 @@ describe('the deployment’s own SEP-38 prices', () => {
 describe('the rate feed adapter', () => {
   const body = {stellar: {try: 8.97, usd: 0.1851}};
 
-  it('turns a market feed into SEP-38 rates', async () => {
+  /**
+   * Published in SEP-38's direction — units of the sold asset for one unit of
+   * the bought one — not the feed's. A lumen worth 8.97 lira means one lira
+   * costs 0.1115 lumens, and that second number is what the standard asks for.
+   * Serving the first is what made a real anchor and this server disagree by a
+   * factor of eighty.
+   */
+  it('publishes rates in the direction SEP-38 asks for, not the feed’s', async () => {
     const fetcher = vi.fn((_url: string, _init?: RequestInit) =>
       Promise.resolve(new Response(JSON.stringify(body), {status: 200})),
     );
     const rates = await new CoinGeckoRateProvider({fetcher: fetcher as unknown as typeof fetch}).ratesFor(xlm);
 
-    expect(rates).toEqual([
-      {asset: 'iso4217:TRY', price: '8.9700', decimals: 2},
-      {asset: 'iso4217:USD', price: '0.1851', decimals: 2},
-    ]);
+    expect(rates.map(rate => rate.asset)).toEqual(['iso4217:TRY', 'iso4217:USD']);
+    expect(Number(rates[0]!.price)).toBeCloseTo(1 / 8.97, 6);
+    expect(Number(rates[1]!.price)).toBeCloseTo(1 / 0.1851, 4);
     const url = fetcher.mock.calls[0]![0];
     expect(url).toContain('ids=stellar');
     expect(url).toContain('vs_currencies=try%2Cusd');
@@ -193,7 +199,7 @@ describe('the SEP-38 routes', () => {
       url: `/sep38/prices?sell_asset=${encodeURIComponent(xlm)}&sell_amount=1`,
     });
     expect(prices.statusCode).toBe(200);
-    expect(prices.json().buy_assets).toEqual([{asset: 'iso4217:TRY', price: '8.9700', decimals: 2}]);
+    expect(prices.json().buy_assets).toEqual([{asset: 'iso4217:TRY', price: '0.1115', decimals: 2}]);
   });
 
   it('defaults to one unit, because that is what a rate is', async () => {

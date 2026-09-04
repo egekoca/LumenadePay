@@ -77,7 +77,18 @@ export class CoinGeckoRateProvider implements RateProvider {
       // A rate of zero or a missing one is left out rather than published as a
       // number: a price of nothing would make a paid coffee look free.
       if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) continue;
-      rates.push({asset, price: value.toFixed(decimalsFor(asset) + 2), decimals: decimalsFor(asset)});
+      /*
+       * The feed says how much fiat one lumen is worth; SEP-38 asks the
+       * opposite — units of the sold asset for one unit of the bought one. So
+       * this is inverted before it is published.
+       *
+       * It used not to be, and nothing caught it, because the only reader was
+       * this project's own app inverting it back. The first real anchor we
+       * pointed at quoted the other way and a 500 lira coffee became 24,095
+       * USDC. Serving the standard's direction is what makes the two
+       * interchangeable, which is the entire point of speaking SEP-38.
+       */
+      rates.push({asset, price: (1 / value).toFixed(10), decimals: decimalsFor(asset)});
     }
     return rates;
   }

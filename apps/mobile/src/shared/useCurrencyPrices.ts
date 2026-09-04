@@ -18,7 +18,7 @@ export function useCurrencyPrices(sellAsset?: string) {
     refetchInterval: 5 * 60_000,
     retry: 1,
     queryFn: async (): Promise<CurrencyPrice[]> => {
-      const source = await resolveQuoteSource();
+      const source = await resolveQuoteSource(sellAsset);
       return readCurrencyPrices({source, ...(sellAsset ? {sellAsset} : {})});
     },
   });
