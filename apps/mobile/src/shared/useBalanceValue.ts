@@ -1,5 +1,5 @@
 import {useQuery} from '@tanstack/react-query';
-import {assetCodeOf, readIndicativePrices} from '@rosapay/anchor';
+import {assetCodeOf, currencyValueOfAsset, readIndicativePrices} from '@rosapay/anchor';
 import {payableAssetByCode} from '../features/payments/assets';
 import type {Holding} from './useWalletBalance';
 import {displayAmount} from './displayAmount';
@@ -54,7 +54,7 @@ export function useBalanceValue(holdings: Holding[] | undefined) {
           (currency ? prices.find(price => assetCodeOf(price.asset) === currency) : prices[0]);
         if (!chosen) continue;
 
-        const value = Number(holding.amount) * Number(chosen.price);
+        const value = currencyValueOfAsset({amount: holding.amount, price: chosen.price});
         if (!Number.isFinite(value)) continue;
 
         currency ??= assetCodeOf(chosen.asset);
