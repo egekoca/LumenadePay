@@ -267,8 +267,16 @@ export function MerchantRequestScreen({navigation}: Props) {
   );
 }
 
-/** One currency a merchant can price in. Plain, because it is a choice, not a feature. */
+/**
+ * One currency a merchant can price in.
+ *
+ * The flag carries the money the fiat currencies name, because a merchant
+ * picking one is picking the money on their own menu and reads it faster than
+ * a three-letter code. Assets get no flag: USDC and lumens belong to no
+ * country, and inventing one for them would say something untrue.
+ */
 function CurrencyPill({label, selected, onPress}: {label: string; selected: boolean; onPress(): void}) {
+  const flag = FLAGS[label];
   return (
     <Pressable
       accessibilityRole="button"
@@ -276,10 +284,14 @@ function CurrencyPill({label, selected, onPress}: {label: string; selected: bool
       onPress={onPress}
       style={[styles.pill, selected && styles.pillSelected]}
       testID={`currency-${label}`}>
-      <Text style={[styles.pillText, selected && styles.pillTextSelected]}>{label}</Text>
+      <Text style={[styles.pillText, selected && styles.pillTextSelected]}>
+        {flag ? `${flag}  ${label}` : label}
+      </Text>
     </Pressable>
   );
 }
+
+const FLAGS: Record<string, string | undefined> = {TRY: '🇹🇷', USD: '🇺🇸', EUR: '🇪🇺', CAD: '🇨🇦'};
 
 function RequestStatus({intentId}: {intentId: string}) {
   const status = usePaymentRequestStatus(intentId);

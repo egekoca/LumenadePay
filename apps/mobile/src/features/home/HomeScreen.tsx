@@ -14,6 +14,7 @@ import {useBalanceValue} from '../../shared/useBalanceValue';
 import {shareValue} from '../../shared/shareAddress';
 import {useAppStore} from '../../state/appStore';
 import {useCurrentAccount} from '../wallet/currentAccount';
+import {DISPLAY_CURRENCIES} from '../../shared/priceSource';
 import {greetingFor} from './greeting';
 import {MerchantBalanceCard} from './MerchantBalanceCard';
 import {PaymentCard} from './PaymentCard';
@@ -55,6 +56,14 @@ export function HomeScreen({navigation}: Props) {
 function CustomerHome({navigation, merchantEnabled}: {navigation: Props['navigation']; merchantEnabled: boolean}) {
   const account = useCurrentAccount();
   const receipts = useAppStore(state => state.receipts);
+  const displayCurrency = useAppStore(state => state.displayCurrency);
+  const setDisplayCurrency = useAppStore(state => state.setDisplayCurrency);
+  // Two currencies, so tapping through them is the whole control. A picker
+  // would be a sheet to open and dismiss for a choice with one alternative.
+  const cycleCurrency = () => {
+    const index = DISPLAY_CURRENCIES.findIndex(entry => entry.code === displayCurrency);
+    setDisplayCurrency(DISPLAY_CURRENCIES[(index + 1) % DISPLAY_CURRENCIES.length]!.code);
+  };
   const [setupBusy, setSetupBusy] = useState(false);
   const [setupError, setSetupError] = useState<string>();
   const balance = useWalletBalance();
@@ -81,6 +90,8 @@ function CustomerHome({navigation, merchantEnabled}: {navigation: Props['navigat
       <AnimatedContent>
         <PaymentCard
           holdings={balance.data ?? []}
+          currency={displayCurrency}
+          onChangeCurrency={cycleCurrency}
           {...(value.data ? {value: value.data} : {})}
           {...(address === undefined ? {} : {address})}
           state={
