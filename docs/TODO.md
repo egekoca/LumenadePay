@@ -62,6 +62,9 @@ Status: `[x]` implemented and locally verified, `[~]` foundation or mocked slice
 - [x] Create and sign payment intents from merchant data rather than a fixture; amounts are canonicalized, expiry comes from the live ledger and the customer verifies the merchant signature.
 - [x] Add merchant request status and receipt lookup; the request screen polls the API settlement, and the merchant home lists every request that merchant made with its outcome.
 - [x] Persist local session and pending payment recovery across app restarts; the merchant profile, demo wallet, open request and receipts survive a restart in the platform's encrypted store, and a returning user skips onboarding.
+- [x] Let a merchant price in the money on their menu: a request named in lira carries the converted asset amount, the `500.00 TRY` label travels in the signed reference, and both the customer's card and the merchant's read in lira. Verified on Android — 500 TRY became 55.7413601 XLM at 8.97 TRY/XLM.
+- [ ] Replace this deployment's own SEP-38 server with a real anchor's when one prices Turkish lira. Surveying every domain in the Stellar Anchor Directory found two publishing an `ANCHOR_QUOTE_SERVER`, both the same operator, both pricing only `iso4217:BRL`; `testanchor.stellar.org` offers USD and CAD and its `/prices` has been answering 502. Until then rates come from a public market feed and the screens say so.
+- [ ] Convert on the customer's behalf when they hold the wrong asset. A merchant paid in USDC and a customer holding only XLM currently cannot transact; the settlement contract moves one named token, so this needs a DEX (Soroswap is live on Mainnet) either before settlement or inside it.
 
 ## P2 - Reliability and Evidence
 

@@ -359,19 +359,37 @@ describe('what a balance is worth', () => {
       json({buy_assets: [{asset: 'iso4217:USD', price: '0.39', decimals: 4}]}),
     ) as unknown as typeof fetch;
 
-    const prices = await readIndicativePrices({anchor: withQuotes, sellAmount: '100', fetcher});
+    const prices = await readIndicativePrices({source: withQuotes, sellAmount: '100', fetcher});
 
     expect(prices).toEqual([{asset: 'iso4217:USD', price: '0.39', decimals: 4}]);
   });
 
   it('returns nothing when the anchor quotes no prices', async () => {
     const fetcher = vi.fn(async () => json({}, 404)) as unknown as typeof fetch;
-    await expect(readIndicativePrices({anchor: withQuotes, sellAmount: '100', fetcher})).resolves.toEqual([]);
+    await expect(readIndicativePrices({source: withQuotes, sellAmount: '100', fetcher})).resolves.toEqual([]);
   });
 
-  it('returns nothing when the anchor has no quote server at all', async () => {
+  it('reads a bare quote server that is not an anchor at all', async () => {
+    // The deployment serves its own SEP-38 for currencies no anchor prices, so
+    // a `quoteServer` on its own has to be as good as a discovered anchor.
+    const fetcher = vi.fn(async () =>
+      json({buy_assets: [{asset: 'iso4217:TRY', price: '8.97', decimals: 2}]}),
+    ) as unknown as typeof fetch;
+
+    const prices = await readIndicativePrices({
+      source: {quoteServer: 'https://pay.example/sep38'},
+      sellAmount: '1',
+      fetcher,
+    });
+
+    expect(prices).toEqual([{asset: 'iso4217:TRY', price: '8.97', decimals: 2}]);
+    const [url] = (fetcher as unknown as ReturnType<typeof vi.fn>).mock.calls[0] as [string];
+    expect(url).toContain('https://pay.example/sep38/prices');
+  });
+
+  it('returns nothing when there is no quote server at all', async () => {
     // Rather than invent a rate, which is what a payment screen must never do.
-    await expect(readIndicativePrices({anchor: anchorInfo(), sellAmount: '100'})).resolves.toEqual([]);
+    await expect(readIndicativePrices({source: anchorInfo(), sellAmount: '100'})).resolves.toEqual([]);
   });
 
   it('lists only the currencies the anchor can actually price', async () => {
@@ -387,7 +405,7 @@ describe('what a balance is worth', () => {
       }),
     ) as unknown as typeof fetch;
 
-    const currencies = await readCurrencyPrices({anchor: withQuotes, fetcher});
+    const currencies = await readCurrencyPrices({source: withQuotes, fetcher});
 
     expect(currencies).toEqual([
       {currency: 'USD', asset: 'iso4217:USD', perUnit: '0.39'},

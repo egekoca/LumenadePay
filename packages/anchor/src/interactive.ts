@@ -305,22 +305,34 @@ export type IndicativePrice = {
 };
 
 /**
- * SEP-38 indicative prices: what an anchor would give for an asset right now.
+ * Where SEP-38 prices are read from. An `AnchorInfo` satisfies it, so a
+ * discovered anchor can still be passed straight in.
+ */
+export type QuoteSource = {quoteServer?: string};
+
+/**
+ * SEP-38 indicative prices: what a quote server would give for an asset now.
  *
- * Indicative, not a quote — it commits the anchor to nothing and is only good
+ * Indicative, not a quote — it commits the server to nothing and is only good
  * for telling someone roughly what their balance is worth. A firm number needs
  * `/quote`, which requires an authenticated session and reserves a rate.
+ *
+ * The source is a quote server, not a whole anchor, because the two are not the
+ * same thing. Discovering an anchor is how you find one; it is not the only way
+ * to have one, and a deployment whose currency no anchor will price has to be
+ * able to point this somewhere else without the callers changing.
  */
 export async function readIndicativePrices(input: {
-  anchor: AnchorInfo;
+  source: QuoteSource;
   sellAsset?: string;
   sellAmount: string;
   fetcher?: typeof fetch;
 }): Promise<IndicativePrice[]> {
-  const {anchor, sellAsset = nativeAsset, sellAmount, fetcher = fetch} = input;
-  if (!anchor.quoteServer) return [];
+  const {source, sellAsset = nativeAsset, sellAmount, fetcher = fetch} = input;
+  const {quoteServer} = source;
+  if (!quoteServer) return [];
 
-  const url = new URL(`${anchor.quoteServer}/prices`);
+  const url = new URL(`${quoteServer}/prices`);
   url.searchParams.set('sell_asset', sellAsset);
   url.searchParams.set('sell_amount', sellAmount);
 
@@ -366,12 +378,12 @@ export type CurrencyPrice = {
  * real list rather than a hardcoded one that may quote nothing.
  */
 export async function readCurrencyPrices(input: {
-  anchor: AnchorInfo;
+  source: QuoteSource;
   sellAsset?: string;
   fetcher?: typeof fetch;
 }): Promise<CurrencyPrice[]> {
   const prices = await readIndicativePrices({
-    anchor: input.anchor,
+    source: input.source,
     sellAsset: input.sellAsset ?? nativeAsset,
     sellAmount: '1',
     ...(input.fetcher ? {fetcher: input.fetcher} : {}),

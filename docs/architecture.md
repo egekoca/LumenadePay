@@ -388,6 +388,42 @@ The first network is Stellar Testnet. The read path uses Stellar RPC; Horizon is
 
 The contract stores the Testnet network identifier and settlement contract address in the signed intent. A pubnet deployment must use a separate configuration and separate keys.
 
+## Pricing in a currency no anchor quotes
+
+A merchant prices a coffee in the money their customers count in, and the
+contract moves an asset. Something has to hold the rate between the two, and
+SEP-38 is the standard shape for it: the app asks a quote server what one lumen
+is worth, converts the menu price into an asset amount, and sends the fiat label
+along in the signed reference so the customer can check the screen against the
+till.
+
+The rate was meant to come from an anchor. It cannot. Every domain in the
+Stellar Anchor Directory was surveyed: 27 publish a `stellar.toml`, two declare
+an `ANCHOR_QUOTE_SERVER`, both belong to the same operator, and the only fiat
+either prices is the Brazilian real. `testanchor.stellar.org` offers USD and CAD
+and its `/prices` has been answering 502. There are TRY tokens on the public
+network, but they publish no home domain and so no quote server at all. Buying
+lumens for lira through a wallet like LOBSTR goes through MoonPay, which is a
+card ramp rather than a rate service and needs an API key besides.
+
+So this deployment serves the rate itself, from `/sep38/info` and
+`/sep38/prices`, in exactly the shape the app already reads. The app learns no
+new protocol, and when a lira anchor appears, `PRICE_ANCHOR_DOMAIN` in
+`shared/priceSource.ts` is set and the server here is deleted. That is the whole
+reason for wearing SEP-38's shape rather than inventing an endpoint.
+
+What it costs is provenance. These are market rates, not an anchor's quote, and
+nothing here implements `/quote` — a firm rate is a promise to exchange at it,
+and this deployment settles on chain instead of exchanging anything. Rates are
+cached for a minute and a failed read clears the cache rather than serving a
+stale number, because a stale rate prices a sale at a figure the market has
+already left.
+
+The gap this leaves is the customer holding the wrong asset. A merchant paid in
+USDC and a customer holding only XLM cannot transact today; closing it needs a
+DEX, either before settlement or inside the contract, and is tracked in the
+backlog rather than half-built here.
+
 ## Platform sequencing
 
 QR is the required common payment path and is the current vertical slice. Android NFC is an optimization after real QR settlement. iOS uses the same QR path as a safe fallback because background NFC behavior and entitlement requirements differ by device and OS version. NFC must not introduce a second payment protocol.
