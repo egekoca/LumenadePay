@@ -227,7 +227,7 @@ export function MerchantRequestScreen({navigation}: Props) {
                 <Text style={styles.conversion} testID="request-conversion">
                   {priced
                     ? `Customer sends ${displayAmount(priced.assetAmount)} ${payable.code} · ${displayAmount(currency.perUnit)} ${currency.currency} per ${payable.code}`
-                    : `Rate ${displayAmount(currency.perUnit)} ${currency.currency} per ${payable.code}, from the anchor`}
+                    : `Rate ${displayAmount(currency.perUnit)} ${currency.currency} per ${payable.code}`}
                 </Text>
               ) : null}
               <TextField
@@ -291,7 +291,14 @@ function CurrencyPill({label, selected, onPress}: {label: string; selected: bool
   );
 }
 
-const FLAGS: Record<string, string | undefined> = {TRY: '🇹🇷', USD: '🇺🇸', EUR: '🇪🇺', CAD: '🇨🇦'};
+const FLAGS: Record<string, string | undefined> = {
+  TRY: '🇹🇷',
+  USD: '🇺🇸',
+  NGN: '🇳🇬',
+  EUR: '🇪🇺',
+  CAD: '🇨🇦',
+  GBP: '🇬🇧',
+};
 
 function RequestStatus({intentId}: {intentId: string}) {
   const status = usePaymentRequestStatus(intentId);

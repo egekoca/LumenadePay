@@ -44,6 +44,8 @@ export const RATE_SOURCE_LABEL = PRICE_ANCHOR_DOMAIN;
 export const DISPLAY_CURRENCIES = [
   {code: 'TRY', flag: '🇹🇷', name: 'Turkish lira'},
   {code: 'USD', flag: '🇺🇸', name: 'US dollar'},
+  {code: 'NGN', flag: '🇳🇬', name: 'Nigerian naira'},
+  {code: 'EUR', flag: '🇪🇺', name: 'euro'},
 ] as const;
 
 export type DisplayCurrency = (typeof DISPLAY_CURRENCIES)[number]['code'];
@@ -70,8 +72,13 @@ let discovered: Promise<QuoteSource> | undefined;
  * all: an unreachable anchor is a worse reason to lose a sale than a rate from
  * a market feed.
  */
+/** This deployment's own SEP-38 server, which prices what no anchor will. */
+export function ownQuoteSource(): QuoteSource {
+  return {quoteServer: `${useAppStore.getState().apiBaseUrl}/sep38`};
+}
+
 export async function resolveQuoteSource(sellAsset?: string, currency?: string): Promise<QuoteSource> {
-  const ownServer = {quoteServer: `${useAppStore.getState().apiBaseUrl}/sep38`};
+  const ownServer = ownQuoteSource();
   // The anchor prices lira and nothing else. Asking it for dollars would come
   // back empty and read as "this wallet is worth nothing", so a currency it
   // cannot quote goes to the server that can.
