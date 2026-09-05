@@ -14,7 +14,7 @@ import {useBalanceValue} from '../../shared/useBalanceValue';
 import {shareValue} from '../../shared/shareAddress';
 import {useAppStore} from '../../state/appStore';
 import {useCurrentAccount} from '../wallet/currentAccount';
-import {DISPLAY_CURRENCIES} from '../../shared/priceSource';
+import {CurrencyPicker} from './CurrencyPicker';
 import {greetingFor} from './greeting';
 import {MerchantBalanceCard} from './MerchantBalanceCard';
 import {PaymentCard} from './PaymentCard';
@@ -58,12 +58,9 @@ function CustomerHome({navigation, merchantEnabled}: {navigation: Props['navigat
   const receipts = useAppStore(state => state.receipts);
   const displayCurrency = useAppStore(state => state.displayCurrency);
   const setDisplayCurrency = useAppStore(state => state.setDisplayCurrency);
-  // Two currencies, so tapping through them is the whole control. A picker
-  // would be a sheet to open and dismiss for a choice with one alternative.
-  const cycleCurrency = () => {
-    const index = DISPLAY_CURRENCIES.findIndex(entry => entry.code === displayCurrency);
-    setDisplayCurrency(DISPLAY_CURRENCIES[(index + 1) % DISPLAY_CURRENCIES.length]!.code);
-  };
+  // Opens the list rather than stepping to the next one. Cycling hid the
+  // options and made reaching the fourth cost three rate lookups.
+  const [pickingCurrency, setPickingCurrency] = useState(false);
   const [setupBusy, setSetupBusy] = useState(false);
   const [setupError, setSetupError] = useState<string>();
   const balance = useWalletBalance();
@@ -91,7 +88,7 @@ function CustomerHome({navigation, merchantEnabled}: {navigation: Props['navigat
         <PaymentCard
           holdings={balance.data ?? []}
           currency={displayCurrency}
-          onChangeCurrency={cycleCurrency}
+          onChangeCurrency={() => setPickingCurrency(true)}
           {...(value.data ? {value: value.data} : {})}
           {...(address === undefined ? {} : {address})}
           state={
@@ -171,6 +168,13 @@ function CustomerHome({navigation, merchantEnabled}: {navigation: Props['navigat
           </PressScale>
         </AnimatedContent>
       ) : null}
+
+      <CurrencyPicker
+        onClose={() => setPickingCurrency(false)}
+        onSelect={setDisplayCurrency}
+        selected={displayCurrency}
+        visible={pickingCurrency}
+      />
 
       <AnimatedContent delay={160}>
         <Text style={styles.listTitle}>Payments</Text>

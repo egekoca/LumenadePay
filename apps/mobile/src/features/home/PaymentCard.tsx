@@ -114,7 +114,7 @@ export function PaymentCard({holdings, value, currency, address, state, onCopy, 
                 <Text style={[styles.conversionValue, !value && styles.conversionPending]}>
                   {value ? `≈ ${value.amount} ${value.currency}` : `≈ —  ${shownCurrency}`}
                 </Text>
-                {onChangeCurrency ? <ChevronDown color={ink} size={15} strokeWidth={2.4} /> : null}
+                {onChangeCurrency ? <ChevronDown color={ink} size={17} strokeWidth={2.6} /> : null}
               </Pressable>
             ) : null}
             {rest.length > 0 ? (
@@ -171,10 +171,27 @@ const styles = StyleSheet.create({
   legend: {gap: 2},
   legendLabel: {...typography.mono, color: inkSoft, fontSize: 7.5, letterSpacing: 1.8},
   legendValue: {...typography.mono, color: ink, fontSize: 9.5, letterSpacing: 1.2},
-  conversion: {alignItems: 'center', flexDirection: 'row', gap: 7, marginTop: 3},
-  conversionValue: {...typography.mono, color: ink, fontSize: 15, letterSpacing: 0.6},
+  /*
+   * A plate under the row, because this sits on marbled metal. Mono type at
+   * small sizes disappeared into the gradient — the letterforms are thin and
+   * the background moves. A slightly darker ground and the sans face at
+   * seventeen give it an edge to read against without putting a box on a card
+   * that is otherwise all open surface.
+   */
+  conversion: {
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(28,21,3,0.10)',
+    borderRadius: 999,
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 7,
+    paddingHorizontal: 11,
+    paddingVertical: 6,
+  },
+  conversionValue: {...typography.body, color: ink, fontSize: 17, fontWeight: '600', letterSpacing: 0.2},
   conversionPending: {color: inkSoft},
-  flag: {fontSize: 17},
+  flag: {fontSize: 19},
   numberRow: {alignItems: 'center', flexDirection: 'row', gap: spacing.xs},
   number: {...typography.mono, color: ink, fontSize: 12, letterSpacing: 1.4},
 });
