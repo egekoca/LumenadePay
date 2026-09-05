@@ -31,7 +31,7 @@ const captions: Record<PaymentCardState, string> = {
   'no-wallet': 'SETUP REQUIRED',
   loading: 'READING',
   error: 'RECONNECTING',
-  ready: 'AVAILABLE',
+  ready: '',
 };
 
 /** A payment card is 85.6 by 53.98 millimetres, everywhere in the world. */
@@ -72,9 +72,13 @@ export function PaymentCard({holdings, value, currency, address, state, onCopy, 
       contentStyle={styles.inner}
       height={cardHeight}
       idSuffix="wallet"
+      interactive
       width={cardWidth}>
+          {/*
+            The app's name was printed here and again in the header directly
+            above it. A card carries the issuer's mark, not its name twice.
+          */}
           <View style={styles.top}>
-            <Text style={styles.brand}>LUMENADE PAY</Text>
             <WalletCards color={inkSoft} size={18} strokeWidth={1.8} />
           </View>
 
@@ -132,9 +136,13 @@ export function PaymentCard({holdings, value, currency, address, state, onCopy, 
           </View>
 
           <View style={styles.bottom}>
+            {/*
+              "BALANCE" over "AVAILABLE" was two labels for one fact anybody
+              holding a wallet already knows. What is worth saying is when the
+              card is *not* showing a balance, so only that is said.
+            */}
             <View style={styles.legend}>
-              <Text style={styles.legendLabel}>BALANCE</Text>
-              <Text style={styles.legendValue}>{captions[state]}</Text>
+              {state === 'ready' ? null : <Text style={styles.legendValue}>{captions[state]}</Text>}
             </View>
             <Pressable
               accessibilityLabel="Copy wallet address"
