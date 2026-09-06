@@ -80,6 +80,145 @@ const TR: Record<string, string> = {
     'Bu hesabı ve anahtarını bu telefondan siler.',
   'No email': 'E-posta yok',
   'Copy address': 'Adresi kopyala',
+  // Welcome and setup
+  'Pay by scanning.': 'Okut ve öde.',
+  'Settle on Stellar.': 'Stellar üzerinde ödeş.',
+  'One app for both sides of the counter. Your money moves on Stellar, and only this phone can approve it.':
+    'Tezgâhın iki tarafı için tek uygulama. Paranız Stellar üzerinde hareket eder ve yalnızca bu telefon onaylayabilir.',
+  "Scan a merchant's code to pay": 'Ödemek için satıcının kodunu okutun',
+  'Or hold the two phones together': 'Ya da iki telefonu birbirine yaklaştırın',
+  'Approved with your face or fingerprint': 'Yüzünüz veya parmak izinizle onaylanır',
+  'Create a new wallet': 'Yeni cüzdan oluştur',
+  'I already have a wallet': 'Zaten cüzdanım var',
+  'No password to remember. Twelve words are your wallet, and they are what lets you add money in lira.':
+    'Ezberlenecek parola yok. On iki kelime cüzdanınızdır ve lira yüklemenizi sağlayan şey odur.',
+  'Set up your account': 'Hesabınızı kurun',
+  'Restore your wallet': 'Cüzdanınızı geri yükleyin',
+  'Your name': 'Adınız',
+  'Email (optional)': 'E-posta (isteğe bağlı)',
+  'Only used to send you a receipt. It is not a login.':
+    'Yalnızca makbuz göndermek için. Giriş bilgisi değildir.',
+  'Your name is what a merchant sees on a receipt. Everything else stays on this phone.':
+    'Satıcı makbuzda adınızı görür. Kalan her şey bu telefonda kalır.',
+  'Twelve words are your wallet': 'On iki kelime cüzdanınızdır',
+  'Your existing wallet': 'Mevcut cüzdanınız',
+  'That does not look like an email address': 'Bu bir e-posta adresine benzemiyor',
+  'Please enter the name a merchant should see': 'Satıcının göreceği adı girin',
+
+  // Recovery phrase
+  'Your recovery phrase': 'Kurtarma cümleniz',
+  'These twelve words are your wallet. Write them down on paper, in this order, and keep them somewhere only you can reach.':
+    'Bu on iki kelime cüzdanınızdır. Kâğıda bu sırayla yazın ve yalnızca sizin ulaşabileceğiniz bir yerde saklayın.',
+  'I have written them down': 'Yazdım',
+  'Check your phrase': 'Cümlenizi doğrulayın',
+  'Tap the word that belongs in each place.': 'Her sıraya ait kelimeye dokunun.',
+  'Create my wallet': 'Cüzdanımı oluştur',
+  'Show the words again': 'Kelimeleri tekrar göster',
+
+  // Import
+  'Recovery phrase': 'Kurtarma cümlesi',
+  'Secret key': 'Gizli anahtar',
+  'Enter the recovery phrase from your existing Stellar wallet. It never leaves this phone.':
+    'Mevcut Stellar cüzdanınızın kurtarma cümlesini girin. Bu telefondan asla çıkmaz.',
+  'The key that starts with an S, not the address that starts with a G':
+    'G ile başlayan adres değil, S ile başlayan anahtar',
+  'Is this your account?': 'Hesabınız bu mu?',
+  'Yes, use this wallet': 'Evet, bu cüzdanı kullan',
+  'No, let me check again': 'Hayır, tekrar kontrol edeyim',
+  'STELLAR ACCOUNT': 'STELLAR HESABI',
+
+  // Unlock
+  'Set up this device again': 'Bu cihazı yeniden kur',
+  'Welcome back': 'Tekrar hoş geldiniz',
+
+  // Scan and pay
+  'Allow camera access': 'Kamera erişimine izin ver',
+  "QR is the universal payment path on iOS and Android.": 'QR, iOS ve Android’de ortak ödeme yoludur.',
+  "Scan this device's request": 'Bu cihazın isteğini okut',
+  "You can also hold this phone against the merchant's":
+    'Telefonu satıcınınkine de yaklaştırabilirsiniz',
+  'YOU ARE PAYING': 'ÖDEYECEĞİNİZ',
+  'SECURE CHECKOUT': 'GÜVENLİ ÖDEME',
+  Recipient: 'Alıcı',
+  Asset: 'Varlık',
+  Issuer: 'İhraççı',
+  Network: 'Ağ',
+  Expires: 'Son geçerlilik',
+  'Long-press the recipient or issuer to copy it.':
+    'Kopyalamak için alıcıya veya ihraççıya uzun basın.',
+  'The merchant signature failed verification. Ask for a new payment request.':
+    'Satıcı imzası doğrulanamadı. Yeni bir ödeme isteği isteyin.',
+
+  // Receipt
+  'PAYMENT COMPLETE': 'ÖDEME TAMAMLANDI',
+  Status: 'Durum',
+  CONFIRMED: 'ONAYLANDI',
+  Ledger: 'Defter',
+  Transaction: 'İşlem',
+  'Intent ID': 'İstek kimliği',
+  'Confirmed at': 'Onay zamanı',
+  'View on Explorer': 'Explorer’da görüntüle',
+  'Share receipt': 'Makbuzu paylaş',
+
+  // Activity
+  Activity: 'Hareketler',
+  'Filter activity': 'Hareketleri filtrele',
+  PAYMENTS: 'ÖDEMELER',
+
+  // Merchant
+  'GET PAID': 'ÖDEME AL',
+  'Set up your business': 'İşletmenizi kurun',
+  'Customers see this name. You are paid into the wallet you already have.':
+    'Müşteriler bu adı görür. Ödeme, hâlihazırdaki cüzdanınıza yapılır.',
+  'BUSINESS NAME': 'İŞLETME ADI',
+  'RECEIVING ADDRESS': 'ALICI ADRES',
+  'Paid into this wallet': 'Bu cüzdana ödenir',
+  'Stellar account or contract address that receives payments':
+    'Ödemeleri alan Stellar hesabı veya kontrat adresi',
+  'The address is checked before it can ever appear on a payment request.':
+    'Adres, bir ödeme isteğinde görünmeden önce doğrulanır.',
+  'Verify and continue': 'Doğrula ve devam et',
+  'Registering on Testnet': 'Testnet’e kaydediliyor',
+  'Payment request': 'Ödeme isteği',
+  'Enter what the customer owes': 'Müşterinin borcunu girin',
+  'PAID IN': 'ÖDEME BİRİMİ',
+  'PRICED IN': 'FİYAT BİRİMİ',
+  REFERENCE: 'AÇIKLAMA',
+  'Create payment request': 'Ödeme isteği oluştur',
+  'New request': 'Yeni istek',
+  'Preview customer view': 'Müşteri görünümünü önizle',
+  'PAYMENT STATUS': 'ÖDEME DURUMU',
+  'Not registered on Testnet': 'Testnet’e kayıtlı değil',
+  'Register this business': 'Bu işletmeyi kaydet',
+  'The settlement contract only accepts requests from a registered merchant key.':
+    'Ödeşme kontratı yalnızca kayıtlı bir satıcı anahtarından gelen istekleri kabul eder.',
+  'Or let the customer tap their phone here':
+    'Ya da müşteri telefonunu buraya dokundursun',
+  'Set up business': 'İşletmeyi kur',
+  'Set up your business profile before creating a payment request.':
+    'Ödeme isteği oluşturmadan önce işletme profilinizi kurun.',
+  'Recent payments': 'Son ödemeler',
+  'Create a request and keep this screen open at the counter.':
+    'Bir istek oluşturun ve bu ekranı tezgâhta açık tutun.',
+  'Business status': 'İşletme durumu',
+  SETTLED: 'ÖDEŞTİ',
+  OPEN: 'AÇIK',
+  'ACTIVE QR': 'AKTİF QR',
+  BUSINESS: 'İŞLETME',
+  Pay: 'Öde',
+  'Get paid': 'Ödeme al',
+
+  // Card and errors
+  'Copy wallet address': 'Cüzdan adresini kopyala',
+  'SETUP REQUIRED': 'KURULUM GEREKLİ',
+  READING: 'OKUNUYOR',
+  RECONNECTING: 'YENİDEN BAĞLANIYOR',
+  'Lumenade Pay needs a fresh start': 'Lumenade Pay’in yeniden başlaması gerekiyor',
+  'Your wallet and payment authorization were not changed.':
+    'Cüzdanınız ve ödeme yetkiniz değişmedi.',
+  'Try again': 'Tekrar dene',
+  'Lira needs a recovery-phrase wallet': 'Lira için kurtarma cümlesi cüzdanı gerekir',
+  'PAID OUT TO': 'ŞURAYA ÖDENDİ',
 };
 
 const CATALOGUES: Record<string, Record<string, string>> = {tr: TR};

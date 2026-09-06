@@ -21,6 +21,7 @@ import {useRecipientCanReceive} from './useRecipientCanReceive';
 import {registerMerchantForTestnet} from './merchantRegistration';
 import {publishPaymentRequest, useRelayerIdentity, usePaymentRequestStatus} from './merchantRequestStatus';
 import {useMerchantCountersigning} from './merchantCountersigning';
+import {useTranslate} from '../../shared/i18n';
 
 type Props = NativeStackScreenProps<RootStackParams, 'MerchantRequest'>;
 
@@ -28,6 +29,7 @@ type Props = NativeStackScreenProps<RootStackParams, 'MerchantRequest'>;
 const randomBytes = createRandomBytes({allowInsecureFallback: false});
 
 export function MerchantRequestScreen({navigation}: Props) {
+  const t = useTranslate();
   const {
     merchantProfile,
     pendingRequest,
@@ -65,8 +67,8 @@ export function MerchantRequestScreen({navigation}: Props) {
   if (!merchantProfile) {
     return (
       <Screen contentStyle={styles.centered}>
-        <Text style={styles.subtitle}>Set up your business profile before creating a payment request.</Text>
-        <Button onPress={() => navigation.replace('MerchantOnboarding')}>Set up business</Button>
+        <Text style={styles.subtitle}>{t('Set up your business profile before creating a payment request.')}</Text>
+        <Button onPress={() => navigation.replace('MerchantOnboarding')}>{t('Set up business')}</Button>
       </Screen>
     );
   }
@@ -137,7 +139,7 @@ export function MerchantRequestScreen({navigation}: Props) {
         <View style={styles.heading}>
           <View style={styles.merchantIcon}><Store color={colors.goldBright} size={22} /></View>
           <Text style={styles.eyebrow}>{merchantProfile.displayName.toUpperCase()}</Text>
-          <Text style={styles.title}>Payment request</Text>
+          <Text style={styles.title}>{t('Payment request')}</Text>
           <Text style={styles.subtitle}>
             {pendingRequest ? 'Show this code to your customer' : 'Enter what the customer owes'}
           </Text>
@@ -147,10 +149,8 @@ export function MerchantRequestScreen({navigation}: Props) {
       {!merchantRegisteredOnChain ? (
         <AnimatedContent delay={70}>
           <SurfaceCard accent="amber" style={styles.warning}>
-            <Text style={styles.warningTitle}>Not registered on Testnet</Text>
-            <Text style={styles.warningBody}>
-              The settlement contract only accepts requests from a registered merchant key.
-            </Text>
+            <Text style={styles.warningTitle}>{t('Not registered on Testnet')}</Text>
+            <Text style={styles.warningBody}>{t('The settlement contract only accepts requests from a registered merchant key.')}</Text>
             <Button loading={registering} tone="ghost" onPress={() => void registerOnChain()} testID="register-merchant">
               {registering ? 'Registering' : 'Register this business'}
             </Button>
@@ -173,7 +173,7 @@ export function MerchantRequestScreen({navigation}: Props) {
         <>
           <AnimatedContent delay={110} scaleFrom={0.985}>
             <SurfaceCard accent="amber" style={styles.form}>
-              <Text style={styles.fieldLabel}>PAID IN</Text>
+              <Text style={styles.fieldLabel}>{t('PAID IN')}</Text>
               <View style={styles.currencyRow}>
                 {payableAssets.map(option => (
                   <CurrencyPill
@@ -195,7 +195,7 @@ export function MerchantRequestScreen({navigation}: Props) {
               </Text>
 
               {currencies.data && currencies.data.length > 0 ? (
-                <Text style={styles.fieldLabel}>PRICED IN</Text>
+                <Text style={styles.fieldLabel}>{t('PRICED IN')}</Text>
               ) : null}
               {currencies.data && currencies.data.length > 0 ? (
                 <View style={styles.currencyRow}>
@@ -231,7 +231,7 @@ export function MerchantRequestScreen({navigation}: Props) {
                 </Text>
               ) : null}
               <TextField
-                label="REFERENCE"
+                label={t('REFERENCE')}
                 maxLength={120}
                 onChangeText={setReference}
                 placeholder="Table 08"
@@ -257,9 +257,7 @@ export function MerchantRequestScreen({navigation}: Props) {
             <Button
               disabled={canReceive.data === false}
               onPress={createRequest}
-              testID="create-request">
-              Create payment request
-            </Button>
+              testID="create-request">{t('Create payment request')}</Button>
           </AnimatedContent>
         </>
       )}
@@ -301,6 +299,7 @@ const FLAGS: Record<string, string | undefined> = {
 };
 
 function RequestStatus({intentId}: {intentId: string}) {
+  const t = useTranslate();
   const status = usePaymentRequestStatus(intentId);
   const settlement = status.data;
   const tone = settlement?.status === 'confirmed' ? 'success' : settlement?.status === 'failed' ? 'danger' : 'pending';
@@ -308,7 +307,7 @@ function RequestStatus({intentId}: {intentId: string}) {
   return (
     <SurfaceCard style={styles.statusCard}>
       <View style={styles.statusRow}>
-        <Text style={styles.statusLabel}>PAYMENT STATUS</Text>
+        <Text style={styles.statusLabel}>{t('PAYMENT STATUS')}</Text>
         <StatusPill tone={tone}>{(settlement?.status ?? (status.isPending ? 'checking' : 'unknown')).toUpperCase()}</StatusPill>
       </View>
       <Text style={styles.statusBody}>
@@ -349,6 +348,7 @@ function RequestCard({
   status?: ReactNode;
   settlementStatus?: string;
 }) {
+  const t = useTranslate();
   const remaining = latestLedger === undefined ? undefined : request.intent.expiresAtLedger - latestLedger;
   // Once a payment has moved, its outcome is what matters; the expiry window
   // only describes a request that is still waiting for a customer.
@@ -381,7 +381,7 @@ function RequestCard({
         {nfc.canBroadcast && nfc.enabled && !settled && !expired ? (
           <View style={styles.nfcRow}>
             <Nfc color={colors.amber} size={18} />
-            <Text style={styles.nfcText}>Or let the customer tap their phone here</Text>
+            <Text style={styles.nfcText}>{t('Or let the customer tap their phone here')}</Text>
           </View>
         ) : null}
         <View style={styles.expiry}>
@@ -398,8 +398,8 @@ function RequestCard({
         </View>
       </SurfaceCard>
       {status}
-      <Button onPress={onPreview}>Preview customer view</Button>
-      <Button tone="ghost" onPress={onReset} testID="new-request">New request</Button>
+      <Button onPress={onPreview}>{t('Preview customer view')}</Button>
+      <Button tone="ghost" onPress={onReset} testID="new-request">{t('New request')}</Button>
     </>
   );
 }
