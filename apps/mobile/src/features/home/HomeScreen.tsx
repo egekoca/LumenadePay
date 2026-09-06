@@ -172,8 +172,8 @@ function CustomerHome({navigation, merchantEnabled}: {navigation: Props['navigat
                 <Text style={styles.liraFlag}>🇹🇷</Text>
               </View>
               <View style={styles.scanCopy}>
-                <Text style={styles.liraTitle}>{t('Türk Lirası ile para yükle')}</Text>
-                <Text style={styles.scanHint}>{t('Banka havalesi · hesabınıza USDC olarak geçer')}</Text>
+                <Text style={styles.liraTitle}>{t('Add money with Turkish lira')}</Text>
+                <Text style={styles.scanHint}>{t('Bank transfer · receive USDC in your wallet')}</Text>
               </View>
               <ChevronRight color={colors.inkMuted} size={19} />
             </Pressable>

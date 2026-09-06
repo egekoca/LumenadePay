@@ -8,9 +8,11 @@ import {Screen} from '../../shared/Screen';
 import {displayAmount} from '../../shared/displayAmount';
 import {shareValue} from '../../shared/shareAddress';
 import {useWalletBalance} from '../../shared/useWalletBalance';
+import {useAppStore} from '../../state/appStore';
 import {useCurrentAccount} from './currentAccount';
 import {useTranslate} from '../../shared/i18n';
 import {AssetMark} from '../home/AssetMark';
+import {currencySymbol, displayCurrencyMeta} from '../../shared/priceSource';
 import {
   IS_SANDBOX_ANCHOR,
   LiraRampError,
@@ -52,6 +54,7 @@ export function LiraDepositScreen({navigation}: Props) {
   const t = useTranslate();
   const account = useCurrentAccount();
   const balance = useWalletBalance();
+  const addRampActivity = useAppStore(state => state.addRampActivity);
   const usdcHeld = balance.data?.find(holding => holding.code === 'USDC')?.amount ?? '0';
 
   const [direction, setDirection] = useState<Direction>('add');
@@ -83,7 +86,7 @@ export function LiraDepositScreen({navigation}: Props) {
   const rate = direction === 'add' ? quote?.perUsdc : payout?.perUsdc;
   const fee = direction === 'add' ? quote?.feeTotal : payout?.feeTotal;
   const rateLine = rate
-    ? `1 USDC = ₺${displayAmount(rate)}${fee ? `  ·  ${t('fee')} ₺${displayAmount(fee)}` : ''}`
+    ? `1 USDC = ${fiatPrefix('TRY')}${displayAmount(rate)}${fee ? `  ·  ${t('fee')} ${fiatPrefix('TRY')}${displayAmount(fee)}` : ''}`
     : t('Reading the rate…');
 
   const entered = Number(amount);
@@ -126,7 +129,7 @@ export function LiraDepositScreen({navigation}: Props) {
   }, [amount, supported, direction, open]);
 
   const poll = useCallback(
-    (transfer: {transferServer: string; transactionId: string; session: StartedLiraDeposit['session']}) => {
+    (transfer: {transferServer: string; transactionId: string; session: StartedLiraDeposit['session']}, kind: Direction) => {
       clearInterval(polling.current);
       polling.current = setInterval(async () => {
         try {
@@ -135,6 +138,15 @@ export function LiraDepositScreen({navigation}: Props) {
           if (next.settled || next.failed) {
             clearInterval(polling.current);
             if (next.amountOut) setReceived(next.amountOut);
+            if (next.settled) {
+              addRampActivity({
+                id: `${kind}:${transfer.transactionId}`,
+                kind: kind === 'add' ? 'deposit' : 'withdrawal',
+                amount,
+                assetCode: kind === 'add' ? 'TRY' : 'USDC',
+                createdAt: new Date().toISOString(),
+              });
+            }
             void balance.refetch();
           }
         } catch {
@@ -143,7 +155,7 @@ export function LiraDepositScreen({navigation}: Props) {
         }
       }, POLL_MS);
     },
-    [balance],
+    [addRampActivity, amount, balance],
   );
 
   const begin = async () => {
@@ -159,7 +171,7 @@ export function LiraDepositScreen({navigation}: Props) {
         });
         setStarted(deposit);
         setStatus('pending_user_transfer_start');
-        poll(deposit);
+        poll(deposit, 'add');
       } else {
         const sent = await startLiraWithdrawal({
           address: account.address,
@@ -169,7 +181,7 @@ export function LiraDepositScreen({navigation}: Props) {
         });
         setWithdrawal(sent);
         setStatus('pending_anchor');
-        poll(sent);
+        poll(sent, 'cash-out');
       }
     } catch (failure) {
       setError(
@@ -260,7 +272,7 @@ export function LiraDepositScreen({navigation}: Props) {
               <View style={styles.side}>
                 <Text style={styles.sideLabel}>{t('YOU SEND')}</Text>
                 <View style={styles.sideRow}>
-                  <Text style={styles.mark}>{direction === 'add' ? '₺' : '$'}</Text>
+                  {direction === 'add' ? <FiatMark code="TRY" /> : <AssetMark code="USDC" size={30} />}
                   <TextInput
                     keyboardType="decimal-pad"
                     maxLength={14}
@@ -297,7 +309,7 @@ export function LiraDepositScreen({navigation}: Props) {
                   {direction === 'add' ? (
                     <AssetMark code="USDC" size={30} />
                   ) : (
-                    <Text style={styles.flag}>🇹🇷</Text>
+                    <FiatMark code="TRY" />
                   )}
                   <Text
                     adjustsFontSizeToFit
@@ -309,8 +321,8 @@ export function LiraDepositScreen({navigation}: Props) {
                         ? displayAmount(quote.buyAmount)
                         : '—'
                       : payout
-                        ? `₺${displayAmount(payout.buyAmount)}`
-                        : '₺—'}
+                        ? `${currencySymbol('TRY')}${displayAmount(payout.buyAmount)}`
+                        : `${currencySymbol('TRY')}—`}
                   </Text>
                   <Text style={styles.sideUnit}>{direction === 'add' ? 'USDC' : 'TRY'}</Text>
                 </View>
@@ -487,6 +499,21 @@ function readableStatus(status: string | undefined, direction: Direction): strin
   }
 }
 
+function FiatMark({code}: {code: string}) {
+  const meta = displayCurrencyMeta(code);
+  return (
+    <View style={styles.fiatMark} accessibilityLabel={`${meta.name} ${currencySymbol(code)}`}>
+      <Text style={styles.fiatFlag}>{meta.flag}</Text>
+      <Text style={styles.fiatSymbol}>{currencySymbol(code)}</Text>
+    </View>
+  );
+}
+
+function fiatPrefix(code: string): string {
+  const meta = displayCurrencyMeta(code);
+  return `${meta.flag} ${currencySymbol(code)}`;
+}
+
 const styles = StyleSheet.create({
   hero: {gap: spacing.xs},
   icon: {alignItems: 'center', backgroundColor: colors.goldSoft, borderColor: colors.goldDeep, borderRadius: radius.round, borderWidth: 1, height: 44, justifyContent: 'center', marginBottom: spacing.sm, width: 44},
@@ -506,6 +533,9 @@ const styles = StyleSheet.create({
   sideRow: {alignItems: 'center', flexDirection: 'row', gap: spacing.sm},
   mark: {color: colors.inkMuted, fontSize: 26, fontWeight: '600'},
   flag: {fontSize: 26},
+  fiatMark: {alignItems: 'center', flexDirection: 'row', gap: 4},
+  fiatFlag: {fontSize: 22},
+  fiatSymbol: {color: colors.inkMuted, fontSize: 26, fontWeight: '600'},
   sideInput: {color: colors.ink, flex: 1, fontSize: 30, fontWeight: '700', padding: 0},
   receive: {color: colors.goldBright, flex: 1, fontSize: 30, fontWeight: '700'},
   sideUnit: {...typography.mono, color: colors.inkFaint, fontSize: 13},

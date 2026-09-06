@@ -35,7 +35,8 @@
     "web": "npm run dev --workspace @lumenadepay/web",
     "testnet:register-asset": "tsx --env-file-if-exists=.env scripts/testnet-register-asset.mts",
     "testnet:phrase-wallet": "tsx --env-file-if-exists=.env scripts/testnet-phrase-wallet.mts",
-    "testnet:try-ramp": "tsx --env-file-if-exists=.env scripts/testnet-try-ramp.mts"
+    "testnet:try-ramp": "tsx --env-file-if-exists=.env scripts/testnet-try-ramp.mts",
+    "deploy:check": "node --env-file-if-exists=.env scripts/deployment-check.mjs"
   },
   "devDependencies": {
     "@noble/curves": "^2.3.0",

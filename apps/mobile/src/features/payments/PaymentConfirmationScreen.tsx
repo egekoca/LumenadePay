@@ -21,7 +21,10 @@ type Props = NativeStackScreenProps<RootStackParams, 'Confirm'>;
 
 export function PaymentConfirmationScreen({route, navigation}: Props) {
   const t = useTranslate();
-  const {payload} = route.params;
+  // The scanner's legacy route carries only the payload; that path is QR.
+  // Merchant preview also renders a QR request, so treating an omitted source
+  // as QR keeps channel totals useful without changing the public payload.
+  const {payload, transport = 'qr'} = route.params;
   const {intent} = payload;
   const {addReceipt} = useAppStore();
   const stellarHealth = useStellarHealth();
@@ -32,6 +35,7 @@ export function PaymentConfirmationScreen({route, navigation}: Props) {
       setStage(undefined);
       setSubmittedHash(undefined);
       return settlePaymentIntent(payload, {
+        transport,
         onProgress: progress => {
           setStage(progress.stage);
           if (progress.transactionHash) setSubmittedHash(progress.transactionHash);

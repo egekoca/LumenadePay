@@ -64,6 +64,7 @@ Status: `[x]` implemented and locally verified, `[~]` foundation or mocked slice
 - [x] Create and sign payment intents from merchant data rather than a fixture; amounts are canonicalized, expiry comes from the live ledger and the customer verifies the merchant signature.
 - [x] Add merchant request status and receipt lookup; the request screen polls the API settlement, and the merchant home lists every request that merchant made with its outcome.
 - [x] Persist local session and pending payment recovery across app restarts; the merchant profile, demo wallet, open request and receipts survive a restart in the platform's encrypted store, and a returning user skips onboarding.
+- [x] Add transport-aware activity records and a Dashboard bottom tab; confirmed QR/NFC payment totals are separated, and completed TRY deposits and USDC withdrawals are retained for the money-movement summary. Merchant totals use the authenticated payment list when available.
 - [x] Let a merchant price in the money on their menu: a request named in lira carries the converted asset amount, the `500.00 TRY` label travels in the signed reference, and both the customer's card and the merchant's read in lira. Verified on Android — 500 TRY became 55.7413601 XLM at 8.97 TRY/XLM.
 - [x] Read lira rates from a real anchor: `tr-mock-anchor.fly.dev` quotes TRY against the USDC issuer this app already settles in, unauthenticated, on Testnet. Fixed a SEP-38 price-direction bug it exposed — the standard quotes sold-per-bought, this app read it bought-per-sold, and both sides being wrong the same way hid it until a real anchor priced a 500 TRY coffee at 24,095 USDC.
 - [x] Add the anchor's TRY on-ramp (SEP-10 + SEP-38 + SEP-6), reachable from the home screen. Verified on Android end to end: 500 TRY arrived as 10.27 USDC at 48.67 TRY/USDC.
@@ -220,8 +221,9 @@ What still stands between here and a store build:
 - A release build with the JS bundle embedded; the debug build loads from Metro
   and cannot run away from the development machine.
 - Signing identities: a Play upload key and an Apple distribution certificate.
-- The API, worker and database must run somewhere other than the laptop before
-  Testnet mode works for anyone else (`docs/deployment.md`).
+- [x] Add a containerized API/worker deployment path and Render blueprint; the
+  remaining step is entering provider secrets and a durable PostgreSQL URL in
+  the hosting dashboards (`docs/deployment.md`).
 - Privacy declarations: Apple's nutrition label and Play's Data Safety form.
 
 ## Next Execution Order

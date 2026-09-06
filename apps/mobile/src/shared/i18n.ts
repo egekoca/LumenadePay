@@ -45,6 +45,8 @@ const TR: Record<string, string> = {
 
   // Lira
   'Add money': 'Para yükle',
+  'Add money with Turkish lira': 'Türk Lirası ile para yükle',
+  'Bank transfer · receive USDC in your wallet': 'Banka havalesi · hesabınıza USDC olarak geçer',
   'Cash out': 'Paraya çevir',
   'Add lira': 'Lira yükle',
   'YOU SEND': 'GÖNDERDİĞİNİZ',
@@ -164,6 +166,24 @@ const TR: Record<string, string> = {
   Activity: 'Hareketler',
   'Filter activity': 'Hareketleri filtrele',
   PAYMENTS: 'ÖDEMELER',
+
+  // Dashboard
+  Dashboard: 'Gösterge paneli',
+  OVERVIEW: 'GENEL BAKIŞ',
+  'TOTAL RECEIVED': 'TOPLAM ALINAN',
+  'TOTAL PAYMENTS': 'TOPLAM ÖDEME',
+  'Confirmed merchant payments': 'Doğrulanmış satıcı ödemeleri',
+  'Confirmed payments on this phone': 'Bu telefondaki doğrulanmış ödemeler',
+  'PAYMENT CHANNELS': 'ÖDEME KANALLARI',
+  'QR RECEIVED': 'QR İLE ALINAN',
+  'NFC RECEIVED': 'NFC İLE ALINAN',
+  'MONEY MOVEMENT': 'PARA HAREKETİ',
+  'Money deposited': 'Para yatırma',
+  'Money withdrawn': 'Para çekme',
+  transfers: 'transfer',
+  confirmed: 'doğrulandı',
+  'Channel totals reflect confirmed activity saved on this device.':
+    'Kanal toplamları bu cihazda kaydedilen doğrulanmış hareketleri gösterir.',
 
   // Merchant
   'GET PAID': 'ÖDEME AL',

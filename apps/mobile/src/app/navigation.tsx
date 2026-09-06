@@ -2,7 +2,7 @@ import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {useNavigation, type NavigationProp} from '@react-navigation/native';
-import {UserRound, WalletCards} from 'lucide-react-native';
+import {BarChart3, UserRound, WalletCards} from 'lucide-react-native';
 import {colors} from '@rosapay/ui';
 import type {SignedPaymentIntentV1} from '@rosapay/protocol';
 
@@ -22,6 +22,8 @@ import {useTranslate} from '../shared/i18n';
 import {MerchantOnboardingScreen} from '../features/merchant/MerchantOnboardingScreen';
 import {MerchantRequestScreen} from '../features/merchant/MerchantRequestScreen';
 import {hasRestorableSession, useAppStore, type LocalReceipt} from '../state/appStore';
+import type {PaymentTransport} from '../state/appStore';
+import {DashboardScreen} from '../features/dashboard/DashboardScreen';
 
 export type RootStackParams = {
   Welcome: undefined;
@@ -38,7 +40,7 @@ export type RootStackParams = {
   /** Buying USDC with lira, through the anchor's SEP-6 door. */
   LiraDeposit: undefined;
   Scan: undefined;
-  Confirm: {payload: SignedPaymentIntentV1};
+  Confirm: {payload: SignedPaymentIntentV1; transport?: PaymentTransport};
   Receipt: {receipt: LocalReceipt};
   DeveloperSettings: undefined;
   MerchantOnboarding: undefined;
@@ -72,10 +74,15 @@ function ProfileTab() {
   return <ProfileScreen navigation={navigation as never} />;
 }
 
+function DashboardTab() {
+  return <DashboardScreen />;
+}
+
 // Hoisted so the tab bar is not handed a new component type on every render,
 // which would tear down and rebuild the icon each time the language changes.
 const walletIcon = ({color}: {color: string}) => <WalletCards color={color} size={22} />;
 const profileIcon = ({color}: {color: string}) => <UserRound color={color} size={22} />;
+const dashboardIcon = ({color}: {color: string}) => <BarChart3 color={color} size={22} />;
 
 function MainTabs() {
   const t = useTranslate();
@@ -99,6 +106,14 @@ function MainTabs() {
         options={{
           tabBarLabel: t('Wallet'),
           tabBarIcon: walletIcon,
+        }}
+      />
+      <Tabs.Screen
+        name="DashboardTab"
+        component={DashboardTab}
+        options={{
+          tabBarLabel: t('Dashboard'),
+          tabBarIcon: dashboardIcon,
         }}
       />
       <Tabs.Screen
