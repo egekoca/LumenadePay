@@ -9,6 +9,7 @@ import {displayAmount} from '../../shared/displayAmount';
 import {shareValue} from '../../shared/shareAddress';
 import {useWalletBalance} from '../../shared/useWalletBalance';
 import {useCurrentAccount} from './currentAccount';
+import {useTranslate} from '../../shared/i18n';
 import {AssetMark} from '../home/AssetMark';
 import {
   IS_SANDBOX_ANCHOR,
@@ -48,6 +49,7 @@ type Direction = 'add' | 'cash-out';
  * it — the screen says so on arrival rather than failing at the last step.
  */
 export function LiraDepositScreen({navigation}: Props) {
+  const t = useTranslate();
   const account = useCurrentAccount();
   const balance = useWalletBalance();
   const usdcHeld = balance.data?.find(holding => holding.code === 'USDC')?.amount ?? '0';
@@ -81,8 +83,8 @@ export function LiraDepositScreen({navigation}: Props) {
   const rate = direction === 'add' ? quote?.perUsdc : payout?.perUsdc;
   const fee = direction === 'add' ? quote?.feeTotal : payout?.feeTotal;
   const rateLine = rate
-    ? `1 USDC = ₺${displayAmount(rate)}${fee ? `  ·  fee ₺${displayAmount(fee)}` : ''}`
-    : 'Reading the rate…';
+    ? `1 USDC = ₺${displayAmount(rate)}${fee ? `  ·  ${t('fee')} ₺${displayAmount(fee)}` : ''}`
+    : t('Reading the rate…');
 
   const entered = Number(amount);
   const overspending = direction === 'cash-out' && entered > Number(usdcHeld);
@@ -93,8 +95,8 @@ export function LiraDepositScreen({navigation}: Props) {
   // The bar said "Add lira" over a screen headed "Take out lira", which is the
   // kind of contradiction that makes someone check they tapped the right thing.
   useEffect(() => {
-    navigation.setOptions({title: direction === 'add' ? 'Add lira' : 'Cash out'});
-  }, [direction, navigation]);
+    navigation.setOptions({title: direction === 'add' ? t('Add lira') : t('Cash out')});
+  }, [direction, navigation, t]);
 
   useEffect(() => {
     if (!amount.trim() || !supported || open) return;
@@ -209,7 +211,7 @@ export function LiraDepositScreen({navigation}: Props) {
           </View>
         </AnimatedContent>
         <AnimatedContent delay={90}>
-          <Button onPress={() => navigation.goBack()}>Go back</Button>
+          <Button onPress={() => navigation.goBack()}>{t('Go back')}</Button>
         </AnimatedContent>
       </Screen>
     );
@@ -228,7 +230,7 @@ export function LiraDepositScreen({navigation}: Props) {
           <AnimatedContent delay={60}>
             <View style={styles.directionRow}>
               <DirectionPill
-                label="Add money"
+                label={t('Add money')}
                 onPress={() => {
                   setDirection('add');
                   setAmount('500');
@@ -237,7 +239,7 @@ export function LiraDepositScreen({navigation}: Props) {
                 testID="direction-add"
               />
               <DirectionPill
-                label="Cash out"
+                label={t('Cash out')}
                 onPress={() => {
                   setDirection('cash-out');
                   setAmount(usdcHeld === '0' ? '' : usdcHeld);
@@ -258,7 +260,7 @@ export function LiraDepositScreen({navigation}: Props) {
           <AnimatedContent delay={80} scaleFrom={0.99}>
             <View style={styles.counter}>
               <View style={styles.side}>
-                <Text style={styles.sideLabel}>{direction === 'add' ? 'YOU SEND' : 'YOU SEND'}</Text>
+                <Text style={styles.sideLabel}>{t('YOU SEND')}</Text>
                 <View style={styles.sideRow}>
                   <Text style={styles.mark}>{direction === 'add' ? '₺' : '$'}</Text>
                   <TextInput
@@ -291,7 +293,7 @@ export function LiraDepositScreen({navigation}: Props) {
               </View>
 
               <View style={styles.side}>
-                <Text style={styles.sideLabel}>YOU GET</Text>
+                <Text style={styles.sideLabel}>{t('YOU GET')}</Text>
                 <View style={styles.sideRow}>
                   {/* The app's own mark for an asset, the flag for a currency. */}
                   {direction === 'add' ? (
@@ -332,7 +334,7 @@ export function LiraDepositScreen({navigation}: Props) {
               loading={busy}
               onPress={() => void begin()}
               testID="open-lira-transfer">
-              {direction === 'add' ? 'Continue' : 'Send and cash out'}
+              {direction === 'add' ? t('Continue') : t('Send and cash out')}
             </Button>
           </AnimatedContent>
         </>
@@ -344,16 +346,16 @@ export function LiraDepositScreen({navigation}: Props) {
                 <>
                   <Instruction
                     icon={<Building2 color={colors.goldBright} size={18} />}
-                    label="SEND TO"
+                    label={t('SEND TO')}
                     onCopy={() => void shareValue('Anchor IBAN', started.instructions.iban ?? '')}
                     title={started.instructions.bankName ?? 'The anchor’s bank'}
                     {...(started.instructions.iban ? {value: started.instructions.iban} : {})}
                   />
                   <View style={styles.separator} />
                   <Instruction
-                    body="Write this in the transfer description. It is what routes the money to your wallet."
+                    body={t('Write this in the transfer description. It is what routes the money to your wallet.')}
                     icon={<ShieldCheck color={colors.success} size={18} />}
-                    label="REFERENCE (AÇIKLAMA)"
+                    label={t('REFERENCE (AÇIKLAMA)')}
                     onCopy={() => void shareValue('Transfer reference', started.instructions.reference ?? '')}
                     {...(started.instructions.reference ? {value: started.instructions.reference} : {})}
                   />
@@ -373,9 +375,9 @@ export function LiraDepositScreen({navigation}: Props) {
 
           <AnimatedContent delay={150}>
             <View style={styles.status}>
-              <Text style={styles.instructionLabel}>STATUS</Text>
+              <Text style={styles.instructionLabel}>{t('STATUS')}</Text>
               <Text style={styles.statusValue} testID="lira-status">
-                {readableStatus(status, direction)}
+                {t(readableStatus(status, direction))}
               </Text>
               {received ? (
                 <Text style={styles.received} testID="lira-received">
@@ -400,7 +402,7 @@ export function LiraDepositScreen({navigation}: Props) {
                 behind this anchor, so nothing else would ever move the money.
               */}
               <Button loading={busy} onPress={() => void simulate()} testID="simulate-bank-transfer">
-                Simulate the bank transfer
+                {t('Simulate the bank transfer')}
               </Button>
             </AnimatedContent>
           ) : null}
