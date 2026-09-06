@@ -10,6 +10,7 @@ import {shareValue} from '../../shared/shareAddress';
 import {useWalletBalance} from '../../shared/useWalletBalance';
 import {useCurrentAccount} from './currentAccount';
 import {
+  IS_SANDBOX_ANCHOR,
   LIRA_ANCHOR_HOME_DOMAIN,
   LiraRampError,
   quoteLiraDeposit,
@@ -66,6 +67,15 @@ export function LiraDepositScreen({navigation}: Props) {
   const supported = account?.kind === 'classic';
   const open = started ?? withdrawal;
   const unit = direction === 'add' ? 'TRY' : 'USDC';
+
+  /*
+   * Said before the button rather than after the fingerprint. The device
+   * prompt is what this screen spends of the customer's patience, and spending
+   * it to report a number they could have been told about is the wrong order.
+   */
+  const entered = Number(amount);
+  const overspending = direction === 'cash-out' && entered > Number(usdcHeld);
+  const payable = amount.trim().length > 0 && Number.isFinite(entered) && entered > 0 && !overspending;
 
   useEffect(() => () => clearInterval(polling.current), []);
 
@@ -135,6 +145,7 @@ export function LiraDepositScreen({navigation}: Props) {
         const sent = await startLiraWithdrawal({
           address: account.address,
           amountUsdc: amount.trim(),
+          available: usdcHeld,
           reason: `Cash out ${amount.trim()} USDC to lira`,
         });
         setWithdrawal(sent);
@@ -240,7 +251,11 @@ export function LiraDepositScreen({navigation}: Props) {
                 value={amount}
               />
               {direction === 'cash-out' ? (
-                <Text style={styles.rate}>You hold {displayAmount(usdcHeld)} USDC</Text>
+                <Text style={[styles.rate, overspending && styles.rateWarning]}>
+                  {overspending
+                    ? `You only hold ${displayAmount(usdcHeld)} USDC`
+                    : `You hold ${displayAmount(usdcHeld)} USDC`}
+                </Text>
               ) : null}
               {direction === 'add' && quote ? (
                 <Text style={styles.rate} testID="lira-quote">
@@ -263,7 +278,11 @@ export function LiraDepositScreen({navigation}: Props) {
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
           <AnimatedContent delay={160}>
-            <Button loading={busy} onPress={() => void begin()} testID="open-lira-transfer">
+            <Button
+              disabled={!payable}
+              loading={busy}
+              onPress={() => void begin()}
+              testID="open-lira-transfer">
               {direction === 'add' ? 'Continue' : 'Send and cash out'}
             </Button>
           </AnimatedContent>
@@ -319,7 +338,13 @@ export function LiraDepositScreen({navigation}: Props) {
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
-          {started && status === 'pending_user_transfer_start' ? (
+          {/*
+            Only the sandbox has a bank that can be told to pretend. Against a
+            real anchor this button would post to an endpoint that does not
+            exist, next to a customer waiting for a transfer they must actually
+            send.
+          */}
+          {IS_SANDBOX_ANCHOR && started && status === 'pending_user_transfer_start' ? (
             <AnimatedContent delay={210}>
               {/*
                 A sandbox affordance, named for what it is. There is no real bank
@@ -426,6 +451,7 @@ const styles = StyleSheet.create({
   directionLabelSelected: {color: colors.goldBright},
   form: {gap: spacing.lg},
   rate: {...typography.body, color: colors.inkMuted},
+  rateWarning: {color: colors.danger},
   instructionRow: {flexDirection: 'row', gap: spacing.md},
   instructionCopy: {flex: 1, gap: spacing.xs},
   instructionLabel: {...typography.label, color: colors.inkMuted},
