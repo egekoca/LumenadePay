@@ -1,5 +1,5 @@
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {Banknote, ChevronRight, QrCode, ReceiptText, RefreshCw, ScanLine, ShieldCheck, SlidersHorizontal, Store} from 'lucide-react-native';
+import {ChevronRight, QrCode, ReceiptText, RefreshCw, ScanLine, ShieldCheck, SlidersHorizontal, Store} from 'lucide-react-native';
 import {useState} from 'react';
 import {Pressable, StyleSheet, Text, View} from 'react-native';
 import {AnimatedContent, Button, colors, PressScale, radius, spacing, StatusPill, SurfaceCard, typography} from '@rosapay/ui';
@@ -9,7 +9,7 @@ import {LumenadeMark} from '../../shared/LumenadeMark';
 import {useMerchantPayments} from '../merchant/merchantRequestStatus';
 import {Screen} from '../../shared/Screen';
 import {useWalletBalance} from '../../shared/useWalletBalance';
-import {displayAmount} from '../../shared/displayAmount';
+import {displayAmount, exactAmount} from '../../shared/displayAmount';
 import {useBalanceValue} from '../../shared/useBalanceValue';
 import {shareValue} from '../../shared/shareAddress';
 import {useAppStore} from '../../state/appStore';
@@ -18,6 +18,9 @@ import {CurrencyPicker} from './CurrencyPicker';
 import {greetingFor} from './greeting';
 import {MerchantBalanceCard} from './MerchantBalanceCard';
 import {PaymentCard} from './PaymentCard';
+import {AssetMark} from './AssetMark';
+import {payableAssetByCode} from '../payments/assets';
+import {currencySymbol} from '../../shared/priceSource';
 import {createHardwareSigner} from '../settings/hardwareSigner';
 
 type Props = NativeStackScreenProps<RootStackParams, 'Main'>;
@@ -156,12 +159,19 @@ function CustomerHome({navigation, merchantEnabled}: {navigation: Props['navigat
               onPress={() => navigation.navigate('LiraDeposit')}
               style={styles.liraAction}
               testID="add-lira">
+              {/*
+                The lira mark and the flag rather than a generic banknote. This
+                row is the one place in the app where a Turkish customer is
+                being offered their own money, and a wallet icon said "money"
+                where it could have said "yours".
+              */}
               <View style={styles.liraIcon}>
-                <Banknote color={colors.goldBright} size={22} />
+                <Text style={styles.liraSymbol}>₺</Text>
+                <Text style={styles.liraFlag}>🇹🇷</Text>
               </View>
               <View style={styles.scanCopy}>
-                <Text style={styles.liraTitle}>Add money with lira</Text>
-                <Text style={styles.scanHint}>Bank transfer in TRY · arrives as USDC</Text>
+                <Text style={styles.liraTitle}>Türk Lirası ile para yükle</Text>
+                <Text style={styles.scanHint}>Banka havalesi · hesabınıza USDC olarak geçer</Text>
               </View>
               <ChevronRight color={colors.inkMuted} size={19} />
             </Pressable>
@@ -175,6 +185,39 @@ function CustomerHome({navigation, merchantEnabled}: {navigation: Props['navigat
         selected={displayCurrency}
         visible={pickingCurrency}
       />
+
+      {/*
+        What the total is made of. The card answers "what is this worth"; two
+        assets in a wallet raise "worth of what", and doing that arithmetic in
+        your head against a single converted number is not a thing to ask.
+      */}
+      {value.data && value.data.holdings.length > 0 ? (
+        <AnimatedContent delay={140}>
+          <Text style={styles.listTitle}>Assets</Text>
+          <View style={styles.assetList}>
+            {value.data.holdings.map(holding => (
+              <View key={holding.code} style={styles.assetRow}>
+                <AssetMark code={holding.code} size={34} />
+                <View style={styles.assetCopy}>
+                  <Text style={styles.assetName}>{payableAssetByCode(holding.code)?.name ?? holding.code}</Text>
+                  {/*
+                    The payload's own digits with the trailing zeros dropped.
+                    Rounding here would hide dust someone is holding, and
+                    "10,000.0000000" is seven zeros nobody asked to read.
+                  */}
+                  <Text style={styles.assetAmount}>
+                    {exactAmount(holding.amount)} {holding.code}
+                  </Text>
+                </View>
+                <Text style={styles.assetValue}>
+                  {currencySymbol(value.data!.currency)}
+                  {holding.value}
+                </Text>
+              </View>
+            ))}
+          </View>
+        </AnimatedContent>
+      ) : null}
 
       <AnimatedContent delay={160}>
         <Text style={styles.listTitle}>Payments</Text>
@@ -392,7 +435,9 @@ const styles = StyleSheet.create({
   greeting: {...typography.title, color: colors.ink, fontSize: 20},
 
   liraAction: {alignItems: 'center', backgroundColor: colors.surface, borderColor: colors.goldDeep, borderRadius: 22, borderWidth: 1, flexDirection: 'row', gap: 14, padding: 16},
-  liraIcon: {alignItems: 'center', backgroundColor: colors.goldSoft, borderRadius: 999, height: 48, justifyContent: 'center', width: 48},
+  liraIcon: {alignItems: 'center', backgroundColor: colors.goldSoft, borderColor: colors.goldDeep, borderRadius: 999, borderWidth: 1, height: 48, justifyContent: 'center', width: 48},
+  liraSymbol: {color: colors.goldBright, fontSize: 23, fontWeight: '700', lineHeight: 27},
+  liraFlag: {bottom: -3, fontSize: 15, position: 'absolute', right: -4},
   liraTitle: {...typography.body, color: colors.ink, fontSize: 17, fontWeight: '600'},
   scanAction: {
     alignItems: 'center',
@@ -418,6 +463,12 @@ const styles = StyleSheet.create({
   scanHint: {color: colors.inkMuted, fontSize: 13, lineHeight: 18},
 
   listTitle: {...typography.overline, color: colors.inkFaint, marginBottom: spacing.md, marginTop: spacing.xxl},
+  assetList: {gap: spacing.xs},
+  assetRow: {alignItems: 'center', flexDirection: 'row', gap: spacing.md, minHeight: 58},
+  assetCopy: {flex: 1, gap: 2},
+  assetName: {...typography.body, color: colors.ink, fontSize: 16, fontWeight: '600'},
+  assetAmount: {...typography.mono, color: colors.inkFaint, fontSize: 12},
+  assetValue: {...typography.body, color: colors.ink, fontSize: 16, fontWeight: '600'},
   list: {gap: 2},
   listRow: {
     alignItems: 'center',
