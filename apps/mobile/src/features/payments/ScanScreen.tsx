@@ -112,7 +112,7 @@ export function ScanScreen({navigation}: Props) {
           {camera === 'granted' ? <ScanLine color={colors.amber} size={52} /> : null}
         </View>
         <Text style={styles.cameraText} pointerEvents="none">
-          {cameraMessage(camera, Boolean(pendingRequest))}
+          {t(cameraMessage(camera, Boolean(pendingRequest)))}
         </Text>
       </View>
 

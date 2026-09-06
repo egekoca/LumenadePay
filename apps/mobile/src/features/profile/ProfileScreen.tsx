@@ -36,7 +36,7 @@ export function ProfileScreen({navigation}: {navigation?: ProfileNavigation} = {
     try {
       await signOut();
     } catch (failure) {
-      setError(failure instanceof Error ? failure.message : 'This phone could not erase the key.');
+      setError(failure instanceof Error ? failure.message : t('This phone could not erase the key.'));
     }
   };
 
@@ -120,7 +120,7 @@ export function ProfileScreen({navigation}: {navigation?: ProfileNavigation} = {
             <LogOut color={colors.danger} size={19} />
             <View style={styles.rowCopy}>
               <Text style={[styles.rowTitle, styles.dangerTitle]}>
-                {confirming ? 'Tap again to erase' : t('Sign out')}
+                {confirming ? t('Tap again to erase') : t('Sign out')}
               </Text>
               <Text style={styles.rowHint}>{t('Erases this account and its key from this phone.')}</Text>
             </View>

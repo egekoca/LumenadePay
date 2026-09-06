@@ -41,7 +41,7 @@ export function MerchantOnboardingScreen({navigation}: Props) {
         setErrors({[error.field]: error.message});
         return;
       }
-      setErrors({general: error instanceof Error ? error.message : 'The merchant profile could not be created'});
+      setErrors({general: error instanceof Error ? error.message : t('The merchant profile could not be created')});
       return;
     }
 
@@ -58,7 +58,7 @@ export function MerchantOnboardingScreen({navigation}: Props) {
     } catch (error) {
       setErrors({
         general: `Profile saved, but Testnet registration failed: ${
-          error instanceof Error ? error.message : 'unknown error'
+          error instanceof Error ? error.message : t('unknown error')
         }. You can retry it from the payment request screen.`,
       });
     } finally {
@@ -101,7 +101,7 @@ export function MerchantOnboardingScreen({navigation}: Props) {
               <View style={styles.useWalletCopy}>
                 <Text style={styles.useWalletTitle}>{t('Paid into this wallet')}</Text>
                 <Text style={styles.useWalletBody}>
-                  {`${account.address.slice(0, 8)}…${account.address.slice(-6)} — the account this phone already uses. Tap to be paid somewhere else instead.`}
+                  {`${account.address.slice(0, 8)}…${account.address.slice(-6)} — ${t('The account this phone already uses. Tap to be paid somewhere else instead.')}`}
                 </Text>
               </View>
             </Pressable>
@@ -134,7 +134,7 @@ export function MerchantOnboardingScreen({navigation}: Props) {
       {errors.general ? <Text style={styles.error}>{errors.general}</Text> : null}
       <AnimatedContent delay={220}>
         <Button loading={registering} onPress={() => void submit()} testID="merchant-save-profile">
-          {registering ? 'Registering on Testnet' : 'Verify and continue'}
+          {registering ? t('Registering on Testnet') : t('Verify and continue')}
         </Button>
       </AnimatedContent>
     </Screen>

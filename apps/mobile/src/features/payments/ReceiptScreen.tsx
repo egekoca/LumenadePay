@@ -19,7 +19,7 @@ export function ReceiptScreen({route, navigation}: Props) {
   return (
     <Screen contentStyle={styles.screen}>
       <AnimatedContent distance={8} scaleFrom={0.78} duration={560}><View style={styles.successIcon}><Check color={colors.black} size={32} strokeWidth={3} /></View></AnimatedContent>
-      <AnimatedContent delay={100}><View style={styles.center}><Text style={styles.eyebrow}>{t('PAYMENT COMPLETE')}</Text><SplitText delay={140} splitBy="word" style={styles.title} text="Payment confirmed" /><Text style={styles.merchant}>{`Your payment to ${receipt.merchantName} was confirmed on Stellar.`}</Text></View></AnimatedContent>
+      <AnimatedContent delay={100}><View style={styles.center}><Text style={styles.eyebrow}>{t('PAYMENT COMPLETE')}</Text><SplitText delay={140} splitBy="word" style={styles.title} text={t('Payment confirmed')} /><Text style={styles.merchant}>{`${t('Your payment to')} ${receipt.merchantName} ${t('was confirmed on Stellar.')}`}</Text></View></AnimatedContent>
       <AnimatedContent delay={180} scaleFrom={0.98}><SurfaceCard accent="success" style={styles.amountCard}><Text adjustsFontSizeToFit minimumFontScale={0.6} numberOfLines={1} style={styles.amount}>{displayAmount(receipt.amount)} <Text style={styles.asset}>{receipt.assetCode}</Text></Text><StatusPill tone="success">{t('CONFIRMED')}</StatusPill></SurfaceCard></AnimatedContent>
       <AnimatedContent delay={240}>
         <SurfaceCard padded={false} style={styles.receipt}>
@@ -28,7 +28,7 @@ export function ReceiptScreen({route, navigation}: Props) {
           <Row label={t('Transaction')} value={`${receipt.transactionHash.slice(0, 16)}...`} mono />
           {receipt.ledger !== undefined ? <Row label={t('Ledger')} value={String(receipt.ledger)} mono /> : null}
           {receipt.confirmedAt ? <Row label={t('Confirmed at')} value={new Date(receipt.confirmedAt).toLocaleString()} /> : null}
-          <Row label={t('Status')} value="Confirmed" success />
+          <Row label={t('Status')} value={t('Confirmed')} success />
         </SurfaceCard>
       </AnimatedContent>
       <AnimatedContent delay={300} distance={8}><View style={[styles.actions, width < 380 && styles.actionsStacked]}><Pressable accessibilityRole="link" style={styles.action} onPress={() => Linking.openURL(`https://stellar.expert/explorer/testnet/tx/${receipt.transactionHash}`)}><ExternalLink color={colors.amber} size={18} /><Text style={styles.actionText}>{t('View on Explorer')}</Text></Pressable><Pressable

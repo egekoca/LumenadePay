@@ -45,11 +45,11 @@ export function CreateAccountScreen({navigation, route}: Props) {
     setError(undefined);
 
     if (trimmedName.length < 2) {
-      setNameError('Please enter the name a merchant should see');
+      setNameError(t('Please enter the name a merchant should see'));
       return;
     }
     if (trimmedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(trimmedEmail)) {
-      setEmailError('That does not look like an email address');
+      setEmailError(t('That does not look like an email address'));
       return;
     }
 
@@ -68,7 +68,7 @@ export function CreateAccountScreen({navigation, route}: Props) {
       // person actually wrote it down.
       navigation.replace('RecoveryPhrase', {...identity, phrase: generateRecoveryPhrase()});
     } catch (failure) {
-      setError(failure instanceof Error ? failure.message : 'Your account could not be created');
+      setError(failure instanceof Error ? failure.message : t('Your account could not be created'));
     } finally {
       setBusy(false);
     }
@@ -86,7 +86,7 @@ export function CreateAccountScreen({navigation, route}: Props) {
           automaticallyAdjustKeyboardInsets>
           <AnimatedContent>
             <View style={styles.hero}>
-              <Text style={styles.title}>{importing ? 'Restore your wallet' : 'Set up your account'}</Text>
+              <Text style={styles.title}>{importing ? t('Restore your wallet') : t('Set up your account')}</Text>
               <Text style={styles.subtitle}>{t('Your name is what a merchant sees on a receipt. Everything else stays on this phone.')}</Text>
             </View>
           </AnimatedContent>
@@ -128,8 +128,7 @@ export function CreateAccountScreen({navigation, route}: Props) {
                   <View style={styles.explainerCopy}>
                     <Text style={styles.explainerTitle}>{t('Your existing wallet')}</Text>
                     <Text style={styles.explainerBody}>
-                      The next screen asks for your recovery phrase. It opens the same account you already use in
-                      another wallet, and the address is shown for you to check before anything is saved.
+                      {t('The next screen asks for your recovery phrase. It opens the same account you already use in another wallet, and the address is shown for you to check before anything is saved.')}
                     </Text>
                   </View>
                 </View>
@@ -145,9 +144,7 @@ export function CreateAccountScreen({navigation, route}: Props) {
                   <View style={styles.explainerCopy}>
                     <Text style={styles.explainerTitle}>{t('Twelve words are your wallet')}</Text>
                     <Text style={styles.explainerBody}>
-                      The next screen shows them once. They open this same account in Lumenade Pay, Lobstr or
-                      Freighter, they are what lets you add money in lira, and they are the only way back if you lose
-                      this phone. Nobody can reissue them.
+                      {t('The next screen shows them once. They open this same account in Lumenade Pay, Lobstr or Freighter, they are what lets you add money in lira, and they are the only way back if you lose this phone. Nobody can reissue them.')}
                     </Text>
                   </View>
                 </View>

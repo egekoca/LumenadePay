@@ -45,7 +45,7 @@ export function RecoveryPhraseScreen({route, navigation}: Props) {
   async function finish() {
     const wrong = asked.filter(index => answers[index] !== words[index]);
     if (wrong.length > 0) {
-      setError('That is not the phrase on the last screen. Go back and check it again.');
+      setError(t('That is not the phrase on the last screen. Go back and check it again.'));
       setAnswers({});
       return;
     }
@@ -71,7 +71,7 @@ export function RecoveryPhraseScreen({route, navigation}: Props) {
       setWallet({address: keypair.publicKey(), origin: 'created'});
       navigation.replace('Main');
     } catch (failure) {
-      setError(failure instanceof Error ? failure.message : 'The wallet could not be saved on this phone');
+      setError(failure instanceof Error ? failure.message : t('The wallet could not be saved on this phone'));
     } finally {
       setBusy(false);
     }
@@ -85,8 +85,7 @@ export function RecoveryPhraseScreen({route, navigation}: Props) {
             <View style={styles.icon}><KeyRound color={colors.amber} size={22} /></View>
             <Text style={styles.title}>{t('Your recovery phrase')}</Text>
             <Text style={styles.subtitle}>
-              These twelve words are your wallet. Write them down on paper, in this order, and keep them somewhere only
-              you can reach.
+              {t('These twelve words are your wallet. Write them down on paper, in this order, and keep them somewhere only you can reach.')}
             </Text>
           </View>
         </AnimatedContent>
@@ -107,8 +106,7 @@ export function RecoveryPhraseScreen({route, navigation}: Props) {
             <View style={styles.warningRow}>
               <ShieldAlert color={colors.danger} size={20} />
               <Text style={styles.warningText}>
-                Anyone with these words can spend your money. Nobody at Lumenade Pay can see them, and nobody can give
-                them back to you if they are lost.
+                {t('Anyone with these words can spend your money. Nobody at Lumenade Pay can see them, and nobody can give them back to you if they are lost.')}
               </Text>
             </View>
           </SurfaceCard>
@@ -134,7 +132,7 @@ export function RecoveryPhraseScreen({route, navigation}: Props) {
         {asked.map((index, position) => (
           <AnimatedContent delay={70 * (position + 1)} key={index}>
             <View style={styles.check}>
-              <Text style={styles.checkLabel}>Word {index + 1}</Text>
+              <Text style={styles.checkLabel}>{t('Word')} {index + 1}</Text>
               <View style={styles.choices}>
                 {options[index]!.map(option => {
                   const chosen = answers[index] === option;

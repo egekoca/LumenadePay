@@ -28,13 +28,16 @@ type Props = NativeStackScreenProps<RootStackParams, 'Main'>;
 
 export function HomeScreen({navigation}: Props) {
   const {mode, merchantProfile, account} = useAppStore();
+  const t = useTranslate();
   const merchantEnabled = merchantProfile !== null;
+  const greeting = greetingFor(account?.name);
+  const [greetingPart, ...greetingName] = greeting.split(', ');
   return (
     <Screen>
       <View style={styles.header}>
         <View style={styles.identity}>
           <LumenadeMark motion="float" size={38} />
-          <View><Text style={styles.eyebrow}>LUMENADE PAY</Text><Text style={styles.greeting} numberOfLines={1}>{greetingFor(account?.name)}</Text></View>
+          <View><Text style={styles.eyebrow}>{t('LUMENADE PAY')}</Text><Text style={styles.greeting} numberOfLines={1}>{`${t(greetingPart!)}${greetingName.length ? `, ${greetingName.join(', ')}` : ''}`}</Text></View>
         </View>
 
       </View>
@@ -113,8 +116,7 @@ function CustomerHome({navigation, merchantEnabled}: {navigation: Props['navigat
             <View style={styles.walletSetupCopy}>
               <Text style={styles.walletSetupTitle}>{t('Finish wallet setup')}</Text>
               <Text style={styles.walletSetupHint}>
-                This account has no wallet yet. Twelve words will make one, and they are what lets you add money in
-                lira.
+                {t('This account has no wallet yet. Twelve words will make one, and they are what lets you add money in lira.')}
               </Text>
             </View>
             <Button
@@ -170,8 +172,8 @@ function CustomerHome({navigation, merchantEnabled}: {navigation: Props['navigat
                 <Text style={styles.liraFlag}>🇹🇷</Text>
               </View>
               <View style={styles.scanCopy}>
-                <Text style={styles.liraTitle}>Türk Lirası ile para yükle</Text>
-                <Text style={styles.scanHint}>Banka havalesi · hesabınıza USDC olarak geçer</Text>
+                <Text style={styles.liraTitle}>{t('Türk Lirası ile para yükle')}</Text>
+                <Text style={styles.scanHint}>{t('Banka havalesi · hesabınıza USDC olarak geçer')}</Text>
               </View>
               <ChevronRight color={colors.inkMuted} size={19} />
             </Pressable>
@@ -224,7 +226,7 @@ function CustomerHome({navigation, merchantEnabled}: {navigation: Props['navigat
         {receipts.length === 0 ? (
           <View style={styles.emptyRow}>
             <Text style={styles.emptyTitle}>{t('No payments yet')}</Text>
-            <Text style={styles.emptyHint}>Your payment history will appear here.</Text>
+            <Text style={styles.emptyHint}>{t('Your payment history will appear here.')}</Text>
           </View>
         ) : (
           <View style={styles.list}>
@@ -256,7 +258,7 @@ function CustomerHome({navigation, merchantEnabled}: {navigation: Props['navigat
             style={styles.merchantRow}
             testID="activate-merchant">
             <Store color={colors.amber} size={18} />
-            <Text style={styles.merchantText}>Get paid with this account</Text>
+            <Text style={styles.merchantText}>{t('Get paid with this account')}</Text>
             <ChevronRight color={colors.inkMuted} size={17} />
           </Pressable>
         </AnimatedContent>
@@ -293,10 +295,10 @@ function MerchantHome({navigation}: {navigation: Props['navigation']}) {
           <View style={styles.modeIntroRow}>
             <View style={styles.modeIntroCopy}>
               <Text numberOfLines={1} style={styles.modeTitle}>
-                {merchantProfile?.displayName ?? 'Get paid'}
+                {merchantProfile?.displayName ?? t('Get paid')}
               </Text>
             </View>
-            <StatusPill tone={statusTone}>{payments.isError ? 'LOCAL' : payments.isPending ? 'SYNCING' : 'LIVE'}</StatusPill>
+            <StatusPill tone={statusTone}>{payments.isError ? t('LOCAL') : payments.isPending ? t('SYNCING') : t('LIVE')}</StatusPill>
           </View>
         </View>
       </AnimatedContent>
@@ -316,7 +318,7 @@ function MerchantHome({navigation}: {navigation: Props['navigation']}) {
 
       <AnimatedContent delay={140}>
         <Button icon={<QrCode color={colors.black} size={20} />} onPress={() => navigation.navigate('MerchantRequest')}>
-          {pendingRequest ? 'Open active request' : 'Create payment request'}
+          {pendingRequest ? t('Open active request') : t('Create payment request')}
         </Button>
       </AnimatedContent>
 
@@ -324,24 +326,24 @@ function MerchantHome({navigation}: {navigation: Props['navigation']}) {
         <View style={styles.merchantMeta}>
           <View style={styles.metaBlock}>
             <Text style={styles.metaValue}>{settled.length}</Text>
-            <Text style={styles.metaLabel}>SETTLED</Text>
+            <Text style={styles.metaLabel}>{t('SETTLED')}</Text>
           </View>
           <View style={styles.metaDivider} />
           <View style={styles.metaBlock}>
             <Text style={styles.metaValue}>{received.length - settled.length}</Text>
-            <Text style={styles.metaLabel}>OPEN</Text>
+            <Text style={styles.metaLabel}>{t('OPEN')}</Text>
           </View>
           <View style={styles.metaDivider} />
           <View style={styles.metaBlock}>
             <Text style={styles.metaValue}>{pendingRequest ? '1' : '0'}</Text>
-            <Text style={styles.metaLabel}>ACTIVE QR</Text>
+            <Text style={styles.metaLabel}>{t('ACTIVE QR')}</Text>
           </View>
         </View>
       </AnimatedContent>
 
       <AnimatedContent delay={230}>
         <>
-          <SectionTitle title="Business status" />
+          <SectionTitle title={t('Business status')} />
           <SurfaceCard padded={false} style={styles.statusCard}>
             <View style={styles.statusRow}>
               <View style={styles.capabilityIcon}>
@@ -349,16 +351,16 @@ function MerchantHome({navigation}: {navigation: Props['navigation']}) {
               </View>
               <View style={styles.activityCopy}>
                 <Text style={styles.activityTitle}>
-                  {merchantRegisteredOnChain ? 'Receiving address verified' : 'Verification in progress'}
+                  {merchantRegisteredOnChain ? t('Receiving address verified') : t('Verification in progress')}
                 </Text>
                 <Text style={styles.address}>
                   {merchantProfile?.recipient
                     ? `${merchantProfile.recipient.slice(0, 8)}...${merchantProfile.recipient.slice(-6)}`
-                    : 'No address on file'}
+                    : t('No address on file')}
                 </Text>
               </View>
               <StatusPill tone={merchantRegisteredOnChain ? 'success' : 'pending'}>
-                {merchantRegisteredOnChain ? 'READY' : 'ACTION'}
+                {merchantRegisteredOnChain ? t('READY') : t('ACTION')}
               </StatusPill>
             </View>
           </SurfaceCard>
@@ -367,7 +369,7 @@ function MerchantHome({navigation}: {navigation: Props['navigation']}) {
 
       <AnimatedContent delay={280}>
         <>
-          <SectionTitle title="Recent payments" />
+          <SectionTitle title={t('Recent payments')} />
           {received.length === 0 ? (
             <View style={styles.merchantEmptyRow}>
               <View style={styles.emptyIcon}>
@@ -375,7 +377,7 @@ function MerchantHome({navigation}: {navigation: Props['navigation']}) {
               </View>
               <View style={styles.emptyCopy}>
                 <Text style={styles.emptyTitle}>{t('No payments yet')}</Text>
-                <Text style={styles.emptyHint}>Create a request and keep this screen open at the counter.</Text>
+                <Text style={styles.emptyHint}>{t('Create a request and keep this screen open at the counter.')}</Text>
               </View>
             </View>
           ) : (
@@ -387,7 +389,7 @@ function MerchantHome({navigation}: {navigation: Props['navigation']}) {
                   </View>
                   <View style={styles.listCopy}>
                     <Text numberOfLines={1} style={styles.listName}>
-                      {'reference' in payment ? payment.reference : 'Payment received'}
+                      {'reference' in payment ? payment.reference : t('Payment received')}
                     </Text>
                     <Text style={styles.listWhen}>{new Date(payment.createdAt).toLocaleDateString()}</Text>
                   </View>

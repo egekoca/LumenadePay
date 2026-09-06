@@ -43,7 +43,7 @@ export function ImportWalletScreen({navigation, route}: Props) {
       setDerived(method === 'phrase' ? keypairFromRecoveryPhrase(phrase) : keypairFromSecret(secret));
     } catch (failure) {
       setDerived(null);
-      setError(failure instanceof Error ? failure.message : 'That wallet could not be read');
+      setError(failure instanceof Error ? failure.message : t('That wallet could not be read'));
     }
   }
 
@@ -53,7 +53,7 @@ export function ImportWalletScreen({navigation, route}: Props) {
     setError(undefined);
     try {
       if (!(await canHoldSigningKey())) {
-        setError('This phone needs a screen lock before it can hold a wallet key. Set one, then try again.');
+        setError(t('This phone needs a screen lock before it can hold a wallet key. Set one, then try again.'));
         return;
       }
       await saveSigningKey(derived.secret());
@@ -63,7 +63,7 @@ export function ImportWalletScreen({navigation, route}: Props) {
       setWallet({address: derived.publicKey(), origin: 'imported'});
       navigation.replace('Main');
     } catch (failure) {
-      setError(failure instanceof Error ? failure.message : 'The wallet could not be saved on this phone');
+      setError(failure instanceof Error ? failure.message : t('The wallet could not be saved on this phone'));
     } finally {
       setBusy(false);
     }
@@ -76,8 +76,7 @@ export function ImportWalletScreen({navigation, route}: Props) {
           <View style={styles.hero}>
             <Text style={styles.title}>{t('Is this your account?')}</Text>
             <Text style={styles.subtitle}>
-              Check this against the address in the wallet you are moving from. If it does not match, the phrase belongs
-              to a different account and nothing has been saved yet.
+              {t('Check this against the address in the wallet you are moving from. If it does not match, the phrase belongs to a different account and nothing has been saved yet.')}
             </Text>
           </View>
         </AnimatedContent>
@@ -130,7 +129,7 @@ export function ImportWalletScreen({navigation, route}: Props) {
                   style={[styles.tab, method === option && styles.tabOn]}
                   testID={`import-method-${option}`}>
                   <Text style={method === option ? styles.tabTextOn : styles.tabText}>
-                    {option === 'phrase' ? 'Recovery phrase' : 'Secret key'}
+                    {option === 'phrase' ? t('Recovery phrase') : t('Secret key')}
                   </Text>
                 </Pressable>
               ))}
@@ -147,7 +146,7 @@ export function ImportWalletScreen({navigation, route}: Props) {
                 autoCapitalize="none"
                 multiline
                 maxLength={400}
-                hint={wordCount > 0 ? `${wordCount} of 12 words` : 'Usually twelve words, in order'}
+                hint={wordCount > 0 ? `${wordCount}${t('of 12 words')}` : t('Usually twelve words, in order')}
                 testID="import-phrase"
               />
             ) : (

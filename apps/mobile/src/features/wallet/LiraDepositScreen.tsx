@@ -202,11 +202,9 @@ export function LiraDepositScreen({navigation}: Props) {
         <AnimatedContent>
           <View style={styles.hero}>
             <View style={styles.icon}><Banknote color={colors.amber} size={22} /></View>
-            <Text style={styles.title}>Lira needs a recovery-phrase wallet</Text>
+            <Text style={styles.title}>{t('Lira needs a recovery-phrase wallet')}</Text>
             <Text style={styles.subtitle}>
-              The anchor verifies a wallet by having it sign a challenge, which only an ordinary Stellar account can
-              do. This phone's wallet lives in its secure hardware and has no key that can answer. Set this phone up
-              again with a recovery phrase to move money in lira.
+              {t("The anchor verifies a wallet by having it sign a challenge, which only an ordinary Stellar account can do. This phone's wallet lives in its secure hardware and has no key that can answer. Set this phone up again with a recovery phrase to move money in lira.")}
             </Text>
           </View>
         </AnimatedContent>
@@ -278,8 +276,8 @@ export function LiraDepositScreen({navigation}: Props) {
                 {direction === 'cash-out' ? (
                   <Text style={[styles.held, overspending && styles.heldWarning]}>
                     {overspending
-                      ? `Only ${displayAmount(usdcHeld)} USDC in this wallet`
-                      : `${displayAmount(usdcHeld)} USDC in this wallet`}
+                      ? `${t('Only')} ${displayAmount(usdcHeld)} USDC ${t('in this wallet')}`
+                      : `${displayAmount(usdcHeld)} USDC ${t('in this wallet')}`}
                   </Text>
                 ) : null}
               </View>
@@ -348,7 +346,7 @@ export function LiraDepositScreen({navigation}: Props) {
                     icon={<Building2 color={colors.goldBright} size={18} />}
                     label={t('SEND TO')}
                     onCopy={() => void shareValue('Anchor IBAN', started.instructions.iban ?? '')}
-                    title={started.instructions.bankName ?? 'The anchor’s bank'}
+                    title={started.instructions.bankName ?? t('The anchor’s bank')}
                     {...(started.instructions.iban ? {value: started.instructions.iban} : {})}
                   />
                   <View style={styles.separator} />
@@ -362,12 +360,12 @@ export function LiraDepositScreen({navigation}: Props) {
                 </>
               ) : withdrawal ? (
                 <Instruction
-                  body={`${displayAmount(withdrawal.amountUsdc)} USDC has been sent to the anchor. It pays the lira out once it sees the payment.`}
+                  body={`${displayAmount(withdrawal.amountUsdc)} ${t('USDC has been sent to the anchor. It pays the lira out once it sees the payment.')}`}
                   icon={<Landmark color={colors.goldBright} size={18} />}
-                  label="PAID OUT TO"
+                  label={t('PAID OUT TO')}
                   {...(withdrawal.bankAccount
                     ? {value: withdrawal.bankAccount}
-                    : {title: 'Your registered bank account'})}
+                    : {title: t('Your registered bank account')})}
                 />
               ) : null}
             </View>
@@ -381,7 +379,7 @@ export function LiraDepositScreen({navigation}: Props) {
               </Text>
               {received ? (
                 <Text style={styles.received} testID="lira-received">
-                  {displayAmount(received)} {direction === 'add' ? 'USDC arrived in this wallet.' : 'TRY was paid out.'}
+                  {displayAmount(received)} {direction === 'add' ? t('USDC arrived in this wallet.') : t('TRY was paid out.')}
                 </Text>
               ) : null}
             </View>

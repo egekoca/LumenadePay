@@ -122,6 +122,7 @@ function MainTabs() {
 export function RootNavigator() {
   // A returning session skips onboarding and lands where the user left off.
   const returning = useAppStore(hasRestorableSession);
+  const t = useTranslate();
 
   return (
     <Stack.Navigator
@@ -138,23 +139,23 @@ export function RootNavigator() {
         animationTypeForReplace: 'push',
       }}>
       <Stack.Screen name="Welcome" component={WelcomeScreen} options={{headerShown: false, animation: 'fade'}} />
-      <Stack.Screen name="CreateAccount" component={CreateAccountScreen} options={{title: 'Create account', headerBackTitle: 'Back'}} />
+      <Stack.Screen name="CreateAccount" component={CreateAccountScreen} options={{title: t('Set up your account'), headerBackTitle: t('Go back')}} />
       <Stack.Screen
         name="RecoveryPhrase"
         component={RecoveryPhraseScreen}
-        options={{title: 'Recovery phrase', headerBackTitle: 'Back'}}
+        options={{title: t('Recovery phrase'), headerBackTitle: t('Go back')}}
       />
       <Stack.Screen
         name="ImportWallet"
         component={ImportWalletScreen}
-        options={{title: 'Restore wallet', headerBackTitle: 'Back'}}
+        options={{title: t('Restore your wallet'), headerBackTitle: t('Go back')}}
       />
       <Stack.Screen name="Main" component={MainTabs} options={{headerShown: false, animation: 'fade'}} />
-      <Stack.Screen name="LiraDeposit" component={LiraDepositScreen} options={{title: 'Add lira', headerBackTitle: 'Back'}} />
-      <Stack.Screen name="Scan" component={ScanScreen} options={{title: 'Scan QR', animation: 'fade_from_bottom'}} />
-      <Stack.Screen name="Confirm" component={PaymentConfirmationScreen} options={{title: 'Review payment', animation: 'slide_from_bottom'}} />
-      <Stack.Screen name="Receipt" component={ReceiptScreen} options={{title: 'Receipt', headerBackVisible: false, animation: 'fade'}} />
-      <Stack.Screen name="DeveloperSettings" component={DeveloperSettingsScreen} options={{title: 'Developer settings'}} />
+    <Stack.Screen name="LiraDeposit" component={LiraDepositScreen} options={{title: t('Add lira'), headerBackTitle: t('Go back')}} />
+      <Stack.Screen name="Scan" component={ScanScreen} options={{title: t('Scan QR'), animation: 'fade_from_bottom'}} />
+      <Stack.Screen name="Confirm" component={PaymentConfirmationScreen} options={{title: t('Review payment'), animation: 'slide_from_bottom'}} />
+      <Stack.Screen name="Receipt" component={ReceiptScreen} options={{title: t('Receipt'), headerBackVisible: false, animation: 'fade'}} />
+      <Stack.Screen name="DeveloperSettings" component={DeveloperSettingsScreen} options={{title: t('Developer settings')}} />
       <Stack.Screen
         name="MerchantOnboarding"
         component={MerchantOnboardingScreen}
@@ -163,7 +164,7 @@ export function RootNavigator() {
       <Stack.Screen
         name="MerchantRequest"
         component={MerchantRequestScreen}
-        options={{title: 'Payment request', animation: 'slide_from_right'}}
+        options={{title: t('Payment request'), animation: 'slide_from_right'}}
       />
       <Stack.Screen name="AnchorTransfer" component={AnchorTransferScreen} options={{title: 'Anchor transfer'}} />
     </Stack.Navigator>

@@ -55,16 +55,16 @@ export function UnlockScreen() {
     void attempt();
   }, [attempt]);
 
-  const greeting = account?.name ? `Welcome back, ${account.name.split(' ')[0]}` : 'Welcome back';
+  const greeting = account?.name ? `${t('Welcome back')}, ${account.name.split(' ')[0]}` : t('Welcome back');
 
   const eraseAccount = useCallback(async () => {
     setError(undefined);
     try {
       await signOut();
     } catch (failure) {
-      setError(failure instanceof Error ? failure.message : 'This device could not erase the payment key.');
+      setError(failure instanceof Error ? failure.message : t('This device could not erase the payment key.'));
     }
-  }, [signOut]);
+  }, [signOut, t]);
 
   return (
     <Screen contentStyle={styles.screen}>
@@ -86,7 +86,7 @@ export function UnlockScreen() {
           </View>
           <Text style={styles.title}>{greeting}</Text>
           <Text style={styles.subtitle}>
-            {error ?? `Unlock with ${Platform.OS === 'ios' ? 'Face ID' : 'your fingerprint'} to see your balance and pay.`}
+            {error ?? `${t('Unlock with')} ${Platform.OS === 'ios' ? 'Face ID' : t('your fingerprint')} ${t('to see your balance and pay.')}`}
           </Text>
         </View>
       </AnimatedContent>
@@ -101,7 +101,7 @@ export function UnlockScreen() {
           ) : (
             <>
               <Button loading={busy} onPress={() => void attempt()} testID="unlock">
-                {error ? 'Try again' : 'Unlock'}
+                {error ? t('Try again') : t('Unlock')}
               </Button>
               <Pressable
                 accessibilityRole="button"
@@ -109,8 +109,8 @@ export function UnlockScreen() {
                 testID="sign-out">
                 <Text style={[styles.signOut, confirmingSignOut && styles.signOutConfirm]}>
                   {confirmingSignOut
-                    ? 'Tap again to erase this account and start over'
-                    : 'Use a different account'}
+                    ? t('Tap again to erase this account and start over')
+                    : t('Use a different account')}
                 </Text>
               </Pressable>
             </>

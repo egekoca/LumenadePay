@@ -31,7 +31,7 @@ export function ActivityScreen() {
         testID="cycle-activity-filter">
         <SlidersHorizontal color={colors.amber} size={18} />
       </Pressable></View>
-      <View style={styles.summary}><View><Text style={styles.summaryLabel}>{filter === 'all' ? 'TOTAL PAID' : filter === 'settled' ? 'PAID ON-CHAIN' : 'DEMO TOTAL'}</Text><Text style={styles.summaryValue}>{totalPaid} <Text style={styles.summaryAsset}>XLM</Text></Text></View><View style={styles.summaryDivider} /><View><Text style={styles.summaryLabel}>{t('PAYMENTS')}</Text><Text style={styles.summaryValue}>{visible.length}</Text></View></View>
+      <View style={styles.summary}><View><Text style={styles.summaryLabel}>{filter === 'all' ? t('TOTAL PAID') : filter === 'settled' ? t('PAID ON-CHAIN') : t('DEMO TOTAL')}</Text><Text style={styles.summaryValue}>{totalPaid} <Text style={styles.summaryAsset}>XLM</Text></Text></View><View style={styles.summaryDivider} /><View><Text style={styles.summaryLabel}>{t('PAYMENTS')}</Text><Text style={styles.summaryValue}>{visible.length}</Text></View></View>
       <View style={styles.filters}>
         {(['all', 'settled', 'demo'] as const).map(option => (
           <Pressable
@@ -53,7 +53,7 @@ export function ActivityScreen() {
         </SurfaceCard>
       ) : (
         <AnimatedList style={styles.list}>{visible.map(receipt => (
-        <SurfaceCard key={receipt.intentId} padded={false} style={styles.item}><View style={[styles.itemInner, width < 380 && styles.itemInnerCompact]}><View style={styles.paymentIcon}><ReceiptText color={colors.success} size={17} /></View><View style={styles.copy}><Text style={styles.itemTitle}>{receipt.merchantName}</Text><Text style={styles.body}>{'Payment · Stellar Testnet'}</Text><Text style={styles.time}>{new Date(receipt.createdAt).toLocaleDateString()}</Text></View><View style={styles.amountBlock}><Text numberOfLines={1} style={styles.amount}>-{displayAmount(receipt.amount)}</Text><Text style={styles.asset}>{receipt.assetCode}</Text><StatusPill tone="success">{t('CONFIRMED')}</StatusPill></View></View></SurfaceCard>
+        <SurfaceCard key={receipt.intentId} padded={false} style={styles.item}><View style={[styles.itemInner, width < 380 && styles.itemInnerCompact]}><View style={styles.paymentIcon}><ReceiptText color={colors.success} size={17} /></View><View style={styles.copy}><Text style={styles.itemTitle}>{receipt.merchantName}</Text><Text style={styles.body}>{t('Payment · Stellar Testnet')}</Text><Text style={styles.time}>{new Date(receipt.createdAt).toLocaleDateString()}</Text></View><View style={styles.amountBlock}><Text numberOfLines={1} style={styles.amount}>-{displayAmount(receipt.amount)}</Text><Text style={styles.asset}>{receipt.assetCode}</Text><StatusPill tone="success">{t('CONFIRMED')}</StatusPill></View></View></SurfaceCard>
         ))}</AnimatedList>
       )}
     </Screen>
