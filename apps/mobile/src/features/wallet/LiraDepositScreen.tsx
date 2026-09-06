@@ -1,17 +1,17 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {Banknote, Building2, Copy, Landmark, ShieldCheck} from 'lucide-react-native';
-import {Pressable, StyleSheet, Text, View} from 'react-native';
-import {AnimatedContent, Button, colors, radius, spacing, SurfaceCard, TextField, typography} from '@rosapay/ui';
+import {ArrowDown, Banknote, Building2, Copy, Landmark, ShieldCheck} from 'lucide-react-native';
+import {Pressable, StyleSheet, Text, TextInput, View} from 'react-native';
+import {AnimatedContent, Button, colors, radius, spacing, typography} from '@rosapay/ui';
 import type {RootStackParams} from '../../app/navigation';
 import {Screen} from '../../shared/Screen';
 import {displayAmount} from '../../shared/displayAmount';
 import {shareValue} from '../../shared/shareAddress';
 import {useWalletBalance} from '../../shared/useWalletBalance';
 import {useCurrentAccount} from './currentAccount';
+import {AssetMark} from '../home/AssetMark';
 import {
   IS_SANDBOX_ANCHOR,
-  LIRA_ANCHOR_HOME_DOMAIN,
   LiraRampError,
   quoteLiraDeposit,
   quoteLiraWithdrawal,
@@ -73,11 +73,28 @@ export function LiraDepositScreen({navigation}: Props) {
    * prompt is what this screen spends of the customer's patience, and spending
    * it to report a number they could have been told about is the wrong order.
    */
+  /*
+   * One line for the terms, the way an exchange window carries a board: the
+   * rate, then what the anchor keeps. Named as a rate rather than buried in a
+   * sentence, because it is the number to compare against another counter.
+   */
+  const rate = direction === 'add' ? quote?.perUsdc : payout?.perUsdc;
+  const fee = direction === 'add' ? quote?.feeTotal : payout?.feeTotal;
+  const rateLine = rate
+    ? `1 USDC = ₺${displayAmount(rate)}${fee ? `  ·  fee ₺${displayAmount(fee)}` : ''}`
+    : 'Reading the rate…';
+
   const entered = Number(amount);
   const overspending = direction === 'cash-out' && entered > Number(usdcHeld);
   const payable = amount.trim().length > 0 && Number.isFinite(entered) && entered > 0 && !overspending;
 
   useEffect(() => () => clearInterval(polling.current), []);
+
+  // The bar said "Add lira" over a screen headed "Take out lira", which is the
+  // kind of contradiction that makes someone check they tapped the right thing.
+  useEffect(() => {
+    navigation.setOptions({title: direction === 'add' ? 'Add lira' : 'Cash out'});
+  }, [direction, navigation]);
 
   useEffect(() => {
     if (!amount.trim() || !supported || open) return;
@@ -200,19 +217,11 @@ export function LiraDepositScreen({navigation}: Props) {
 
   return (
     <Screen>
-      <AnimatedContent>
-        <View style={styles.hero}>
-          <View style={styles.icon}><Banknote color={colors.amber} size={22} /></View>
-          <Text style={styles.eyebrow}>{direction === 'add' ? 'ADD MONEY' : 'CASH OUT'}</Text>
-          <Text style={styles.title}>{direction === 'add' ? 'Pay in lira' : 'Take out lira'}</Text>
-          <Text style={styles.subtitle}>
-            {direction === 'add'
-              ? 'Send a bank transfer in Turkish lira and receive USDC in this wallet.'
-              : 'Send USDC from this wallet and receive Turkish lira in your bank account.'}{' '}
-            Rate and fee come from {LIRA_ANCHOR_HOME_DOMAIN}.
-          </Text>
-        </View>
-      </AnimatedContent>
+      {/*
+        The eyebrow, the icon and the paragraph were three ways of saying what
+        the segmented control below already says, stacked above the only thing
+        anyone came here to see. They are gone; the screen opens on the money.
+      */}
 
       {!open ? (
         <>
@@ -239,40 +248,80 @@ export function LiraDepositScreen({navigation}: Props) {
             </View>
           </AnimatedContent>
 
-          <AnimatedContent delay={80} scaleFrom={0.985}>
-            <SurfaceCard accent="amber" style={styles.form}>
-              <TextField
-                keyboardType="decimal-pad"
-                label={`AMOUNT (${unit})`}
-                maxLength={14}
-                onChangeText={setAmount}
-                placeholder={direction === 'add' ? '500' : '10'}
-                testID="lira-amount"
-                value={amount}
-              />
-              {direction === 'cash-out' ? (
-                <Text style={[styles.rate, overspending && styles.rateWarning]}>
-                  {overspending
-                    ? `You only hold ${displayAmount(usdcHeld)} USDC`
-                    : `You hold ${displayAmount(usdcHeld)} USDC`}
-                </Text>
-              ) : null}
-              {direction === 'add' && quote ? (
-                <Text style={styles.rate} testID="lira-quote">
-                  You receive {displayAmount(quote.buyAmount)} USDC · {displayAmount(quote.perUsdc)} TRY per USDC
-                  {quote.feeTotal ? ` · fee ${displayAmount(quote.feeTotal)} TRY` : ''}
-                </Text>
-              ) : null}
-              {direction === 'cash-out' && payout ? (
-                <Text style={styles.rate} testID="lira-payout">
-                  You receive {displayAmount(payout.buyAmount)} TRY · {displayAmount(payout.perUsdc)} TRY per USDC
-                  {payout.feeTotal ? ` · fee ${displayAmount(payout.feeTotal)} TRY` : ''}
-                </Text>
-              ) : null}
-              {(direction === 'add' && !quote) || (direction === 'cash-out' && !payout) ? (
-                <Text style={styles.rate}>Reading the anchor's rate…</Text>
-              ) : null}
-            </SurfaceCard>
+          {/*
+            An exchange counter, not a form: what you hand over above, what you
+            get back below, and the rate between them at the bottom where a
+            board would carry it. The answer used to be a grey line under a text
+            field, which made the one number somebody came for the smallest
+            thing on the screen.
+          */}
+          <AnimatedContent delay={80} scaleFrom={0.99}>
+            <View style={styles.counter}>
+              <View style={styles.side}>
+                <Text style={styles.sideLabel}>{direction === 'add' ? 'YOU SEND' : 'YOU SEND'}</Text>
+                <View style={styles.sideRow}>
+                  <Text style={styles.mark}>{direction === 'add' ? '₺' : '$'}</Text>
+                  <TextInput
+                    keyboardType="decimal-pad"
+                    maxLength={14}
+                    onChangeText={setAmount}
+                    placeholder={direction === 'add' ? '500' : '10'}
+                    placeholderTextColor={colors.inkFaint}
+                    style={styles.sideInput}
+                    testID="lira-amount"
+                    value={amount}
+                  />
+                  <Text style={styles.sideUnit}>{unit}</Text>
+                </View>
+                {direction === 'cash-out' ? (
+                  <Text style={[styles.held, overspending && styles.heldWarning]}>
+                    {overspending
+                      ? `Only ${displayAmount(usdcHeld)} USDC in this wallet`
+                      : `${displayAmount(usdcHeld)} USDC in this wallet`}
+                  </Text>
+                ) : null}
+              </View>
+
+              <View style={styles.divider}>
+                <View style={styles.dividerLine} />
+                <View style={styles.dividerMark}>
+                  <ArrowDown color={colors.goldBright} size={15} strokeWidth={2.6} />
+                </View>
+                <View style={styles.dividerLine} />
+              </View>
+
+              <View style={styles.side}>
+                <Text style={styles.sideLabel}>YOU GET</Text>
+                <View style={styles.sideRow}>
+                  {/* The app's own mark for an asset, the flag for a currency. */}
+                  {direction === 'add' ? (
+                    <AssetMark code="USDC" size={30} />
+                  ) : (
+                    <Text style={styles.flag}>🇹🇷</Text>
+                  )}
+                  <Text
+                    adjustsFontSizeToFit
+                    numberOfLines={1}
+                    style={styles.receive}
+                    testID={direction === 'add' ? 'lira-quote' : 'lira-payout'}>
+                    {direction === 'add'
+                      ? quote
+                        ? displayAmount(quote.buyAmount)
+                        : '—'
+                      : payout
+                        ? `₺${displayAmount(payout.buyAmount)}`
+                        : '₺—'}
+                  </Text>
+                  <Text style={styles.sideUnit}>{direction === 'add' ? 'USDC' : 'TRY'}</Text>
+                </View>
+              </View>
+            </View>
+          </AnimatedContent>
+
+          <AnimatedContent delay={120}>
+            <Text style={styles.terms}>
+              {rateLine}
+            </Text>
           </AnimatedContent>
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -289,8 +338,8 @@ export function LiraDepositScreen({navigation}: Props) {
         </>
       ) : (
         <>
-          <AnimatedContent delay={80} scaleFrom={0.985}>
-            <SurfaceCard accent="amber" style={styles.form}>
+          <AnimatedContent delay={80} scaleFrom={0.99}>
+            <View style={styles.receipt}>
               {started ? (
                 <>
                   <Instruction
@@ -319,7 +368,7 @@ export function LiraDepositScreen({navigation}: Props) {
                     : {title: 'Your registered bank account'})}
                 />
               ) : null}
-            </SurfaceCard>
+            </View>
           </AnimatedContent>
 
           <AnimatedContent delay={150}>
@@ -450,6 +499,22 @@ const styles = StyleSheet.create({
   directionLabel: {...typography.body, color: colors.inkMuted},
   directionLabelSelected: {color: colors.goldBright},
   form: {gap: spacing.lg},
+  receipt: {backgroundColor: colors.surface, borderColor: colors.lineSoft, borderRadius: radius.xl, borderWidth: 1, gap: spacing.lg, padding: spacing.lg},
+  counter: {backgroundColor: colors.surface, borderColor: colors.lineSoft, borderRadius: radius.xl, borderWidth: 1, overflow: 'hidden'},
+  side: {gap: 6, paddingHorizontal: spacing.lg, paddingVertical: spacing.lg},
+  sideLabel: {...typography.overline, color: colors.inkFaint},
+  sideRow: {alignItems: 'center', flexDirection: 'row', gap: spacing.sm},
+  mark: {color: colors.inkMuted, fontSize: 26, fontWeight: '600'},
+  flag: {fontSize: 26},
+  sideInput: {color: colors.ink, flex: 1, fontSize: 30, fontWeight: '700', padding: 0},
+  receive: {color: colors.goldBright, flex: 1, fontSize: 30, fontWeight: '700'},
+  sideUnit: {...typography.mono, color: colors.inkFaint, fontSize: 13},
+  held: {...typography.body, color: colors.inkFaint, fontSize: 13},
+  heldWarning: {color: colors.danger},
+  divider: {alignItems: 'center', flexDirection: 'row', gap: spacing.md, paddingHorizontal: spacing.lg},
+  dividerLine: {backgroundColor: colors.lineSoft, flex: 1, height: 1},
+  dividerMark: {alignItems: 'center', backgroundColor: colors.goldSoft, borderRadius: 999, height: 30, justifyContent: 'center', width: 30},
+  terms: {...typography.body, color: colors.inkMuted, fontSize: 14, textAlign: 'center'},
   rate: {...typography.body, color: colors.inkMuted},
   rateWarning: {color: colors.danger},
   instructionRow: {flexDirection: 'row', gap: spacing.md},
