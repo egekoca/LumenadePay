@@ -18,7 +18,9 @@ import {
   LiraRampError,
   quoteLiraDeposit,
   quoteLiraWithdrawal,
+  claimLiraDeposit,
   readLiraTransfer,
+  settleLiraDeposit,
   simulateBankTransfer,
   startLiraDeposit,
   startLiraWithdrawal,
@@ -27,6 +29,7 @@ import {
   type StartedLiraDeposit,
   type StartedLiraWithdrawal,
 } from './liraRamp';
+import {moveUsdcToBridge} from './walletToBridge';
 
 type Props = NativeStackScreenProps<RootStackParams, 'LiraDeposit'>;
 
@@ -69,7 +72,11 @@ export function LiraDepositScreen({navigation}: Props) {
   const [error, setError] = useState<string>();
   const polling = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
 
-  const supported = account?.kind === 'classic';
+  // Both custody models can use the ramp now. A recovery-phrase wallet talks to
+  // the anchor directly; a smart wallet is fronted by a bridge, because the
+  // anchor cannot authenticate a contract or pay one. Either way there has to be
+  // an account on this phone.
+  const supported = account !== null;
   const open = started ?? withdrawal;
   const unit = direction === 'add' ? 'TRY' : 'USDC';
 
@@ -129,12 +136,62 @@ export function LiraDepositScreen({navigation}: Props) {
   }, [amount, supported, direction, open]);
 
   const poll = useCallback(
-    (transfer: {transferServer: string; transactionId: string; session: StartedLiraDeposit['session']}, kind: Direction) => {
+    (
+      transfer: {
+        transferServer: string;
+        transactionId: string;
+        session: StartedLiraDeposit['session'];
+        sweep?: StartedLiraDeposit['sweep'];
+      },
+      kind: Direction,
+    ) => {
       clearInterval(polling.current);
       polling.current = setInterval(async () => {
         try {
-          const next = await readLiraTransfer(transfer);
+          let next = await readLiraTransfer(transfer);
           setStatus(next.status);
+
+          // The anchor pays a wallet with no trustline into a claimable balance
+          // and still calls the transfer complete. Claiming it is one more
+          // transaction and only this phone can send it, so it is sent here
+          // rather than left as a number the customer cannot see or spend.
+          if (next.claimableBalanceId) {
+            setStatus('claiming');
+            try {
+              await claimLiraDeposit({claimableBalanceId: next.claimableBalanceId});
+              next = {...next, claimableBalanceId: undefined, settled: next.status === 'completed'};
+            } catch (claimError) {
+              clearInterval(polling.current);
+              setStatus('unclaimed');
+              setError(
+                claimError instanceof Error
+                  ? claimError.message
+                  : 'The deposit arrived but could not be moved into this wallet.',
+              );
+              return;
+            }
+          }
+
+          // The anchor pays a bridge when the wallet is a contract, so a
+          // completed deposit is not money the customer can spend until it has
+          // been moved across. Reporting settlement before that would be the
+          // same false success as ignoring a claimable balance.
+          if (next.settled && transfer.sweep) {
+            setStatus('moving into your wallet');
+            try {
+              await settleLiraDeposit(transfer as StartedLiraDeposit);
+            } catch (sweepError) {
+              clearInterval(polling.current);
+              setStatus('unswept');
+              setError(
+                sweepError instanceof Error
+                  ? sweepError.message
+                  : 'The deposit arrived but could not be moved into your wallet.',
+              );
+              return;
+            }
+          }
+
           if (next.settled || next.failed) {
             clearInterval(polling.current);
             if (next.amountOut) setReceived(next.amountOut);
@@ -174,6 +231,7 @@ export function LiraDepositScreen({navigation}: Props) {
         poll(deposit, 'add');
       } else {
         const sent = await startLiraWithdrawal({
+          moveToBridge: moveUsdcToBridge,
           address: account.address,
           amountUsdc: amount.trim(),
           available: usdcHeld,

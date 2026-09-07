@@ -5,7 +5,7 @@ import type {PaymentStatus} from '@rosapay/domain';
 import type {SignedPaymentIntentV1} from '@rosapay/protocol';
 import type {MerchantProfile} from '../features/merchant/merchantProfile';
 import {createNativeRosaPaySigner} from '../native/nativeSigner';
-import {clearSigningKey} from '../features/wallet/keyVault';
+import {clearBridgeKey, clearSigningKey} from '../features/wallet/keyVault';
 import {decodeSecrets, encodeSecrets, secureSessionStorage} from './persistence';
 import {defaultApiBaseUrl} from '../shared/apiConfig';
 
@@ -33,6 +33,13 @@ export type StellarAccount = {
 export type SmartWallet = {
   contractId: string;
   devicePublicKey: string;
+  /**
+   * The passkey registered as this wallet's recovery signer, when the phone
+   * could make one. Its absence is the difference between a wallet that
+   * survives a lost handset and one that does not, so the app reads this rather
+   * than assuming.
+   */
+  recovery?: {credentialId: string; publicKey: string};
 };
 
 export type ApiSession = {token: string; expiresAt: string; publicSigner: string};
@@ -300,6 +307,11 @@ export const useAppStore = create<AppState>()(
         const {smartWallet, wallet} = get();
         if (smartWallet) await createNativeRosaPaySigner().deleteIdentity();
         if (wallet) await clearSigningKey();
+        // The bridge key belongs to this installation rather than to the
+        // account, but leaving it behind would hand the next person an account
+        // the anchor still recognises. It holds no money, so dropping it costs
+        // nothing and a later ramp simply makes another.
+        await clearBridgeKey();
         set({
           account: null,
           locked: false,

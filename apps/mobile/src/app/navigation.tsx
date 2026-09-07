@@ -13,6 +13,7 @@ import {WelcomeScreen} from '../features/onboarding/WelcomeScreen';
 import {CreateAccountScreen} from '../features/onboarding/CreateAccountScreen';
 import {RecoveryPhraseScreen} from '../features/onboarding/RecoveryPhraseScreen';
 import {ImportWalletScreen} from '../features/onboarding/ImportWalletScreen';
+import {RecoverWalletScreen} from '../features/onboarding/RecoverWalletScreen';
 import {ScanScreen} from '../features/payments/ScanScreen';
 import {PaymentConfirmationScreen} from '../features/payments/PaymentConfirmationScreen';
 import {ReceiptScreen} from '../features/payments/ReceiptScreen';
@@ -36,6 +37,8 @@ export type RootStackParams = {
    */
   RecoveryPhrase: {phrase: string; name: string; email?: string};
   ImportWallet: {name: string; email?: string};
+  /** A phone that has never seen the wallet, holding only the synced passkey. */
+  RecoverWallet: undefined;
   Main: undefined;
   /** Buying USDC with lira, through the anchor's SEP-6 door. */
   LiraDeposit: undefined;
@@ -164,6 +167,11 @@ export function RootNavigator() {
         name="ImportWallet"
         component={ImportWalletScreen}
         options={{title: t('Restore your wallet'), headerBackTitle: t('Go back')}}
+      />
+      <Stack.Screen
+        name="RecoverWallet"
+        component={RecoverWalletScreen}
+        options={{title: t('Recover your wallet'), headerBackTitle: t('Go back')}}
       />
       <Stack.Screen name="Main" component={MainTabs} options={{headerShown: false, animation: 'fade'}} />
     <Stack.Screen name="LiraDeposit" component={LiraDepositScreen} options={{title: t('Add lira'), headerBackTitle: t('Go back')}} />

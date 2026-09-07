@@ -3,6 +3,7 @@ import {SecureSignerError, type NativeSecureSigner} from '@rosapay/secure-signer
 import {
   createStellarConfig,
   StellarRpcClient,
+  type SettlementFunding,
   type SettlementPipelineProgress,
   type StellarConfig,
 } from '@rosapay/stellar';
@@ -34,6 +35,12 @@ export type MobileSettlementDependencies = {
   baseUrl?: string;
   onProgress?: (progress: SettlementPipelineProgress) => void;
   transport?: PaymentTransport;
+  /**
+   * How the customer is funding a request they cannot pay directly. The
+   * confirmation screen resolves and prices this before asking for a
+   * fingerprint, so by the time settlement runs the choice is already made.
+   */
+  funding?: SettlementFunding;
 };
 
 function toLocalReceipt(
@@ -139,6 +146,7 @@ export async function settlePaymentIntent(
     relayerSigner,
     latestLedger,
     customer,
+    ...(dependencies.funding ? {funding: dependencies.funding} : {}),
     onProgress: progress => {
       dependencies.onProgress?.(progress);
       reporter.record(progress);
