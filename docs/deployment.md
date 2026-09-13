@@ -31,8 +31,19 @@ If you use Supabase, three details matter:
   and a connection held across a reconciliation cycle both need, which the
   transaction pooler does not. Set `DATABASE_MAX_CONNECTIONS` low per instance —
   the pool multiplies by instance count, and a pooler has a hard ceiling.
-- **TLS.** Set `DATABASE_SSL=true`; the client then verifies the certificate
-  rather than trusting anything that answers.
+- **TLS, and the certificate authority.** Set `DATABASE_SSL=true`; the client
+  then verifies the certificate rather than trusting anything that answers.
+  Supabase signs its poolers with `Supabase Root 2021 CA`, which is in no system
+  trust store, so verification fails with `SELF_SIGNED_CERT_IN_CHAIN` until the
+  root is supplied as `DATABASE_CA_CERT` — download it from Database → SSL
+  Configuration. The advice everywhere else is `rejectUnauthorized: false`,
+  which does not weaken verification so much as remove it: the connection stays
+  encrypted and becomes willing to encrypt to anyone who answers. That is the
+  wrong trade for payment records, so it is not offered here.
+
+  Nothing connects until the first query, so getting this wrong does not stop
+  the service starting. It starts, reports its configured storage mode, and
+  fails when someone actually pays.
 - **Keep the migrations.** The repository's runner records a checksum per file
   and refuses a migration that changed after it was applied. Running Supabase's
   own migration tooling alongside it would leave two sources of truth for the

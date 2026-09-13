@@ -38,6 +38,9 @@ const prices = new PriceService({
 const app = buildApp({
   repository: runtime.repository,
   storage: runtime.storage,
+  ...(runtime.connection
+    ? {probeDatabase: async () => void (await runtime.connection!.query('select 1', []))}
+    : {}),
   merchantProfiles: runtime.merchantProfiles,
   walletRepository: runtime.wallets,
   auditLog: runtime.auditLog,

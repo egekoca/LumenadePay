@@ -31,6 +31,12 @@ services:
         value: "10000"
       - key: DATABASE_SSL
         value: "true"
+      # Supabase presents `Supabase Root 2021 CA`, which is in no system trust
+      # store, so a verifying client rejects the pooler until handed it. Paste
+      # the PEM the Supabase dashboard offers under Database -> SSL
+      # Configuration. Leave unset for a provider using a public CA.
+      - key: DATABASE_CA_CERT
+        sync: false
       - key: DATABASE_URL
         sync: false
       - key: API_SESSION_SECRET
