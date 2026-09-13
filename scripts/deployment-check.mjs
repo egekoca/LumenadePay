@@ -32,6 +32,17 @@ record(
   /^[a-f0-9]{64}$/i.test(process.env.STELLAR_WALLET_WASM_HASH ?? ''),
   '64 hexadecimal characters',
 );
+/*
+ * Somebody has to be reconciling. A settlement only ever reaches `confirmed` in
+ * that loop, so a deployment with neither the in-process loop nor a separate
+ * worker leaves every payment sitting at `submitted` - the money moves, the
+ * merchant's screen never says so, and nothing anywhere reports an error.
+ */
+record(
+  'reconciler',
+  process.env.WORKER_IN_PROCESS === 'true' || process.env.WORKER_STANDALONE === 'true',
+  'set WORKER_IN_PROCESS=true, or WORKER_STANDALONE=true when apps/worker runs as its own service',
+);
 
 const failed = checks.filter(check => !check.ok);
 console.log(JSON.stringify({ok: failed.length === 0, checks}, null, 2));

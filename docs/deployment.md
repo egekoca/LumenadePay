@@ -2,12 +2,13 @@
 
 ## What has to run
 
-Lumenade Pay is two Node processes and a database, not one deployable unit.
+Lumenade Pay is a long-lived Node server, a reconciliation loop and a database.
+The loop is a separate *process* only when you choose to deploy it as one.
 
 | Process | Shape | Why |
 | --- | --- | --- |
 | `@rosapay/api` | Long-lived HTTP server | Holds the relayer and admin Stellar keys, keeps a PostgreSQL pool, and waits on the ledger while a settlement confirms |
-| `@rosapay/worker` | Long-lived loop | Reconciles submitted settlements against RPC receipts and expires abandoned requests on an interval, with graceful shutdown |
+| `@rosapay/worker` | Long-lived loop | Reconciles submitted settlements against RPC receipts and expires abandoned requests on an interval, with graceful shutdown. Runs inside the API or beside it — see [Where the reconciliation loop runs](#where-the-reconciliation-loop-runs) |
 | PostgreSQL | Managed instance | Intents, settlements, authorizations, merchant profiles, device wallets and the audit trail |
 
 The mobile app talks only to the API. Nothing in the app reaches the database
@@ -24,11 +25,12 @@ here; pick on operations, not architecture.
 
 If you use Supabase, three details matter:
 
-- **Which connection string.** The pooled connection (pgBouncer, transaction
-  mode) suits the API. The worker holds a connection across its cycle, so give it
-  the session pooler or the direct connection. Set `DATABASE_MAX_CONNECTIONS` low
-  per instance — the pool multiplies by instance count, and a pooler has a hard
-  ceiling.
+- **Which connection string.** Use the session pooler. It is reachable over
+  IPv4, where the direct connection is IPv6-only and often unroutable from a
+  host; and it keeps the prepared statements and transactions that migrations
+  and a connection held across a reconciliation cycle both need, which the
+  transaction pooler does not. Set `DATABASE_MAX_CONNECTIONS` low per instance —
+  the pool multiplies by instance count, and a pooler has a hard ceiling.
 - **TLS.** Set `DATABASE_SSL=true`; the client then verifies the certificate
   rather than trusting anything that answers.
 - **Keep the migrations.** The repository's runner records a checksum per file
@@ -64,26 +66,48 @@ stylistic:
   `DATABASE_MAX_CONNECTIONS`.
 
 A small always-on host — Fly.io, Railway, Render, or a VM — runs both processes
-as they are written. Deploy the API and the worker separately so the worker can
-restart without interrupting payments.
+as they are written.
 
-The repository includes a Docker image and a Render blueprint. The blueprint
-uses Render's free web service for the API and a separately billed worker
-service, because Render does not provide a free always-on background worker.
-For a small TestFlight group this is still the smallest production-shaped
-deployment: use a free Supabase or Neon PostgreSQL database, keep the worker on
-the provider's smallest plan, and move it to another host later without code
-changes. The worker must not be replaced with a sleeping cron job: payment
-confirmation and expiry need a continuous loop.
+### Where the reconciliation loop runs
+
+The loop is `startReconciler` in `apps/worker/src/reconciler.ts`, and both the
+standalone service and the API start the same one. Where it runs is a
+deployment decision rather than a code change:
+
+- **Inside the API** (`WORKER_IN_PROCESS=true`) is the default in `render.yaml`.
+  Nothing connects *to* the loop — it reads settlements from PostgreSQL and asks
+  RPC what became of them, both outbound — so it needs no service of its own,
+  and it borrows the API's pool instead of opening a second. Hosts charge for a
+  background worker while giving the web service away, and for demo volumes that
+  bill buys nothing. On a host that sleeps an idle instance this stays correct
+  for the case that matters: the submit which creates work to reconcile is
+  itself the request that wakes the instance.
+- **As its own service** (`npm run start --workspace @rosapay/worker`) once
+  traffic justifies it, so it can restart without interrupting payments and so a
+  long RPC cycle cannot compete with request handling. Set `WORKER_IN_PROCESS`
+  to false and `WORKER_STANDALONE=true` so `deploy:check` knows to stop asking.
+
+What is not a choice is running neither. A settlement only ever reaches
+`confirmed` in this loop, so without it every payment sits at `submitted`: the
+money moves, the merchant's screen never says so, and nothing reports an error.
+`deploy:check` fails when neither is configured. Nor may it be replaced with a
+sleeping cron job — confirmation and expiry need a continuous loop.
+
+The repository includes a Docker image and a Render blueprint. With the loop in
+process the whole backend is Render's free web service plus a free Supabase or
+Neon database, which is the smallest production-shaped deployment for a
+TestFlight group.
 
 ### Render + Supabase/Neon
 
-1. Create a PostgreSQL project and copy its TLS connection string. Use the
-   provider's pooled connection for the API and a session/direct connection for
-   the worker when both are available.
+1. Create a PostgreSQL project and copy its TLS connection string. Prefer the
+   provider's session pooler: it is reachable over IPv4, and it holds the
+   prepared statements and transactions that migrations and a long-lived pool
+   need. A separate session/direct connection is only needed when the worker
+   runs as its own service.
 2. Create a Render Blueprint from this repository. `render.yaml` creates
-   `rosapay-api` and `rosapay-worker`; enter the same database URL and the
-   Testnet secrets in both services where requested.
+   `rosapay-api` with the reconciliation loop inside it; enter the database URL
+   and the Testnet secrets where requested.
 3. Before deploying, validate the environment without printing any secret:
 
    ```sh
@@ -148,8 +172,8 @@ losing customer funds.
 
 ## Checklist
 
-- [ ] `DATABASE_URL` points at the pooled connection for the API, a session
-      connection for the worker, with `DATABASE_SSL=true`
+- [ ] `DATABASE_URL` points at the provider's session pooler, with
+      `DATABASE_SSL=true`
 - [ ] `npm run db:migrate` applied, and it reports no pending migrations on a
       second run
 - [ ] `API_REQUIRE_DATABASE=true` so the API refuses to start on memory
@@ -158,5 +182,8 @@ losing customer funds.
 - [ ] Relayer and admin secrets set from the secret store, and the relayer account
       funded
 - [ ] `STELLAR_WALLET_WASM_HASH` set to the uploaded wallet contract
-- [ ] Worker running with `WORKER_EVENT_START_LEDGER` if event scanning is wanted
+- [ ] `WORKER_IN_PROCESS=true`, or a separate worker service with
+      `WORKER_STANDALONE=true` — without one of them nothing ever reaches
+      `confirmed`
+- [ ] `WORKER_EVENT_START_LEDGER` set if contract-event scanning is wanted
 - [ ] A shared rate-limit store before more than one API instance runs
