@@ -49,22 +49,23 @@ export function MerchantOnboardingScreen({navigation}: Props) {
     logger.info('merchant_profile_created', {merchantProfileId: profile.merchantProfileId});
 
     // Testnet settlement is rejected until the contract knows this merchant key.
-    let registered = false;
+    let registrationError: string | undefined;
     setRegistering(true);
     try {
       await registerMerchantForTestnet(profile);
       setMerchantRegisteredOnChain(true);
-      registered = true;
     } catch (error) {
-      setErrors({
-        general: `Profile saved, but Testnet registration failed: ${
-          error instanceof Error ? error.message : t('unknown error')
-        }. You can retry it from the payment request screen.`,
-      });
+      registrationError = error instanceof Error ? error.message : t('unknown error');
     } finally {
       setRegistering(false);
     }
-    navigation.replace(registered ? 'Main' : 'MerchantRequest');
+    // The reason travels to the next screen rather than into state this replace
+    // is about to discard, because that screen is where the retry lives.
+    if (registrationError) {
+      navigation.replace('MerchantRequest', {registrationError});
+      return;
+    }
+    navigation.replace('Main');
   };
 
   return (
