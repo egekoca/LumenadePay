@@ -14,7 +14,7 @@ import {useStellarHealth} from '../../shared/useStellarHealth';
 import {useCurrencyPrices} from '../../shared/useCurrencyPrices';
 import {useAppStore} from '../../state/appStore';
 import {useNfcBroadcast} from '../payments/useNfc';
-import {createSignedPaymentRequest, MerchantProfileError} from './merchantProfile';
+import {businessEmailSchema, createSignedPaymentRequest, MerchantProfileError} from './merchantProfile';
 import {priceRequest, referenceForRequest} from './pricedRequest';
 import {defaultPayableAsset, payableAssets, type PayableAsset} from '../payments/assets';
 import {useRecipientCanReceive} from './useRecipientCanReceive';
@@ -64,7 +64,7 @@ export function MerchantRequestScreen({navigation}: Props) {
   const [error, setError] = useState<string | undefined>();
   const [registering, setRegistering] = useState(false);
 
-  if (!merchantProfile) {
+  if (!merchantProfile || !businessEmailSchema.safeParse(merchantProfile.email).success) {
     return (
       <Screen contentStyle={styles.centered}>
         <Text style={styles.subtitle}>{t('Set up your business profile before creating a payment request.')}</Text>

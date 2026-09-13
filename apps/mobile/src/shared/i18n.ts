@@ -29,6 +29,8 @@ export function languageMeta(code: string) {
  * drops its translation, which `missingTranslations` is here to catch.
  */
 const TR: Record<string, string> = {
+  'BUSINESS EMAIL': 'İŞLETME E-POSTASI',
+  'Enter a valid business email address': 'Geçerli bir işletme e-posta adresi girin',
   // Recovering a wallet after losing the phone that held it
   RECOVER: 'KURTARMA',
   'Recover your wallet': 'Cüzdanını kurtar',
