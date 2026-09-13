@@ -117,17 +117,23 @@ TestFlight group.
    Every check must be `true`. The command intentionally rejects a missing
    session secret, in-memory storage, cleartext database connections and a
    loopback API host.
-4. Run the migration once from the API service shell:
+4. Run the migration once, from a machine that has the repository. Render's
+   free instances have no shell, and the API does not migrate on boot, so this
+   is not a step the deployment performs for you:
 
    ```sh
-   npm run db:migrate --workspace @rosapay/api
+   DATABASE_URL="<the hosted connection string>" DATABASE_SSL=true \
+     npm run db:migrate
    ```
 
-   A second run must report no pending migrations.
-5. Copy the API service's HTTPS URL (for example,
-   `https://rosapay-api.onrender.com`) into the mobile app's Profile →
-   Developer settings before installing the TestFlight build. The URL is
-   persisted on the device and can be changed without rebuilding the app.
+   The inline variable wins over anything in `.env`. A second run must report
+   `"applied": []`.
+5. Write the API service's HTTPS URL into `apiBaseUrl` in
+   `config/testnet-deployment.json` and rebuild the app. That file is the
+   build's default, so this is what gives a TestFlight tester a working install
+   without touching any setting. Profile → Developer settings overrides it per
+   device and survives a restart, which is for a developer pointing one phone
+   somewhere else — not something a tester should have to do.
 
 The API health response must report `storage: "postgres"`. If it reports
 `"memory"`, stop: that instance would lose payment state on restart.
