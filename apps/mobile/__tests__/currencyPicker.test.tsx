@@ -17,62 +17,62 @@ async function render(props: Partial<React.ComponentProps<typeof CurrencyPicker>
   let renderer!: ReactTestRenderer.ReactTestRenderer;
   await ReactTestRenderer.act(async () => {
     renderer = ReactTestRenderer.create(
-      <CurrencyPicker
-        onClose={jest.fn()}
-        onSelect={jest.fn()}
-        selected="TRY"
-        visible
-        {...props}
-      />,
+      <CurrencyPicker onClose={jest.fn()} onSelect={jest.fn()} selected="TRY" visible {...props} />,
     );
   });
   active.push(renderer);
   return renderer;
 }
 
-/**
- * Offering a currency nothing prices is how someone picks dollars, sees lira,
- * and concludes the control is broken. That is exactly what happened: the list
- * was the static four while only the anchor's lira had a source behind it.
- */
 describe('which currencies a balance can be read in', () => {
-  it('offers only what something will quote', async () => {
-    const tree = JSON.stringify((await render({available: ['TRY', 'USD']})).toJSON());
-
-    expect(tree).toContain('TRY');
-    expect(tree).toContain('USD');
-    // No source, so not offered — rather than offered and silently substituted.
-    expect(tree).not.toContain('Nigerian naira');
-    expect(tree).not.toContain('euro');
-  });
-
-  it('offers every currency before the quote servers have answered', async () => {
-    // Not knowing yet is not the same as knowing there are none, and an empty
-    // sheet answers nothing.
+  it('offers every currency the product supports, with its flag', async () => {
     const tree = JSON.stringify((await render()).toJSON());
 
+    /*
+     * All of them, always. Filtering to what a rate server happens to be
+     * answering this minute made the list flicker between four entries and two
+     * and read as though currencies had been taken away. A rate that is
+     * missing right now is the card's problem to state, not a reason to remove
+     * the currency from the product.
+     */
     for (const currency of DISPLAY_CURRENCIES) {
+      expect(tree).toContain(currency.code);
       expect(tree).toContain(currency.name);
+      expect(tree).toContain(currency.flag);
     }
   });
 
-  it('falls back to the full list rather than showing an empty sheet', async () => {
-    const tree = JSON.stringify((await render({available: ['ZZZ']})).toJSON());
+  it('marks the one currently chosen', async () => {
+    const renderer = await render({selected: 'NGN'});
 
-    // Nothing matched, which would leave a sheet with no rows in it.
-    expect(tree).toContain('Turkish lira');
+    const option = renderer.root.findByProps({testID: 'currency-picker-option-NGN'});
+    expect(option.props.accessibilityState).toEqual({selected: true});
   });
 
   it('passes the chosen code back and closes', async () => {
     const onSelect = jest.fn();
     const onClose = jest.fn();
-    const renderer = await render({available: ['TRY', 'USD'], onSelect, onClose});
+    const renderer = await render({onSelect, onClose});
 
     await ReactTestRenderer.act(async () => {
-      renderer.root.findByProps({testID: 'currency-picker-option-USD'}).props.onPress();
+      renderer.root.findByProps({testID: 'currency-picker-option-EUR'}).props.onPress();
     });
 
-    expect(onSelect).toHaveBeenCalledWith('USD');
+    expect(onSelect).toHaveBeenCalledWith('EUR');
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it('changes nothing when the scrim is tapped', async () => {
+    const onSelect = jest.fn();
+    const onClose = jest.fn();
+    const renderer = await render({onSelect, onClose});
+
+    await ReactTestRenderer.act(async () => {
+      renderer.root.findByProps({testID: 'currency-picker-scrim'}).props.onPress();
+    });
+
+    // Half of what a person means by "it should not change unless I change it".
+    expect(onSelect).not.toHaveBeenCalled();
     expect(onClose).toHaveBeenCalled();
   });
 });

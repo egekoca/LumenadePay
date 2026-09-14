@@ -11,37 +11,29 @@ import {useTranslate} from '../../shared/i18n';
  * currencies, and what they are called.
  */
 export function CurrencyPicker({
-  available,
   onClose,
   onSelect,
   selected,
   visible,
 }: {
-  /**
-   * The currencies something will actually quote right now. Offering one that
-   * nothing prices is how a person picks dollars, sees lira, and concludes the
-   * control is broken — which is exactly what happened when this list was the
-   * static four and only the anchor's lira had a source behind it.
-   *
-   * Left undefined, or empty, every currency is offered: an empty sheet answers
-   * nothing, and not knowing yet is not the same as knowing there are none.
-   */
-  available?: readonly string[];
   onClose(): void;
   onSelect(code: string): void;
   selected: string;
   visible: boolean;
 }) {
   const t = useTranslate();
-  const offered =
-    available && available.length > 0
-      ? DISPLAY_CURRENCIES.filter(currency => available.includes(currency.code))
-      : DISPLAY_CURRENCIES;
   return (
     <OptionSheet
       onClose={onClose}
       onSelect={onSelect}
-      options={(offered.length > 0 ? offered : DISPLAY_CURRENCIES).map(currency => ({
+      /*
+       * Every currency the product supports, whether or not a rate happens to
+       * be available this minute. Hiding the ones a throttled feed cannot price
+       * was the wrong place to be honest: it made the list flicker between four
+       * entries and two, and told someone their currency had been removed. The
+       * card is where a missing rate belongs, and it has a state for one.
+       */
+      options={DISPLAY_CURRENCIES.map(currency => ({
         value: currency.code,
         label: currency.code,
         detail: currency.name,
