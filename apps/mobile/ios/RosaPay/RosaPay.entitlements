@@ -20,7 +20,7 @@
 	-->
 	<key>com.apple.developer.associated-domains</key>
 	<array>
-		<string>webcredentials:lumenade-pay.vercel.app</string>
+		<string>webcredentials:rosa-pay-app.vercel.app</string>
 	</array>
 </dict>
 </plist>
