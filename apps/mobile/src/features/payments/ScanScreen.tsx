@@ -212,7 +212,12 @@ function ScanBalance() {
         <RosaMark size={22} />
         <Text style={styles.balanceBrand}>{t('ROSA PAY')}</Text>
         <View style={styles.balanceSpacer} />
-        {value.data ? (
+        {/*
+          A total earns its place only when there is something to total. With
+          one holding it repeats the figure on the row below it verbatim, which
+          reads as though the screen is unsure.
+        */}
+        {value.data && holdings.length > 1 ? (
           <Text style={styles.balanceTotal}>
             {`≈ ${currencySymbol(value.data.currency)}${value.data.amount}`}
           </Text>
