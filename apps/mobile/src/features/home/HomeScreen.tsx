@@ -183,6 +183,32 @@ function CustomerHome({navigation, merchantEnabled}: {navigation: Props['navigat
       ) : null}
 
       {/*
+        The other side of the counter, next to the one action rather than under
+        the payment history.
+
+        This sat last on the screen, below the receipts list, so on a phone it
+        was off the bottom: someone who wanted to take a payment saw only "Scan
+        to pay" and concluded the app could not do it. The product's own claim
+        is one app for both sides of the counter, and both sides have to be
+        visible for that to be true.
+      */}
+      {!merchantEnabled && (
+        <AnimatedContent delay={130}>
+          <PressScale>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => navigation.navigate('MerchantOnboarding')}
+              style={styles.merchantRow}
+              testID="activate-merchant">
+              <Store color={colors.amber} size={18} />
+              <Text style={styles.merchantText}>{t('Get paid with this account')}</Text>
+              <ChevronRight color={colors.inkMuted} size={17} />
+            </Pressable>
+          </PressScale>
+        </AnimatedContent>
+      )}
+
+      {/*
         What the total is made of. The card answers "what is this worth"; two
         assets in a wallet raise "worth of what", and doing that arithmetic in
         your head against a single converted number is not a thing to ask.
@@ -244,19 +270,6 @@ function CustomerHome({navigation, merchantEnabled}: {navigation: Props['navigat
         )}
       </AnimatedContent>
 
-      {!merchantEnabled && (
-        <AnimatedContent delay={230}>
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => navigation.navigate('MerchantOnboarding')}
-            style={styles.merchantRow}
-            testID="activate-merchant">
-            <Store color={colors.amber} size={18} />
-            <Text style={styles.merchantText}>{t('Get paid with this account')}</Text>
-            <ChevronRight color={colors.inkMuted} size={17} />
-          </Pressable>
-        </AnimatedContent>
-      )}
     </>
   );
 }
