@@ -103,6 +103,12 @@ export function ScanScreen({navigation}: Props) {
   return (
     <Screen contentStyle={styles.screen}>
       <ScanBalance />
+      {/*
+        The camera takes the room left over and sits in the middle of it, so the
+        balance stays pinned at the top as a header rather than being pushed
+        into the centre of the screen along with everything else.
+      */}
+      <View style={styles.viewfinder}>
       <View style={styles.camera}>
         {camera === 'granted' ? (
           <Camera
@@ -124,6 +130,7 @@ export function ScanScreen({navigation}: Props) {
         <Text style={styles.cameraText} pointerEvents="none">
           {t(cameraMessage(camera, Boolean(pendingRequest)))}
         </Text>
+      </View>
       </View>
 
       {nfc.supported && nfc.enabled && !nfc.needsUserAction ? (
@@ -258,9 +265,13 @@ function ScanBalance() {
 }
 
 const styles = StyleSheet.create({
-  screen: {justifyContent: 'center'},
+  // Top-aligned, not centred: the balance is a header and belongs against the
+  // top of the screen. The viewfinder below it absorbs the slack.
+  screen: {gap: spacing.md, justifyContent: 'flex-start', paddingTop: spacing.xs},
+  viewfinder: {alignItems: 'center', flexGrow: 1, gap: spacing.xl, justifyContent: 'center'},
   balance: {
     alignSelf: 'center',
+    backgroundColor: colors.surface,
     borderColor: colors.line,
     borderRadius: radius.md,
     borderWidth: 1,

@@ -22,6 +22,7 @@ import {greetingFor} from './greeting';
 import {PaymentCard} from './PaymentCard';
 import {AssetMark} from './AssetMark';
 import {payableAssetByCode} from '../payments/assets';
+import {useCurrencyPrices} from '../../shared/useCurrencyPrices';
 import {currencySymbol} from '../../shared/priceSource';
 
 type Props = NativeStackScreenProps<RootStackParams, 'Main'>;
@@ -62,6 +63,10 @@ function WalletOverview() {
   const [pickingCurrency, setPickingCurrency] = useState(false);
   const balance = useWalletBalance();
   const value = useBalanceValue(balance.data);
+  // What the quote servers will price the wallet's own asset in, so the picker
+  // offers currencies that have a source rather than the static four.
+  const prices = useCurrencyPrices(payableAssetByCode(balance.data?.[0]?.code ?? 'XLM')?.sep38);
+  const quotable = prices.data?.map(price => price.currency);
   const address = account?.address;
   return (
     <>
@@ -79,6 +84,7 @@ function WalletOverview() {
         />
       </AnimatedContent>
       <CurrencyPicker
+        available={quotable}
         onClose={() => setPickingCurrency(false)}
         onSelect={setDisplayCurrency}
         selected={displayCurrency}
